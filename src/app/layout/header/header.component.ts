@@ -10,4 +10,12 @@ import { RouterLink } from '@angular/router';
 })
 export class HeaderComponent {
 @Input() title: string = "Neftlix";
+
+@Input() links: { label: string, path: string }[] = [
+  { label: 'Tableau de Bord', path: 'dashboard' },
+  { label: 'Tables', path: 'tables' },
+  { label: 'Utilisateurs', path: 'users' },
+  { label: 'Abonnements', path: 'subscriptions' },
+  { label: 'Évaluations', path: 'evaluations' },
+]
 }

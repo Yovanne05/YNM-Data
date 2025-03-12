@@ -1,9 +1,16 @@
-<header>
-  <nav class="navbar">
-    <div class="container">
-      <a [routerLink]="'/'" class="logo" routerLinkActive="active">{{title}}</a>
-      <ul class="nav-links">
-        <li><a [routerLink]="'/'">Ma BD</a></li>
+<header class="elevated-header shadow-lg mx-auto">
+  <nav>
+    <div class="container mx-auto flex justify-between items-center p-4">
+      <a href="/" class="text-black text-2xl font-bold tracking-wide hover:text-gray-800 transition-transform duration-300 hover:scale-110">
+        {{ title }}
+      </a>
+      <ul class="flex space-x-6">
+        @for (link of links; track $index) {
+          <a [routerLink]="link.path"
+             class="text-black text-lg font-medium tracking-wide hover:text-gray-800 transition-transform duration-300 hover:scale-110">
+            {{ link.label }}
+          </a>
+        }
       </ul>
     </div>
   </nav>

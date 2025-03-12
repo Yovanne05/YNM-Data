@@ -18,14 +18,19 @@ def get_series_by_genre_route(genre: str) -> tuple[Response, int]:
         return jsonify([serie.as_dict() for serie in series]), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
 
-@series_controller.route("/<int:year>", methods=["GET"])
-def get_series_by_year_route(year: int) -> tuple[Response, int]:
+@series_controller.route("/<int:idSerie>", methods=["GET"])
+def get_series_by_id(idSerie: int) -> tuple[Response, int]:
     try:
-        series = get_series_by_year(year)
-        return jsonify([serie.as_dict() for serie in series]), 200
+        serie = get_by_id(idSerie)
+        if serie:
+            return jsonify(serie.as_dict()), 200
+        else:
+            return jsonify({"error": "Serie not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @series_controller.route("/", methods=["POST"])
 def create_series() -> tuple[Response, int]:
@@ -57,16 +62,5 @@ def delete_series(idSerie: int) -> tuple[Response, int]:
     try:
         delete(idSerie)
         return jsonify({"message": "Serie deleted successfully!"}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@series_controller.route("/<int:idSerie>", methods=["GET"])
-def get_series_by_id(idSerie: int) -> tuple[Response, int]:
-    try:
-        serie = get_by_id(idSerie)
-        if serie:
-            return jsonify(serie.as_dict()), 200
-        else:
-            return jsonify({"error": "Serie not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500

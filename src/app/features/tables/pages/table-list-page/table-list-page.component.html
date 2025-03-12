@@ -1,0 +1,5 @@
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+  @for (table of tables; track $index) {
+  <app-table-card [table]="table"></app-table-card>
+  }
+</div>

@@ -4,6 +4,15 @@
   min-height: 100vh;
 }
 
-main {
+.main-container {
   flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container{
+  width: 90%;
+  margin-top: 1em;
+  margin-bottom: 1em;
 }

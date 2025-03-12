@@ -1,0 +1,12 @@
+<div class="bg-white shadow-lg rounded-xl p-4 border border-gray-200">
+  <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">
+    {{ table.name }}
+  </h3>
+  <ul class="mt-2">
+    @for (colum of table.columns; track $index) {
+    <li class="text-gray-600 py-1 border-b last:border-none">
+      {{ colum }}
+    </li>
+    }
+  </ul>
+</div>

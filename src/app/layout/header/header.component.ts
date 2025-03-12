@@ -9,7 +9,7 @@ import { RouterLink } from '@angular/router';
   styleUrl: './header.component.scss'
 })
 export class HeaderComponent {
-@Input() title: string = "Neftlix";
+@Input() title: string = "Netflix";
 
 @Input() links: { label: string, path: string }[] = [
   { label: 'Tableau de Bord', path: 'dashboard' },

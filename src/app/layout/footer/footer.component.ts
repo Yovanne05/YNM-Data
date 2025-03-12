@@ -8,6 +8,6 @@ import { Component, Input } from '@angular/core';
   styleUrl: './footer.component.scss'
 })
 export class FooterComponent {
-@Input() title: string = "Neftlix";
+@Input() title: string = "Netflix";
 currentYear: number = new Date().getFullYear();
 }

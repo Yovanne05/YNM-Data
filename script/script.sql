@@ -1,12 +1,13 @@
 -- Création du schéma NetflixDB
 CREATE SCHEMA IF NOT EXISTS NetflixDB;
-SET search_path TO NetflixDB;
+USE NetflixDB;
 
-DROP TABLE IF EXISTS Paiement, Evaluation, Soustitre, Audio, MaListe, Profil, Abonnement, Utilisateur, Realisation, Studio, Acting, Acteur, TitreGenre, Genre, Film, Serie, Langue CASCADE;
+-- Suppression des tables dans le bon ordre
+DROP TABLE IF EXISTS Paiement, Evaluation, Langue_Disponible, MaListe, Profil, Abonnement, Utilisateur, Realisation, Studio, Acting, Acteur, TitreGenre, Genre, Film, Serie, Titre, Langue CASCADE;
 
 -- Table des Utilisateurs
 CREATE TABLE Utilisateur (
-    idUtilisateur SERIAL PRIMARY KEY,
+    idUtilisateur BIGINT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
     prenom VARCHAR(100) NOT NULL,
     age INT CHECK (age >= 0),
@@ -16,49 +17,27 @@ CREATE TABLE Utilisateur (
     statutAbonnement VARCHAR(20) DEFAULT 'Actif' CHECK (statutAbonnement IN ('Actif', 'Résilié'))
 );
 
-
 -- Table des Abonnements
 CREATE TABLE Abonnement (
-    idAbonnement SERIAL PRIMARY KEY,
-    idUtilisateur INT UNIQUE NOT NULL,
+    idAbonnement BIGINT AUTO_INCREMENT PRIMARY KEY,
+    idUtilisateur BIGINT UNIQUE NOT NULL,
     typeAbonnement VARCHAR(50) NOT NULL,
     prix DECIMAL(6,2) NOT NULL,
     FOREIGN KEY (idUtilisateur) REFERENCES Utilisateur(idUtilisateur) ON DELETE CASCADE
 );
 
--- Table de Paiement
-CREATE TABLE Paiement (
-    idPaiement SERIAL PRIMARY KEY,
-    idAbonnement INT NOT NULL,
-    datePaiement DATE NOT NULL,
-    montant DECIMAL(6,2) NOT NULL,
-    statusPaiement VARCHAR(20) CHECK (statusPaiement IN ('Effectué', 'Échoué')),
-    FOREIGN KEY (idAbonnement) REFERENCES Abonnement(idAbonnement) ON DELETE CASCADE
-);
-
-
 -- Table des Profils
 CREATE TABLE Profil (
-    idProfil SERIAL PRIMARY KEY,
+    idProfil BIGINT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
     typeProfil VARCHAR(10) CHECK (typeProfil IN ('Adulte', 'Enfant')) NOT NULL DEFAULT 'Adulte',
-    idUtilisateur INT NOT NULL,
+    idUtilisateur BIGINT NOT NULL,
     FOREIGN KEY (idUtilisateur) REFERENCES Utilisateur(idUtilisateur) ON DELETE CASCADE
 );
 
--- Table MaListe
-CREATE TABLE MaListe (
-    idMaListe SERIAL PRIMARY KEY,
-    idProfil INT NOT NULL,
-    idTitre INT NOT NULL,
-    FOREIGN KEY (idProfil) REFERENCES Profil(idProfil) ON DELETE CASCADE,
-    FOREIGN KEY (idTitre) REFERENCES Titre(idTitre) ON DELETE CASCADE
-);
-
-
--- Table Titre (Film et Série partagent cette table)
+-- Table des Titres (Film et Série partagent cette table)
 CREATE TABLE Titre (
-    idTitre SERIAL PRIMARY KEY,
+    idTitre BIGINT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(255) NOT NULL,
     annee INT CHECK (annee >= 1900),
     dateDebutLicence DATE NOT NULL,
@@ -69,30 +48,30 @@ CREATE TABLE Titre (
 
 -- Table des Films
 CREATE TABLE Film (
-    idFilm SERIAL PRIMARY KEY,
-    idTitre INT UNIQUE NOT NULL,
+    idFilm BIGINT AUTO_INCREMENT PRIMARY KEY,
+    idTitre BIGINT UNIQUE NOT NULL,
     duree INT CHECK (duree > 0),
     FOREIGN KEY (idTitre) REFERENCES Titre(idTitre) ON DELETE CASCADE
 );
 
 -- Table des Séries
 CREATE TABLE Serie (
-    idSerie SERIAL PRIMARY KEY,
-    idTitre INT UNIQUE NOT NULL,
+    idSerie BIGINT AUTO_INCREMENT PRIMARY KEY,
+    idTitre BIGINT UNIQUE NOT NULL,
     saison INT CHECK (saison > 0),
     FOREIGN KEY (idTitre) REFERENCES Titre(idTitre) ON DELETE CASCADE
 );
 
 -- Table des Genres
 CREATE TABLE Genre (
-    idGenre SERIAL PRIMARY KEY,
+    idGenre BIGINT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(100) UNIQUE NOT NULL
 );
 
 -- Table des relations entre Titres et Genres
 CREATE TABLE TitreGenre (
-    idTitre INT NOT NULL,
-    idGenre INT NOT NULL,
+    idTitre BIGINT NOT NULL,
+    idGenre BIGINT NOT NULL,
     PRIMARY KEY (idTitre, idGenre),
     FOREIGN KEY (idTitre) REFERENCES Titre(idTitre) ON DELETE CASCADE,
     FOREIGN KEY (idGenre) REFERENCES Genre(idGenre) ON DELETE CASCADE
@@ -100,23 +79,23 @@ CREATE TABLE TitreGenre (
 
 -- Table des Langues
 CREATE TABLE Langue (
-    idLangue SERIAL PRIMARY KEY,
+    idLangue BIGINT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(100) UNIQUE NOT NULL
 );
 
+-- Table des Langues Disponibles pour les Titres
 CREATE TABLE Langue_Disponible (
-    idLangueDispo SERIAL PRIMARY KEY,
-    idTitre INT NOT NULL,
-    idLangue INT NOT NULL,
+    idLangueDispo BIGINT AUTO_INCREMENT PRIMARY KEY,
+    idTitre BIGINT NOT NULL,
+    idLangue BIGINT NOT NULL,
     typeLangue VARCHAR(15) CHECK (typeLangue IN ('audio', 'sous-titre')),
     FOREIGN KEY (idTitre) REFERENCES Titre(idTitre) ON DELETE CASCADE,
     FOREIGN KEY (idLangue) REFERENCES Langue(idLangue) ON DELETE CASCADE
 );
 
-
 -- Table des Acteurs
 CREATE TABLE Acteur (
-    idActeur SERIAL PRIMARY KEY,
+    idActeur BIGINT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
     prenom VARCHAR(100) NOT NULL,
     dateNaissance DATE NOT NULL,
@@ -125,34 +104,53 @@ CREATE TABLE Acteur (
 
 -- Table des relations entre Titres et Acteurs
 CREATE TABLE Acting (
-    idActing SERIAL PRIMARY KEY,
-    idTitre INT NOT NULL,
-    idActeur INT NOT NULL,
+    idActing BIGINT AUTO_INCREMENT PRIMARY KEY,
+    idTitre BIGINT NOT NULL,
+    idActeur BIGINT NOT NULL,
     FOREIGN KEY (idTitre) REFERENCES Titre(idTitre) ON DELETE CASCADE,
     FOREIGN KEY (idActeur) REFERENCES Acteur(idActeur) ON DELETE CASCADE
 );
 
 -- Table des Studios
 CREATE TABLE Studio (
-    idStudio SERIAL PRIMARY KEY,
+    idStudio BIGINT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(255) UNIQUE NOT NULL,
     pays VARCHAR(100) NOT NULL
 );
 
 -- Table des Réalisations
 CREATE TABLE Realisation (
-    idRealisation SERIAL PRIMARY KEY,
-    idTitre INT NOT NULL,
-    idStudio INT NOT NULL,
+    idRealisation BIGINT AUTO_INCREMENT PRIMARY KEY,
+    idTitre BIGINT NOT NULL,
+    idStudio BIGINT NOT NULL,
     FOREIGN KEY (idTitre) REFERENCES Titre(idTitre) ON DELETE CASCADE,
     FOREIGN KEY (idStudio) REFERENCES Studio(idStudio) ON DELETE CASCADE
 );
 
+-- Table MaListe
+CREATE TABLE MaListe (
+    idMaListe BIGINT AUTO_INCREMENT PRIMARY KEY,
+    idProfil BIGINT NOT NULL,
+    idTitre BIGINT NOT NULL,
+    FOREIGN KEY (idProfil) REFERENCES Profil(idProfil) ON DELETE CASCADE,
+    FOREIGN KEY (idTitre) REFERENCES Titre(idTitre) ON DELETE CASCADE
+);
+
+-- Table de Paiement
+CREATE TABLE Paiement (
+    idPaiement BIGINT AUTO_INCREMENT PRIMARY KEY,
+    idAbonnement BIGINT NOT NULL,
+    datePaiement DATE NOT NULL,
+    montant DECIMAL(6,2) NOT NULL,
+    statusPaiement VARCHAR(20) CHECK (statusPaiement IN ('Effectué', 'Échoué')),
+    FOREIGN KEY (idAbonnement) REFERENCES Abonnement(idAbonnement) ON DELETE CASCADE
+);
+
 -- Table des Evaluations
 CREATE TABLE Evaluation (
-    idEvaluation SERIAL PRIMARY KEY,
-    idProfil INT NOT NULL,
-    idTitre INT NOT NULL,
+    idEvaluation BIGINT AUTO_INCREMENT PRIMARY KEY,
+    idProfil BIGINT NOT NULL,
+    idTitre BIGINT NOT NULL,
     note INT CHECK (note BETWEEN 1 AND 5),
     avis VARCHAR(255),
     FOREIGN KEY (idProfil) REFERENCES Profil(idProfil) ON DELETE CASCADE,

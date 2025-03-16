@@ -1,0 +1,27 @@
+<div
+  class="w-full flex justify-center items-center text-center text-lg font-semibold text-gray-900 mb-6"
+>
+  @if (currentPage > 1) {
+  <button
+    (click)="goToPreviousPage()"
+    [disabled]="currentPage === 1"
+    class="px-3 py-2 bg-gray-200 text-gray-800 rounded-l-lg mr-2 flex items-center"
+  >
+    <p><</p>
+  </button>
+  }
+
+  @for (table of currentTables; track $index) {
+  <app-table-card [table]="table" class="mx-2"></app-table-card>
+  }
+
+  @if (currentPage < totalPages) {
+  <button
+    (click)="goToNextPage()"
+    [disabled]="currentPage === totalPages"
+    class="px-3 py-2 bg-gray-200 text-gray-800 rounded-r-lg ml-2 flex items-center"
+  >
+  <p>></p>
+  </button>
+  }
+</div>

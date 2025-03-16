@@ -1,0 +1,12 @@
+<aside class="sidebar fixed left-0 top-0 h-full w-64 p-6">
+  <a href="/" class="text-black text-2xl font-bold tracking-wide hover:text-gray-800 transition-transform duration-300 hover:scale-105">
+    {{ title }}
+  </a>
+  <ul class="mt-6 flex flex-col space-y-4 w-full">
+    @for (link of links; track $index) {
+      <a [routerLink]="link.path" class="sidebar-link">
+        {{ link.label }}
+      </a>
+    }
+  </ul>
+</aside>

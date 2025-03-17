@@ -15,8 +15,6 @@ export class SideBarComponent {
   { label: 'Tables', path: 'tables' },
   { label: 'Gestion des Utilisateurs', path: 'users' },
   { label: 'Gestion des Données', path: 'data-management' },
-  { label: 'Paramètres API', path: 'api-settings' },
   { label: 'Logs', path: 'logs' },
-  { label: 'Documentation', path: 'documentation' }
 ]
 }

@@ -17,7 +17,7 @@ export class TableNavBarComponent {
   tables$: Observable<TablesResponse> = new BehaviorSubject<TablesResponse>({});
   tables?: Table[];
   currentPage: number = 1;
-  tablesPerPage: number = 5;
+  tablesPerPage: number = 9;
   totalPages: number = 1;
 
   ngOnInit() {
@@ -33,9 +33,16 @@ export class TableNavBarComponent {
 
   get currentTables(): Table[] {
     const startIndex = (this.currentPage - 1) * this.tablesPerPage;
-    const endIndex = startIndex + this.tablesPerPage;
+    let endIndex = startIndex + this.tablesPerPage;
+
+    if (this.tables && endIndex > this.tables.length) {
+      const missingCount = endIndex - this.tables.length;
+      return this.tables.slice(startIndex - missingCount, this.tables.length);
+    }
+
     return this.tables?.slice(startIndex, endIndex) || [];
   }
+
 
   goToNextPage(): void {
     if (this.currentPage < this.totalPages) {

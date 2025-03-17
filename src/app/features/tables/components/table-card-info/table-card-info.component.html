@@ -1,0 +1,8 @@
+<div class="p-4 border rounded-lg shadow-md bg-white w-[300px]">
+  <h2 class="text-xl font-semibold text-gray-800">{{ table.name }}</h2>
+  <ul class="mt-2 list-disc list-inside">
+    @for (column of table.columns; track $index) {
+      <li class="text-gray-600">{{ column }}</li>
+    }
+  </ul>
+</div>

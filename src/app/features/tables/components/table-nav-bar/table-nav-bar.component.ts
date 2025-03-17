@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { TablesResponse } from '../../../../models/table_response';
 import { Table } from '../../../../models/table';
@@ -13,12 +13,15 @@ import { TableCardComponent } from '../table-card-name/table-card-name.component
   styleUrl: './table-nav-bar.component.scss'
 })
 export class TableNavBarComponent {
- private readonly dbService = inject(DatabaseService);
+  private readonly dbService = inject(DatabaseService);
   tables$: Observable<TablesResponse> = new BehaviorSubject<TablesResponse>({});
+
   tables?: Table[];
   currentPage: number = 1;
   tablesPerPage: number = 9;
   totalPages: number = 1;
+
+  @Output() tableSelected: EventEmitter<Table> = new EventEmitter<Table>();
 
   ngOnInit() {
     this.tables$ = this.dbService.getTables();
@@ -54,5 +57,9 @@ export class TableNavBarComponent {
     if (this.currentPage > 1) {
       this.currentPage--;
     }
+  }
+
+  onTableClick(table: Table): void {
+    this.tableSelected.emit(table);
   }
 }

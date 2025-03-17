@@ -3,7 +3,7 @@ CREATE SCHEMA IF NOT EXISTS NetflixDB;
 USE NetflixDB;
 
 -- Suppression des tables dans le bon ordre
-DROP TABLE IF EXISTS Paiement, Evaluation, Langue_Disponible, MaListe, Profil, Abonnement, Utilisateur, Realisation, Studio, Acting, Acteur, TitreGenre, Genre, Film, Serie, Titre, Langue CASCADE;
+DROP TABLE IF EXISTS Paiement, Evaluation, Langue_Disponible, MaListe, Profil, Abonnement, Utilisateur, Realisation, Studio, Acting, Acteur, TitreGenre, Genre, Film, Serie, Titre, Langue;
 
 -- Table des Utilisateurs
 CREATE TABLE Utilisateur (

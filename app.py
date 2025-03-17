@@ -31,3 +31,26 @@ def get_tables():
 
     finally:
         cursor.close() 
+        
+@app.route('/table/<table_name>', methods=['GET'])
+def get_table_data(table_name):
+    cursor = mysql.connection.cursor()
+    try:
+        query = "SELECT * FROM `{}`".format(table_name)
+        cursor.execute(query)
+
+        rows = cursor.fetchall()
+
+        columns = [desc[0] for desc in cursor.description]
+
+        result = []
+        for row in rows:
+            result.append(dict(zip(columns, row)))
+
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cursor.close()

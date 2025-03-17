@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { TablesResponse } from '../../../../models/table_response';
 import { Table } from '../../../../models/table';
 import { DatabaseService } from '../../../../services/table.service';
-import { TableCardComponent } from '../table-card/table-card.component';
+import { TableCardComponent } from '../table-card-name/table-card-name.component';
 
 @Component({
   selector: 'app-table-nav-bar',

@@ -1,10 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { Table } from '../../../../models/table';
+import { TableCardDataComponent } from "../table-card-data/table-card-data.component";
 
 @Component({
   selector: 'app-table-card-info',
   standalone: true,
-  imports: [],
+  imports: [TableCardDataComponent],
   templateUrl: './table-card-info.component.html',
   styleUrl: './table-card-info.component.scss'
 })

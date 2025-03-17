@@ -2,7 +2,7 @@ import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { TablesResponse } from '../../../../models/table_response';
 import { Table } from '../../../../models/table';
-import { DatabaseService } from '../../../../services/table.service';
+import { TableService } from '../../../../services/table.service';
 import { TableCardComponent } from '../table-card-name/table-card-name.component';
 
 @Component({
@@ -13,7 +13,7 @@ import { TableCardComponent } from '../table-card-name/table-card-name.component
   styleUrl: './table-nav-bar.component.scss'
 })
 export class TableNavBarComponent {
-  private readonly dbService = inject(DatabaseService);
+  private readonly tableService = inject(TableService);
   tables$: Observable<TablesResponse> = new BehaviorSubject<TablesResponse>({});
 
   tables?: Table[];
@@ -24,7 +24,7 @@ export class TableNavBarComponent {
   @Output() tableSelected: EventEmitter<Table> = new EventEmitter<Table>();
 
   ngOnInit() {
-    this.tables$ = this.dbService.getTables();
+    this.tables$ = this.tableService.getTables();
     this.tables$.subscribe((data: TablesResponse) => {
       this.tables = Object.entries(data).map(([name, columns]) => ({
         name,

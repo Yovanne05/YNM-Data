@@ -1,6 +1,5 @@
 import { Component, Input } from '@angular/core';
 import { Table } from '../../../../models/table';
-import { DatabaseService } from '../../../../services/table.service';
 
 @Component({
   selector: 'app-table-card',

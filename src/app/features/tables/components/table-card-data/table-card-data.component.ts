@@ -1,31 +1,35 @@
 import { Component, inject, Input, OnInit } from '@angular/core';
-import { TableService } from '../../../../services/table.service';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { TableDataResponse } from '../../../../models/tables/TableDataReponse';
+import { ServiceFactory } from '../../../../services/service-factory';
 
 @Component({
   selector: 'app-table-card-data',
   standalone: true,
-  imports: [],
   templateUrl: './table-card-data.component.html',
-  styleUrl: './table-card-data.component.scss'
+  styleUrls: ['./table-card-data.component.scss']
 })
-export class TableCardDataComponent implements OnInit{
-  private readonly tableService = inject(TableService);
+export class TableCardDataComponent implements OnInit {
+  private readonly serviceFactory = inject(ServiceFactory);
+
   tablesData$: Observable<TableDataResponse> = new BehaviorSubject<TableDataResponse>({});
   tablesData?: TableDataResponse[];
 
-  @Input({required: true}) tableName!: string;
+  @Input({ required: true }) tableName!: string;
 
-   ngOnInit() {
-      this.tablesData$ = this.tableService.getTableData(this.tableName);
+  ngOnInit() {
+    const service = this.serviceFactory.getService(this.tableName);
+    if (service) {
+      this.tablesData$ = service.getTableData();
       this.tablesData$.subscribe((data: TableDataResponse) => {
         this.tablesData = Object.entries(data).map(([name, columns]) => ({
           name,
           columns,
         }));
       });
+    } else {
+      console.error('Aucun service trouvé pour cette table:', this.tableName);
     }
+  }
 
-    
 }

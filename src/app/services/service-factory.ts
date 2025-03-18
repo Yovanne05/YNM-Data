@@ -17,9 +17,9 @@ export class ServiceFactory {
   ) {}
 
   getService(tableName: string){
-    
+
     switch (tableName) {
-      case 'Utilisateur':
+      case 'utilisateur':
         return this.utilisateurService
       case 'Serie':
         return this.utilisateurService;

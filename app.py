@@ -1,34 +1,19 @@
 from flask import Flask, jsonify
-import pymysql
 from flask_cors import CORS
 from config import Config
-from controllers.serie_controller import series_controller
-
-pymysql.install_as_MySQLdb()
+from controllers.utilisateur_controller import utilisateur_controller
+import db
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 app.config.from_object(Config)
 
-def get_db_connection():
-    return pymysql.connect(
-        host=Config.MYSQL_HOST,
-        user=Config.MYSQL_USER,
-        password=Config.MYSQL_PASSWORD,
-        database=Config.MYSQL_DB,
-        cursorclass=pymysql.cursors.DictCursor
-    )
-
-app.register_blueprint(series_controller)
-
-@app.route('/')
-def home():
-    return "Hello, Flask!"
+app.register_blueprint(utilisateur_controller)
 
 @app.route('/tables', methods=['GET'])
 def get_tables():
+    conn = db.get_db_connection()
     try:
-        conn = get_db_connection()
         with conn.cursor() as cursor:
             cursor.execute("SHOW TABLES")
             tables = [table['Tables_in_' + Config.MYSQL_DB] for table in cursor.fetchall()]

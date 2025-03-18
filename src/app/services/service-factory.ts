@@ -1,6 +1,13 @@
 import { Injectable } from '@angular/core';
 import { UtilisateurService } from './utilisateur.service';
 import { Utilisateur } from '../models/utilisateur';
+import { SerieService } from './serie.service';
+import { Serie } from '../models/serie';
+
+interface ServiceWithModel {
+  service: any;
+  model: any;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -8,20 +15,18 @@ import { Utilisateur } from '../models/utilisateur';
 export class ServiceFactory {
 
   constructor(
-    private utilisateurService: UtilisateurService
+    private utilisateurService: UtilisateurService,
+    private serieService: SerieService
   ) {}
 
-  getService(tableName: string) {
+  getServiceAndModel(tableName: string): ServiceWithModel | null {
     switch (tableName) {
       case 'Utilisateur':
-        return this.utilisateurService;
-    }
-  }
-
-  getModel(tableName: string){
-    switch(tableName){
-        case 'Utilisateur':
-            return 
+        return { service: this.utilisateurService, model: <Utilisateur> };
+      case 'Serie':
+        return { service: this.serieService, model: Serie };
+      default:
+        return null;
     }
   }
 }

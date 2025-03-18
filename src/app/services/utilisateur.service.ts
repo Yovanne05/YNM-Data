@@ -3,13 +3,13 @@ import { API_CONFIG } from '../config/api.config';
 import { HttpClient } from "@angular/common/http";
 import { catchError, Observable } from "rxjs";
 import { Utilisateur } from "../models/utilisateur";
-import { Service } from "./service-interface";
+import { ServiceInterface } from "./service-interface";
 
 @Injectable({
     providedIn: 'root',
 })
 
-export class UtilisateurService implements Service{
+export class UtilisateurService implements ServiceInterface{
     private apiUrl = API_CONFIG.API_URL + '/utilisateur';
 
     constructor(private readonly http: HttpClient) { }

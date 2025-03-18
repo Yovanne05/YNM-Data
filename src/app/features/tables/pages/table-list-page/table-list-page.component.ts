@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { TableNavBarComponent } from "../../components/table-nav-bar/table-nav-bar.component";
-import { Table } from '../../../../models/table';
+import { Table } from '../../../../models/tables/table';
 import { TableCardInfoComponent } from "../../components/table-card-info/table-card-info.component";
 
 @Component({

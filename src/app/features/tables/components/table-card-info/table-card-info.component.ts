@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { Table } from '../../../../models/table';
+import { Table } from '../../../../models/tables/table';
 import { TableCardDataComponent } from "../table-card-data/table-card-data.component";
 
 @Component({

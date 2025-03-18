@@ -1,9 +1,9 @@
-import { TableDataResponse } from './../models/TableDataReponse';
+import { TableDataResponse } from '../models/tables/TableDataReponse';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { catchError, Observable } from 'rxjs';
 import { API_CONFIG } from '../config/api.config';
-import { TablesResponse } from '../models/table_response';
+import { TablesResponse } from '../models/tables/table_response';
 
 @Injectable({
   providedIn: 'root',

@@ -1,21 +1,3 @@
-@if (tablesData && tablesData.length > 0) {
-<div>
-  <table class="table">
-    <thead>
-      <tr>
-        @for (column of [tablesData[0]] ; track $index)
-        {
-          <th>{{ column }}</th>
-        }
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-       @for (row of tablesData; track $index) {
-        <td >{{ row }}</td>
-      }
-      </tr>
-    </tbody>
-  </table>
-</div>
-}
+<p>
+  {{tablesData}}
+</p>

@@ -1,3 +1,11 @@
-<p>
-  {{tablesData}}
-</p>
+@if (tablesData) {
+  <div>
+    @for (item of tablesData; track $index) {
+      <div>
+        @for (key of getObjectKeys(item); track $index) {
+          <p>{{ key }}: {{ getValue(key, item) }}</p>
+        }
+      </div>
+    }
+  </div>
+}

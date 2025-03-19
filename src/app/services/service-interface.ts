@@ -1,5 +1,5 @@
 import { Observable } from "rxjs";
 
-export interface ServiceInterface {
+export interface ServiceInterface<T> {
     getTableData(): Observable<any>;
   }

@@ -9,7 +9,7 @@ import { ServiceInterface } from "./service-interface";
     providedIn: 'root',
 })
 
-export class UtilisateurService implements ServiceInterface{
+export class UtilisateurService implements ServiceInterface<Utilisateur>{
     private apiUrl = API_CONFIG.API_URL + '/utilisateur';
 
     constructor(private readonly http: HttpClient) { }

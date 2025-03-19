@@ -12,7 +12,7 @@ export class TableCardDataComponent<T> implements OnInit {
   private readonly serviceFactory = inject(ServiceFactory);
 
   tablesData$!: Observable<T>;
-  tablesData?: T;
+  tablesData: any;
 
   @Input() tableName!: string;
 
@@ -22,10 +22,11 @@ export class TableCardDataComponent<T> implements OnInit {
     if (service) {
       this.tablesData$ = service.getTableData() as Observable<T>;
       this.tablesData$.subscribe({
-        next: (data: T) => { // next pr être appeller a chaque fois que l'obeservable chang
-          console.log('tablesData$', data);
+        next: (data: T) => {
+          console.log('data', data);
           if (data) {
             this.tablesData = data;
+            console.log('tablesData', this.tablesData);
           }
         },
         error: (err) => {
@@ -39,4 +40,13 @@ export class TableCardDataComponent<T> implements OnInit {
       );
     }
   }
+
+  getObjectKeys(obj: any): string[] {
+    return Object.keys(obj);
+  }
+
+  getValue(key: string, item: any): any {
+    return item ? item[key] : null;
+  }
 }
+

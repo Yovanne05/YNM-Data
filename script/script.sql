@@ -1,9 +1,7 @@
--- Création du schéma NetflixDB
-CREATE DATABASE IF NOT EXISTS Entrepot_Netflix;
+CREATE SCHEMA IF NOT EXISTS Entrepot_Netflix;
 USE Entrepot_Netflix;
 
--- Création de la table Utilisateur
-CREATE TABLE IF NOT EXISTS Utilisateur (
+CREATE TABLE Utilisateur (
     idUtilisateur INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(100),
     prenom VARCHAR(100),
@@ -15,15 +13,13 @@ CREATE TABLE IF NOT EXISTS Utilisateur (
     CHECK (statutAbonnement IN ('Actif', 'Résilié'))
 );
 
--- Création de la table Abonnement
-CREATE TABLE IF NOT EXISTS Abonnement (
+CREATE TABLE Abonnement (
     idAbonnement INT AUTO_INCREMENT PRIMARY KEY,
     typeAbonnement VARCHAR(50),
     prix DECIMAL(6,2)
 );
 
--- Création de la table Temps
-CREATE TABLE IF NOT EXISTS Temps (
+CREATE TABLE Temps (
     idDate INT AUTO_INCREMENT PRIMARY KEY,
     jour INT,
     mois INT,
@@ -31,74 +27,68 @@ CREATE TABLE IF NOT EXISTS Temps (
     trimestre INT
 );
 
--- Création de la table Titre
-CREATE TABLE IF NOT EXISTS Titre (
+CREATE TABLE Genre (
+    idGenre INT AUTO_INCREMENT PRIMARY KEY,
+    nomGenre VARCHAR(50)
+);
+
+CREATE TABLE Titre (
     idTitre INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(255),
     annee INT,
     iddateDebutLicence INT,
     iddateFinLicence INT,
-    categorieAge VARCHAR(50) CHECK (categorieAge IN ('Tout public', '12+', '16+', '18+')),
+    idGenre INT,
+    categorieAge VARCHAR(50),
     description TEXT,
+    CHECK (categorieAge IN ('Tout public', '12+', '16+', '18+')),
     FOREIGN KEY (iddateDebutLicence) REFERENCES Temps(idDate) ON DELETE SET NULL,
-    FOREIGN KEY (iddateFinLicence) REFERENCES Temps(idDate) ON DELETE SET NULL
+    FOREIGN KEY (iddateFinLicence) REFERENCES Temps(idDate) ON DELETE SET NULL,
+    FOREIGN KEY (idGenre) REFERENCES Genre(idGenre)
 );
 
--- Création de la table Serie
-CREATE TABLE IF NOT EXISTS Serie (
+CREATE TABLE Serie (
     idSerie INT AUTO_INCREMENT PRIMARY KEY,
     idTitre INT UNIQUE NOT NULL,
     saison INT CHECK (saison > 0),
     FOREIGN KEY (idTitre) REFERENCES Titre(idTitre)
 );
 
--- Création de la table Film
-CREATE TABLE IF NOT EXISTS Film (
+CREATE TABLE Film (
     idFilm INT AUTO_INCREMENT PRIMARY KEY,
     idTitre INT UNIQUE NOT NULL,
     duree INT CHECK (duree > 0),
     FOREIGN KEY (idTitre) REFERENCES Titre(idTitre)
 );
 
--- Création de la table Genre
-CREATE TABLE IF NOT EXISTS Genre (
-    idGenre INT AUTO_INCREMENT PRIMARY KEY,
-    nomGenre VARCHAR(50)
-);
-
--- Création de la table Langue
-CREATE TABLE IF NOT EXISTS Langue (
+CREATE TABLE Langue (
     idLangue INT AUTO_INCREMENT PRIMARY KEY,
     nomLangue VARCHAR(50)
 );
 
--- Création de la table Langue_Disponible
-CREATE TABLE IF NOT EXISTS Langue_Disponible (
+CREATE TABLE Langue_Disponible (
     idLangueDispo INT AUTO_INCREMENT PRIMARY KEY,
     idLangue INT NOT NULL,
-    typeLangue VARCHAR(15) CHECK (typeLangue IN ('audio', 'sous-titre')),
+    typeLangue VARCHAR(15),
+    CHECK (typeLangue IN ('audio', 'sous-titre')),
     FOREIGN KEY (idLangue) REFERENCES Langue(idLangue) ON DELETE CASCADE
 );
 
--- Création de la table Visionnage
-CREATE TABLE IF NOT EXISTS Visionnage (
+CREATE TABLE Visionnage (
     idVisionnage INT AUTO_INCREMENT PRIMARY KEY,
     idUtilisateur INT,
     idTitre INT,
     idDate INT,
-    idGenre INT,
     idLangueDispo INT,
-    dureeVisionnage INT,  -- durée en minutes
+    dureeVisionnage INT,
     nombreVues INT DEFAULT 1,
     FOREIGN KEY (idUtilisateur) REFERENCES Utilisateur(idUtilisateur),
     FOREIGN KEY (idTitre) REFERENCES Titre(idTitre),
     FOREIGN KEY (idDate) REFERENCES Temps(idDate),
-    FOREIGN KEY (idLangueDispo) REFERENCES Langue_Disponible(idLangueDispo),
-    FOREIGN KEY (idGenre) REFERENCES Genre(idGenre)
+    FOREIGN KEY (idLangueDispo) REFERENCES Langue_Disponible(idLangueDispo)
 );
 
--- Création de la table Evaluation
-CREATE TABLE IF NOT EXISTS Evaluation (
+CREATE TABLE Evaluation (
     idEvaluation INT AUTO_INCREMENT PRIMARY KEY,
     idUtilisateur INT,
     idTitre INT,
@@ -111,13 +101,11 @@ CREATE TABLE IF NOT EXISTS Evaluation (
     FOREIGN KEY (idGenre) REFERENCES Genre(idGenre)
 );
 
--- Création de la table Paiement
-CREATE TABLE IF NOT EXISTS Paiement (
+CREATE TABLE Paiement (
     idPaiement INT AUTO_INCREMENT PRIMARY KEY,
     idUtilisateur INT NOT NULL,
     idAbonnement INT NOT NULL,
     idDate INT NOT NULL,
-    montant DECIMAL(6,2),
     statusPaiement VARCHAR(20),
     FOREIGN KEY (idUtilisateur) REFERENCES Utilisateur(idUtilisateur),
     FOREIGN KEY (idAbonnement) REFERENCES Abonnement(idAbonnement),

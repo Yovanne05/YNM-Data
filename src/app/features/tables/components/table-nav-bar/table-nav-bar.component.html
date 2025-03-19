@@ -1,6 +1,4 @@
-<div
-  class="w-full flex justify-center items-center text-center text-lg font-semibold text-gray-900 mb-6"
->
+<div class="w-full flex justify-center items-center text-center text-lg font-semibold text-gray-900 mb-6">
   <button
     (click)="goToPreviousPage()"
     [disabled]="currentPage === 1"
@@ -10,9 +8,11 @@
     <p><</p>
   </button>
 
-  @for (table of currentTables; track $index) {
-    <app-table-card [name]="table.name" class="mx-2 cursor-pointer" (click)="onTableClick(table)"/>
-  }
+  <div class="flex flex-wrap justify-center gap-2">
+    @for (table of currentTables; track $index) {
+      <app-table-card [name]="table.name" class="mx-2 cursor-pointer" (click)="onTableClick(table)"/>
+    }
+  </div>
 
   <button
     (click)="goToNextPage()"

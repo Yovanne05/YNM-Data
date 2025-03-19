@@ -1,8 +1,9 @@
-<app-table-nav-bar
-  class="w-full flex justify-center"
-  (tableSelected)="handleTableSelection($event)"
-></app-table-nav-bar>
-@if (selectedTable) {
-<app-table-card-info [table]="selectedTable" />
-}
+<div>
+  <app-table-nav-bar
+    (tableSelected)="handleTableSelection($event)"
+  ></app-table-nav-bar>
 
+  <div class="card-info">
+    <app-table-card-info [tableName]="selectedTable" />
+  </div>
+</div>

@@ -45,7 +45,7 @@ export class TableCardDataComponent<T> implements OnInit, OnChanges {
       });
     } else {
       console.error(
-        'Aucun service ou modèle trouvé pour cette table:',
+        'Aucun service trouvé pour cette table:',
         this.tableName
       );
     }

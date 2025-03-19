@@ -1,9 +1,25 @@
-<div class="p-4 border rounded-lg shadow-md bg-white w-[300px]">
-  <h2 class="text-xl font-semibold text-gray-800">{{ table.name }}</h2>
-  <ul class="mt-2 list-disc list-inside">
-    @for (column of table.columns; track $index) {
-      <li class="text-gray-600">{{ column }}</li>
-    }
-  </ul>
+@if (table) {
+<div class="flex space-x-4 p-4">
+  <div
+    class="w-1/3 max-w-xs bg-white shadow-lg rounded-xl p-6 transition-transform transform"
+  >
+    <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ table.name }}</h2>
+    <ul class="mt-2 space-y-2">
+      @for (column of table.columns; track $index) {
+      <li
+        class="text-gray-700 text-sm border-b border-gray-200 pb-2 hover:bg-gray-50 px-2 py-1 rounded-md transition-colors duration-200"
+      >
+        {{ column }}
+      </li>
+      }
+    </ul>
+  </div>
+
+  <div
+    class="flex-1 bg-white shadow-lg rounded-xl p-6 h-[400px] overflow-auto transition-transform transform"
+  >
+    <app-table-card-data [tableName]="table.name" />
+  </div>
 </div>
-<app-table-card-data [tableName]="table.name"/>
+
+}

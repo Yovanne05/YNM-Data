@@ -23,7 +23,7 @@ export class TableService {
     );
   }
 
-  getTableData(table_name: string): Observable<TablesResponse>{
+  getTableDataByTableName(table_name: string): Observable<TablesResponse>{
     return this.http.get<TablesResponse>(this.apiUrl + `/table/${table_name}`).pipe(
       catchError((err) => {
         console.error('Erreur lors de la récupération des données de la table', err);

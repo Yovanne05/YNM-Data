@@ -10,28 +10,25 @@ import { TableCardComponent } from '../table-card-name/table-card-name.component
   standalone: true,
   imports: [TableCardComponent],
   templateUrl: './table-nav-bar.component.html',
-  styleUrl: './table-nav-bar.component.scss'
+  styleUrls: ['./table-nav-bar.component.scss']
 })
 export class TableNavBarComponent implements OnInit {
   private readonly tableService = inject(TableService);
   tables$: Observable<TablesResponse> = new BehaviorSubject<TablesResponse>({});
 
-  tables?: Table[];
+  tableNames: string[] = [];
   currentPage: number = 1;
   tablesPerPage: number = 9;
   totalPages: number = 1;
 
-  @Output() tableSelected: EventEmitter<Table> = new EventEmitter<Table>();
+  @Output() tableSelected: EventEmitter<string> = new EventEmitter<string>();
 
   ngOnInit() {
     this.updateTablesPerPage();
     this.tables$ = this.tableService.getTables();
     this.tables$.subscribe((data: TablesResponse) => {
-      this.tables = Object.entries(data).map(([name, columns]) => ({
-        name,
-        columns,
-      }));
-      this.totalPages = Math.ceil(this.tables.length / this.tablesPerPage);
+      this.tableNames = Object.keys(data);
+      this.totalPages = Math.ceil(this.tableNames.length / this.tablesPerPage);
     });
   }
 
@@ -44,20 +41,20 @@ export class TableNavBarComponent implements OnInit {
     } else {
       this.tablesPerPage = 8;
     }
-    this.totalPages = Math.ceil((this.tables?.length || 0) / this.tablesPerPage); // ceil pour arrondir
+    this.totalPages = Math.ceil(this.tableNames.length / this.tablesPerPage);
     this.currentPage = 1;
   }
 
-  get currentTables(): Table[] {
+  get currentTables(): string[] {
     const startIndex = (this.currentPage - 1) * this.tablesPerPage;
     let endIndex = startIndex + this.tablesPerPage;
 
-    if (this.tables && endIndex > this.tables.length) {
-      const missingCount = endIndex - this.tables.length;
-      return this.tables.slice(startIndex - missingCount, this.tables.length);
+    if (endIndex > this.tableNames.length) {
+      const missingCount = endIndex - this.tableNames.length;
+      return this.tableNames.slice(startIndex - missingCount, this.tableNames.length);
     }
 
-    return this.tables?.slice(startIndex, endIndex) || [];
+    return this.tableNames.slice(startIndex, endIndex);
   }
 
   goToNextPage(): void {
@@ -72,7 +69,7 @@ export class TableNavBarComponent implements OnInit {
     }
   }
 
-  onTableClick(table: Table): void {
-    this.tableSelected.emit(table);
+  onTableClick(tableName: string): void {
+    this.tableSelected.emit(tableName);
   }
 }

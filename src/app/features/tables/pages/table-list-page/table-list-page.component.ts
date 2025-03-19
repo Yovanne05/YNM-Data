@@ -11,9 +11,9 @@ import { TableCardInfoComponent } from "../../components/table-card-info/table-c
   styleUrl: './table-list-page.component.scss',
 })
 export class TableListPageComponent{
-  selectedTable: Table | null = null;
+  selectedTable: string = 'abonnement';
 
-  handleTableSelection(selectedTable: Table): void {
+  handleTableSelection(selectedTable: string): void {
     this.selectedTable = selectedTable;
   }
 }

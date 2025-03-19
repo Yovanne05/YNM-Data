@@ -10,7 +10,7 @@
 
   <div class="flex flex-wrap justify-center gap-2">
     @for (table of currentTables; track $index) {
-      <app-table-card [name]="table.name" class="mx-2 cursor-pointer" (click)="onTableClick(table)"/>
+      <app-table-card [name]="table" class="mx-2 cursor-pointer" (click)="onTableClick(table)"/>
     }
   </div>
 

@@ -34,3 +34,19 @@ def get_tables():
 
     finally:
         cursor.close() 
+
+@app.route('/table/<table_name>', methods=['GET'])
+def get_table_structure(table_name):
+    conn = db.get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(f"DESCRIBE `{table_name}`")
+            columns = [column['Field'] for column in cursor.fetchall()]
+
+        return jsonify({table_name: columns})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cursor.close()

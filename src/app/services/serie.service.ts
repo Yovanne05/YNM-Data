@@ -7,7 +7,6 @@ import { Utilisateur } from "../models/utilisateur";
   providedIn: 'root',
 })
 
-
 export class SerieService implements ServiceInterface <Utilisateur>{
     getTableData(): Observable<any> {
         throw new Error("Method not implemented.");

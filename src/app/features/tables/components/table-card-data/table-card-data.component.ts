@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnInit } from '@angular/core';
+import { Component, inject, Input, OnChanges, SimpleChanges, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ServiceFactory } from '../../../../services/service-factory';
 
@@ -8,7 +8,7 @@ import { ServiceFactory } from '../../../../services/service-factory';
   templateUrl: './table-card-data.component.html',
   styleUrls: ['./table-card-data.component.scss'],
 })
-export class TableCardDataComponent<T> implements OnInit {
+export class TableCardDataComponent<T> implements OnInit, OnChanges {
   private readonly serviceFactory = inject(ServiceFactory);
 
   tablesData$!: Observable<T>;
@@ -17,6 +17,16 @@ export class TableCardDataComponent<T> implements OnInit {
   @Input() tableName!: string;
 
   ngOnInit(): void {
+    this.loadData();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['tableName'] && changes['tableName'].currentValue) {
+      this.loadData();
+    }
+  }
+
+  private loadData(): void {
     const service = this.serviceFactory.getService(this.tableName);
 
     if (service) {
@@ -49,4 +59,3 @@ export class TableCardDataComponent<T> implements OnInit {
     return item ? item[key] : null;
   }
 }
-

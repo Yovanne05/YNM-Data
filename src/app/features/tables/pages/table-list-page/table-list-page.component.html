@@ -1,7 +1,5 @@
-<div>
-  <app-table-nav-bar
-    (tableSelected)="handleTableSelection($event)"
-  ></app-table-nav-bar>
+<div class="page-container">
+  <app-table-nav-bar (tableSelected)="handleTableSelection($event)"></app-table-nav-bar>
 
   <div class="card-info">
     <app-table-card-info [tableName]="selectedTable" />

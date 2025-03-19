@@ -8,11 +8,11 @@ import { ServiceFactory } from '../../../../services/service-factory';
   templateUrl: './table-card-data.component.html',
   styleUrls: ['./table-card-data.component.scss'],
 })
-export class TableCardDataComponent<T> implements OnInit, OnChanges {
+export class TableCardDataComponent implements OnInit, OnChanges {
   private readonly serviceFactory = inject(ServiceFactory);
 
-  tablesData$!: Observable<T>;
-  tablesData: any;
+  tablesData$!: Observable<Record<string, unknown>[]>;
+  tablesData: Record<string, unknown>[] | null = null;
 
   @Input() tableName!: string;
 
@@ -30,9 +30,9 @@ export class TableCardDataComponent<T> implements OnInit, OnChanges {
     const service = this.serviceFactory.getService(this.tableName);
 
     if (service) {
-      this.tablesData$ = service.getTableData() as Observable<T>;
+      this.tablesData$ = service.getTableData() as unknown as Observable<Record<string, unknown>[]>;
       this.tablesData$.subscribe({
-        next: (data: T) => {
+        next: (data: Record<string, unknown>[]) => {
           console.log('data', data);
           if (data) {
             this.tablesData = data;
@@ -51,11 +51,11 @@ export class TableCardDataComponent<T> implements OnInit, OnChanges {
     }
   }
 
-  getObjectKeys(obj: any): string[] {
+  getObjectKeys(obj: Record<string, unknown>): string[] {
     return Object.keys(obj);
   }
 
-  getValue(key: string, item: any): any {
+  getValue(key: string, item: Record<string, unknown>): unknown {
     return item ? item[key] : null;
   }
 }

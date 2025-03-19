@@ -37,5 +37,5 @@ class Utilisateur:
             'paysResidence': self.paysResidence,
             'email': self.email,
             'numero': self.numero,
-            'statut_abonnement': self.statut
+            'statutAbonnement': self.statut
         }

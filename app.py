@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from config import Config
 from controllers.utilisateur_controller import utilisateur_controller
+from controllers.abonnement_controller import abonnemment_controller
 import db
 
 app = Flask(__name__)
@@ -9,6 +10,7 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 app.config.from_object(Config)
 
 app.register_blueprint(utilisateur_controller)
+app.register_blueprint(abonnemment_controller)
 
 @app.route('/tables', methods=['GET'])
 def get_tables():

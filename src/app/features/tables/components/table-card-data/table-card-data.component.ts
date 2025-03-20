@@ -1,7 +1,8 @@
 import { Component, inject, Input, OnChanges, SimpleChanges, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
+import { filter, Observable } from 'rxjs';
 import { ServiceFactory } from '../../../../services/service-factory';
-
+import { getObjectKeys, getValue } from '../../../../utils/json.method';
+import { FilterStrategy } from '../../../../models/interface/filter.interface';
 @Component({
   selector: 'app-table-card-data',
   standalone: true,
@@ -11,8 +12,9 @@ import { ServiceFactory } from '../../../../services/service-factory';
 export class TableCardDataComponent implements OnInit, OnChanges {
   private readonly serviceFactory = inject(ServiceFactory);
 
-  tablesData$!: Observable<Record<string, unknown>[]>;
-  tablesData: Record<string, unknown>[] | null = null;
+  tablesData$!: Observable<Record<string, string>[]>;
+  tablesData: Record<string, string>[] | null = null;
+  filterNames: Array<string> = [];
 
   @Input() tableName!: string;
 
@@ -30,13 +32,13 @@ export class TableCardDataComponent implements OnInit, OnChanges {
     const service = this.serviceFactory.getService(this.tableName);
 
     if (service) {
-      this.tablesData$ = service.getTableData() as unknown as Observable<Record<string, unknown>[]>;
+      this.tablesData$ = service.service.getTableData() as unknown as Observable<Record<string, string>[]>;
+      this.filterNames = Object.keys(service.filters); 
       this.tablesData$.subscribe({
-        next: (data: Record<string, unknown>[]) => {
-          console.log('data', data);
+        next: (data: Record<string, string>[]) => {
           if (data) {
             this.tablesData = data;
-            console.log('tablesData', this.tablesData);
+            console.log("donnée filtrer : ", this.tablesData = this.applyFilters(data, service.filters));
           }
         },
         error: (err) => {
@@ -51,11 +53,23 @@ export class TableCardDataComponent implements OnInit, OnChanges {
     }
   }
 
+  private applyFilters(data: Record<string, string>[], filters: { [key: string]: FilterStrategy }): Record<string, string>[] {
+    let filteredData = data;
+    
+    Object.keys(filters).forEach(filterKey => {
+      const filter = filters[filterKey];
+      filteredData = filter.filter(filteredData, 'criteria');
+    });
+
+    return filteredData;
+  }
+
   getObjectKeys(obj: Record<string, unknown>): string[] {
-    return Object.keys(obj);
+    return getObjectKeys(obj);
   }
 
   getValue(key: string, item: Record<string, unknown>): unknown {
-    return item ? item[key] : null;
+    return getValue(key, item);
   }
+
 }

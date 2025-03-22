@@ -1,8 +1,8 @@
 import { Component, inject, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
-import { Table } from '../../../../models/tables/table';
+import { Table } from '../../../../models/table';
 import { TableCardDataComponent } from '../table-card-data/table-card-data.component';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { TablesResponse } from '../../../../models/tables/table_response';
+import { TablesResponse } from '../../../../models/table_response';
 import { GenericTableService } from '../../../../services/generic.service';
 
 @Component({

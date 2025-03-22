@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { API_CONFIG } from '../config/api.config';
 import { GenericTableInterface } from './interfaces/service.interface';
-import { TablesResponse } from '../models/tables/table_response';
+import { TablesResponse } from '../models/table_response';
 
 @Injectable({
   providedIn: 'root',

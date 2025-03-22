@@ -1,6 +1,6 @@
 import { Component, EventEmitter, inject, Output, OnInit, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { TablesResponse } from '../../../../models/tables/table_response';
+import { TablesResponse } from '../../../../models/table_response';
 import { TableCardComponent } from '../table-card-name/table-card-name.component';
 import { GenericTableService } from '../../../../services/generic.service';
 

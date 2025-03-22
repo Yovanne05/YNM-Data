@@ -18,10 +18,11 @@ export class TableCardDataComponent implements OnInit, OnChanges {
 
   tablesData$!: Observable<Record<string, string>[]>;
   tablesData: Record<string, string>[] | null = null;
-  filteredData: Record<string, string>[] | null = null;
 
+  filteredData: Record<string, string>[] | null = null;
   activeFilters: { [key: string]: boolean } = {};
   availableFilters: { key: string; name: string }[] = [];
+  showFilters = false;
 
   @Input() tableName!: string;
 
@@ -60,6 +61,10 @@ export class TableCardDataComponent implements OnInit, OnChanges {
     } else {
       console.error('Aucun service trouvé pour cette table:', this.tableName);
     }
+  }
+
+  toggleFilters() {
+    this.showFilters = !this.showFilters;
   }
 
   onFilterSelect(filterKey: string): void {

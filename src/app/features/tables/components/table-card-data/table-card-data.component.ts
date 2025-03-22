@@ -49,6 +49,7 @@ export class TableCardDataComponent implements OnInit, OnChanges {
         next: (data: Record<string, string>[]) => {
           if (data) {
             this.tablesData = data;
+            console.log(this.activeFilters);
             this.filteredData = this.filterManager.applyFilters(data, this.activeFilters);
           }
         },

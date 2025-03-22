@@ -1,4 +1,3 @@
-// service-factory.ts
 import { Injectable } from '@angular/core';
 import { UtilisateurService } from '../utilisateur.service';
 import { AbonnementService } from '../abonnement.service';

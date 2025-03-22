@@ -7,3 +7,11 @@ export class StatutAbonnementFilter extends BaseFilter {
         return filteredData;
     }
 }
+export class UtilisateurMajeur extends BaseFilter {
+    filter(data: Record<string, string>[]): Record<string, string>[] {
+        const filteredData = data.filter(item =>
+            item['age'] >= "18"
+        );
+        return filteredData;
+    }
+}

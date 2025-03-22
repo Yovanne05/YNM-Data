@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { FilterRegistryService } from './factory/filter.registry.service';
+import { FilterRegistryService } from './filter.registry.service';
 
 @Injectable({ providedIn: 'root' })
 export class FilterManagerService {

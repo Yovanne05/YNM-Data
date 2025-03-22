@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { FilterStrategy } from '../../models/interface/filter.interface';
-import { StatutAbonnementFilter, UtilisateurMajeur } from '../../models/filter/utilisateur.filter';
+import { FilterStrategy } from '../models/interface/filter.interface';
+import { StatutAbonnementFilter, UtilisateurMajeur } from '../models/filter/utilisateur.filter';
 
 @Injectable({ providedIn: 'root' })
 export class FilterRegistryService {

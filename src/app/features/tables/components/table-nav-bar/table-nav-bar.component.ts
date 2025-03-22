@@ -1,9 +1,8 @@
 import { Component, EventEmitter, inject, Output, OnInit, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { TablesResponse } from '../../../../models/tables/table_response';
-import { Table } from '../../../../models/tables/table';
-import { TableService } from '../../../../services/table.service';
 import { TableCardComponent } from '../table-card-name/table-card-name.component';
+import { GenericTableService } from '../../../../services/generic.service';
 
 @Component({
   selector: 'app-table-nav-bar',
@@ -13,7 +12,7 @@ import { TableCardComponent } from '../table-card-name/table-card-name.component
   styleUrls: ['./table-nav-bar.component.scss']
 })
 export class TableNavBarComponent implements OnInit {
-  private readonly tableService = inject(TableService);
+  private readonly genericTableService = inject(GenericTableService);
   tables$: Observable<TablesResponse> = new BehaviorSubject<TablesResponse>({});
 
   tableNames: string[] = [];
@@ -25,7 +24,7 @@ export class TableNavBarComponent implements OnInit {
 
   ngOnInit() {
     this.updateTablesPerPage();
-    this.tables$ = this.tableService.getTables();
+    this.tables$ = this.genericTableService.getTables();
     this.tables$.subscribe((data: TablesResponse) => {
       this.tableNames = Object.keys(data);
       this.totalPages = Math.ceil(this.tableNames.length / this.tablesPerPage);

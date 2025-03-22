@@ -1,6 +1,4 @@
 import { Component, Input } from '@angular/core';
-import { Table } from '../../../../models/tables/table';
-
 @Component({
   selector: 'app-table-card',
   standalone: true,

@@ -1,4 +1,7 @@
 import { Observable } from "rxjs";
-export interface ServiceInterface {
-  getTableData(): Observable<Record<string, string>>;
+import { TablesResponse } from "../../models/tables/table_response";
+export interface GenericTableInterface {
+  getTableData(tableName: string): Observable<Record<string, string> []>;
+  getTables(): Observable<TablesResponse>;
+  getTableDataByTableName(table_name: string): Observable<TablesResponse>;
 }

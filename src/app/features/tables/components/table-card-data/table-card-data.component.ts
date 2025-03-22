@@ -1,10 +1,9 @@
-// table-card-data.component.ts
 import { Component, inject, Input, OnChanges, SimpleChanges, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { getObjectKeys, getValue } from '../../../../utils/json.method';
-import { ServiceFactory } from '../../../../services/factory/service.factory';
-import { FilterRegistryService } from '../../../../services/factory/filter.registry.service';
+import { FilterRegistryService } from '../../../../services/filter.registry.service';
 import { FilterManagerService } from '../../../../services/filter.manager.service';
+import { GenericTableService } from '../../../../services/generic.service';
 
 @Component({
   selector: 'app-table-card-data',
@@ -13,7 +12,7 @@ import { FilterManagerService } from '../../../../services/filter.manager.servic
   styleUrls: ['./table-card-data.component.scss'],
 })
 export class TableCardDataComponent implements OnInit, OnChanges {
-  private readonly serviceFactory = inject(ServiceFactory);
+  private readonly genericTableService = inject(GenericTableService);
   private readonly filterRegistry = inject(FilterRegistryService);
   private readonly filterManager = inject(FilterManagerService);
 
@@ -32,14 +31,15 @@ export class TableCardDataComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['tableName'] && changes['tableName'].currentValue) {
+      this.activeFilters = {};
       this.loadData();
     }
   }
 
   private loadData(): void {
-    const service = this.serviceFactory.getService(this.tableName);
-    if (service) {
-      this.tablesData$ = service.getTableData() as Observable<Record<string, string>[]>;
+    const tableData = this.genericTableService.getTableData(this.tableName);
+    this.tablesData$ = tableData;
+    if (this.tablesData$) {
       this.availableFilters = Object.entries(this.filterRegistry.getFiltersForTable(this.tableName)).map(([key, name]) => ({
         key,
         name,

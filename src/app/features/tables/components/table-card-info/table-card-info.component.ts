@@ -1,9 +1,9 @@
-import { TableService } from './../../../../services/table.service';
 import { Component, inject, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { Table } from '../../../../models/tables/table';
 import { TableCardDataComponent } from '../table-card-data/table-card-data.component';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { TablesResponse } from '../../../../models/tables/table_response';
+import { GenericTableService } from '../../../../services/generic.service';
 
 @Component({
   selector: 'app-table-card-info',
@@ -16,7 +16,7 @@ export class TableCardInfoComponent implements OnInit, OnChanges {
 
   @Input({ required: true }) tableName!: string;
 
-  private readonly tableService = inject(TableService);
+  private readonly genericTableService = inject(GenericTableService);
   table$: Observable<TablesResponse> = new BehaviorSubject<TablesResponse>({});
   table?: Table;
 
@@ -31,7 +31,7 @@ export class TableCardInfoComponent implements OnInit, OnChanges {
   }
 
   private loadTableData(): void {
-    this.table$ = this.tableService.getTableDataByTableName(this.tableName);
+    this.table$ = this.genericTableService.getTableDataByTableName(this.tableName);
     this.table$.subscribe((data: TablesResponse) => {
       const firstTable = Object.entries(data)[0];
       if (firstTable) {

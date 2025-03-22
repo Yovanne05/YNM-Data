@@ -1,8 +1,8 @@
 @if (filteredData) {
   <div>
-    @for (filterKey of availableFilters; track filterKey) {
-      <button (click)="onFilterSelect(filterKey)">
-        {{ filterKey }}
+    @for (filter of availableFilters; track filter.key) {
+      <button (click)="onFilterSelect(filter.key)">
+        {{ filter.name }}
       </button>
     }
   </div>

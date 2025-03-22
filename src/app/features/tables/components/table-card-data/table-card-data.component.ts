@@ -1,4 +1,11 @@
-import { Component, inject, Input, OnChanges, SimpleChanges, OnInit } from '@angular/core';
+import {
+  Component,
+  inject,
+  Input,
+  OnChanges,
+  SimpleChanges,
+  OnInit,
+} from '@angular/core';
 import { Observable } from 'rxjs';
 import { ServiceFactory } from '../../../../services/service-factory';
 import { getObjectKeys, getValue } from '../../../../utils/json.method';
@@ -18,7 +25,7 @@ export class TableCardDataComponent implements OnInit, OnChanges {
   filteredData: Record<string, string>[] | null = null;
 
   activeFilters: { [key: string]: boolean } = {};
-  availableFilters: string[] = [];
+  availableFilters: { key: string, strategy: FilterStrategy, name: string }[] = [];
 
   @Input() tableName!: string;
 
@@ -36,16 +43,27 @@ export class TableCardDataComponent implements OnInit, OnChanges {
     const service = this.serviceFactory.getService(this.tableName);
 
     if (service) {
-
-      this.tablesData$ = service.service.getTableData() as unknown as Observable<Record<string, string>[]>;
-      this.availableFilters = Object.keys(service.filters);
+      this.tablesData$ =
+        service.service.getTableData() as unknown as Observable<
+          Record<string, string>[]
+        >;
+        this.availableFilters = Object.keys(service.filters).map(filterKey => ({
+          key: filterKey,
+          strategy: service.filters[filterKey].strategy,
+          name: service.filters[filterKey].name
+        }));
 
       this.tablesData$.subscribe({
         next: (data: Record<string, string>[]) => {
           if (data) {
             this.tablesData = data;
-            this.filteredData = this.applyFilters(data, service.filters);
-            console.log("Données filtrées : ", this.filteredData);
+
+            const filters = Object.keys(service.filters).reduce((acc, key) => {
+              acc[key] = service.filters[key].strategy;
+              return acc;
+            }, {} as { [key: string]: FilterStrategy });
+
+            this.filteredData = this.applyFilters(data, filters);
           }
         },
         error: (err) => {
@@ -62,10 +80,13 @@ export class TableCardDataComponent implements OnInit, OnChanges {
     this.loadData();
   }
 
-  private applyFilters(data: Record<string, string>[], filters: { [key: string]: FilterStrategy }): Record<string, string>[] {
+  private applyFilters(
+    data: Record<string, string>[],
+    filters: { [key: string]: FilterStrategy }
+  ): Record<string, string>[] {
     let filteredData = data;
 
-    Object.keys(this.activeFilters).forEach(filterKey => {
+    Object.keys(this.activeFilters).forEach((filterKey) => {
       if (this.activeFilters[filterKey]) {
         const filter = filters[filterKey];
         if (filter) {

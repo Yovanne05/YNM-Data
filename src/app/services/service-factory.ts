@@ -11,16 +11,22 @@ export class ServiceFactory {
     private abonnementService: AbonnementService,
   ) {}
 
-  getService(tableName: string): { service: any, filters: { [key: string]: FilterStrategy } } {
-    const filters: { [key: string]: FilterStrategy } = {};
+  getService(tableName: string): {
+    service: any,
+    filters: { [key: string]: { strategy: FilterStrategy, name: string } }
+  } {
+    const filters: { [key: string]: { strategy: FilterStrategy, name: string } } = {};
 
     switch (tableName) {
       case 'utilisateur':
-        filters['statutAbonnement'] = new StatutAbonnementFilter();
+        filters['statutAbonnement'] = {
+          strategy: new StatutAbonnementFilter(),
+          name: 'Statut Abonnement'
+        };
         return { service: this.utilisateurService, filters };
 
       case 'abonnement':
-        return { service: this.abonnementService, filters: {} };
+        return { service: this.abonnementService, filters : {} };
 
       default:
         return { service: null, filters: {} };

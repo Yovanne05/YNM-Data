@@ -1,6 +1,10 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 from config import Config
+from controllers.genre_controller import genre_controller
+from controllers.paiement_controller import paiement_controller
+from controllers.temps_controller import temps_controller
+from controllers.titre_controller import titre_controller
 from controllers.utilisateur_controller import utilisateur_controller
 import db
 
@@ -9,6 +13,10 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 app.config.from_object(Config)
 
 app.register_blueprint(utilisateur_controller)
+app.register_blueprint(titre_controller)
+app.register_blueprint(genre_controller)
+app.register_blueprint(temps_controller)
+app.register_blueprint(paiement_controller)
 
 @app.route('/tables', methods=['GET'])
 def get_tables():

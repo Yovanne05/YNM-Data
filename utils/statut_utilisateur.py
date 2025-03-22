@@ -1,1 +1,1 @@
-statut_autorise = ["Actif", "Resilié"]
+statut_autorise = ["Actif", "Résilié"]

@@ -1,4 +1,11 @@
-import { Component, inject, Input, OnChanges, SimpleChanges, OnInit } from '@angular/core';
+import {
+  Component,
+  inject,
+  Input,
+  OnChanges,
+  SimpleChanges,
+  OnInit,
+} from '@angular/core';
 import { Observable } from 'rxjs';
 import { getObjectKeys, getValue } from '../../../../utils/json.method';
 import { FilterRegistryService } from '../../../../services/filter.registry.service';
@@ -16,102 +23,104 @@ export class TableCardDataComponent implements OnInit, OnChanges {
   private readonly filterRegistry = inject(FilterRegistryService);
   private readonly filterManager = inject(FilterManagerService);
 
+  @Input() tableName!: string;
+
   tablesData$!: Observable<Record<string, string>[]>;
   tablesData: Record<string, string>[] | null = null;
-
   filteredData: Record<string, string>[] | null = null;
+
   activeFilters: { [key: string]: boolean } = {};
   availableFilters: { key: string; name: string }[] = [];
   showFilters = false;
 
   sortKeys: { key: string; direction: 'asc' | 'desc' }[] = [];
-  sortDirection: 'asc' | 'desc' = 'asc';
-
-  @Input() tableName!: string;
 
   ngOnInit(): void {
     this.loadData();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['tableName'] && changes['tableName'].currentValue) {
-      this.activeFilters = {};
-      this.sortKeys = [];
+    if (changes['tableName']?.currentValue) {
+      this.resetState();
       this.loadData();
     }
   }
 
-  private loadData(): void {
-    const tableData = this.genericTableService.getTableData(this.tableName);
-    this.tablesData$ = tableData;
-    if (this.tablesData$) {
-      this.availableFilters = Object.entries(this.filterRegistry.getFiltersForTable(this.tableName)).map(([key, name]) => ({
-        key,
-        name,
-      }));
+  private resetState(): void {
+    this.activeFilters = {};
+    this.sortKeys = [];
+    this.filteredData = null;
+  }
 
-      this.tablesData$.subscribe({
-        next: (data: Record<string, string>[]) => {
-          if (data) {
-            this.tablesData = data;
-            this.filteredData = this.filterManager.applyFilters(data, this.activeFilters);
-            if (this.sortKeys) {
-              this.filteredData = this.sortData(this.filteredData);
-            }
-          }
-        },
-        error: (err) => {
-          console.error('Erreur de souscription:', err);
-        },
-      });
-    } else {
-      console.error('Aucun service trouvé pour cette table:', this.tableName);
+  private loadData(): void {
+    this.tablesData$ = this.genericTableService.getTableData(this.tableName);
+
+    this.tablesData$.subscribe({
+      next: (data) => {
+        if (data) {
+          this.tablesData = data;
+          this.availableFilters = this.getAvailableFilters();
+          this.applyFiltersAndSort();
+        }
+      },
+      error: (err) => console.error('Erreur de souscription:', err),
+    });
+  }
+
+  private getAvailableFilters(): { key: string; name: string }[] {
+    const filters = this.filterRegistry.getFiltersForTable(this.tableName);
+    return Object.entries(filters).map(([key, name]) => ({ key, name }));
+  }
+
+  private applyFiltersAndSort(): void {
+    if (!this.tablesData) return;
+
+    this.filteredData = this.filterManager.applyFilters(
+      this.tablesData,
+      this.activeFilters
+    );
+
+    if (this.sortKeys.length > 0) {
+      this.filteredData = this.sortData(this.filteredData);
     }
   }
 
   private sortData(data: Record<string, string>[]): Record<string, string>[] {
-    if (this.sortKeys.length === 0) return data;
-
     return data.sort((a, b) => {
       for (const sortKey of this.sortKeys) {
         const valueA = a[sortKey.key];
         const valueB = b[sortKey.key];
 
-        if (valueA < valueB) {
-          return sortKey.direction === 'asc' ? -1 : 1;
-        }
-        if (valueA > valueB) {
-          return sortKey.direction === 'asc' ? 1 : -1;
-        }
+        if (valueA < valueB) return sortKey.direction === 'asc' ? -1 : 1;
+        if (valueA > valueB) return sortKey.direction === 'asc' ? 1 : -1;
       }
       return 0;
     });
   }
 
   onSort(key: string): void {
-    const existingSortKeyIndex = this.sortKeys.findIndex(sort => sort.key === key);
+    const existingSortKeyIndex = this.sortKeys.findIndex(
+      (sort) => sort.key === key
+    );
 
     if (existingSortKeyIndex !== -1) {
       const existingSortKey = this.sortKeys[existingSortKeyIndex];
-      if (existingSortKey.direction === 'asc') {
-        existingSortKey.direction = 'desc';
-      } else {
-        this.sortKeys.splice(existingSortKeyIndex, 1);
-      }
+      existingSortKey.direction =
+        existingSortKey.direction === 'asc' ? 'desc' : 'asc';
     } else {
       this.sortKeys.push({ key, direction: 'asc' });
     }
 
-    this.loadData();
+    this.applyFiltersAndSort();
   }
 
-  toggleFilters() {
+  toggleFilters(): void {
     this.showFilters = !this.showFilters;
   }
 
   onFilterSelect(filterKey: string): void {
     this.activeFilters[filterKey] = !this.activeFilters[filterKey];
-    this.loadData();
+    this.applyFiltersAndSort();
   }
 
   getObjectKeys(obj: Record<string, unknown>): string[] {

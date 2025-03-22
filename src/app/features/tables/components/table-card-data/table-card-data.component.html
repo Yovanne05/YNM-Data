@@ -7,44 +7,42 @@
   </button>
 
   @if (showFilters) {
-  <div
-    class="absolute mt-1 bg-white border border-gray-200 rounded-md shadow-md w-48 z-10"
-  >
-    @for (filter of availableFilters; track filter.key) {
-    <button
-      (click)="onFilterSelect(filter.key)"
-      class="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-    >
-      {{ filter.name }}
-    </button>
-    }
-  </div>
+    <div class="absolute mt-1 bg-white border border-gray-200 rounded-md shadow-md w-48 z-10">
+      @for (filter of availableFilters; track filter.key) {
+        <button
+          (click)="onFilterSelect(filter.key)"
+          class="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
+        >
+          {{ filter.name }}
+        </button>
+      }
+    </div>
   }
 </div>
 
 <div class="p-2">
   @if (filteredData) {
-  <div class="bg-gray-100 rounded-md p-2 mb-2">
-    <div class="grid grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-2 text-sm font-medium border-b py-1">
-      @for (key of getObjectKeys(filteredData[0]); track $index) {
-      <span class="cursor-pointer hover:text-blue-500" (click)="onSort(key)">
-        {{ key }}
-        @for (sortKey of sortKeys; track $index) {
-          @if (sortKey.key === key) {
-            <span>{{ sortKey.direction === "asc" ? "▲" : "▼" }}</span>
-          }
+    <div class="bg-gray-100 rounded-md p-2 mb-2">
+      <div class="grid grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-2 text-sm font-medium border-b py-1">
+        @for (key of getObjectKeys(filteredData[0]); track $index) {
+          <span class="cursor-pointer hover:text-blue-500" (click)="onSort(key)">
+            {{ key }}
+            @for (sortKey of sortKeys; track $index) {
+              @if (sortKey.key === key) {
+                <span>{{ sortKey.direction === 'asc' ? '▲' : '▼' }}</span>
+              }
+            }
+          </span>
         }
-      </span>
-      }
-    </div>
+      </div>
 
-    @for (item of filteredData; track $index) {
-    <div class="grid grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-2 text-sm border-b last:border-none py-1">
-      @for (key of getObjectKeys(item); track $index) {
-      <span>{{ getValue(key, item) }}</span>
+      @for (item of filteredData; track $index) {
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-2 text-sm border-b last:border-none py-1">
+          @for (key of getObjectKeys(item); track $index) {
+            <span>{{ getValue(key, item) }}</span>
+          }
+        </div>
       }
     </div>
-    }
-  </div>
   }
 </div>

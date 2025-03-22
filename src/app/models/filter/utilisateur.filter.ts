@@ -1,26 +1,9 @@
-import { FilterStrategy } from "../interface/filter.interface";
-import { UtilisateurService } from "../../services/utilisateur.service";
-
-export class StatutAbonnementFilter implements FilterStrategy {
-    filter(param: string | Record<string, string>[]): Record<string, string>[] {
-        let data: Record<string, string>[];
-
-        if (typeof param === "string") {
-            data = this.getDataFromTable(param);
-        } else {
-            data = param;
-        }
-
+import { BaseFilter } from "./base.filter";
+export class StatutAbonnementFilter extends BaseFilter {
+    filter(data: Record<string, string>[]): Record<string, string>[] {
         const filteredData = data.filter(item =>
             item['statutAbonnement'] === "Actif"
         );
-
         return filteredData;
-    }
-
-    private getDataFromTable(tableName: string): Record<string, string>[] {
-        // méthode service a faire
-        console.log(`Fetching data for table: ${tableName}`);
-        return [];
     }
 }

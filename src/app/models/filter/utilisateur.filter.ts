@@ -2,7 +2,7 @@ import { FilterStrategy } from "../interface/filter.interface";
 import { UtilisateurService } from "../../services/utilisateur.service";
 
 export class StatutAbonnementFilter implements FilterStrategy {
-    filter(param: string | Record<string, string>[], criteria: any): Record<string, string>[] {
+    filter(param: string | Record<string, string>[]): Record<string, string>[] {
         let data: Record<string, string>[];
 
         if (typeof param === "string") {

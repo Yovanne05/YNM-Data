@@ -6,5 +6,5 @@ export type Utilisateur = {
   paysResidance: string;
   email: string;
   numero: number;
-  statutAbonnement: 'Actif' | 'Resilié';
+  statutAbonnement: 'Actif' | 'Résilié';
 }

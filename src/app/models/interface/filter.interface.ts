@@ -1,4 +1,4 @@
 export interface FilterStrategy {
-    filter(tableName: string, criteria: any): Record<string, string>[];
-    filter(data: Record<string, string>[], criteria: any): Record<string, string>[];
+    filter(tableName: string): Record<string, string>[];
+    filter(data: Record<string, string>[]): Record<string, string>[];
 }

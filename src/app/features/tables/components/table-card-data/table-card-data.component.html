@@ -1,6 +1,14 @@
-@if (tablesData) {
+@if (filteredData) {
+  <div>
+    @for (filterKey of availableFilters; track filterKey) {
+      <button (click)="onFilterSelect(filterKey)">
+        {{ filterKey }}
+      </button>
+    }
+  </div>
+
   <div class="p-2">
-    @for (item of tablesData; track $index) {
+    @for (item of filteredData; track $index) {
       <div class="bg-gray-100 rounded-md p-2 mb-2">
         @for (key of getObjectKeys(item); track $index) {
           <div class="flex justify-between text-sm border-b last:border-none py-1">
@@ -11,8 +19,6 @@
       </div>
     }
   </div>
-}@else {
-  <p>
-    Aucune donnée
-  </p>
+} @else {
+  <p>Aucune donnée</p>
 }

@@ -13,8 +13,7 @@ export class SideBarComponent {
 
 @Input() links: { label: string, path: string}[] = [
   { label: 'Tables', path: 'tables' },
-  { label: 'Gestion des Utilisateurs', path: 'users' },
-  { label: 'Gestion des Données', path: 'data-management' },
+  { label: 'Filtrage Tables', path: 'filter-tables' },
   { label: 'Logs', path: 'logs' },
 ]
 }

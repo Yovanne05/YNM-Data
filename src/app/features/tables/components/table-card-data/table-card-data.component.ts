@@ -24,6 +24,9 @@ export class TableCardDataComponent implements OnInit, OnChanges {
   availableFilters: { key: string; name: string }[] = [];
   showFilters = false;
 
+  sortKeys: { key: string; direction: 'asc' | 'desc' }[] = [];
+  sortDirection: 'asc' | 'desc' = 'asc';
+
   @Input() tableName!: string;
 
   ngOnInit(): void {
@@ -33,6 +36,7 @@ export class TableCardDataComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['tableName'] && changes['tableName'].currentValue) {
       this.activeFilters = {};
+      this.sortKeys = [];
       this.loadData();
     }
   }
@@ -50,8 +54,10 @@ export class TableCardDataComponent implements OnInit, OnChanges {
         next: (data: Record<string, string>[]) => {
           if (data) {
             this.tablesData = data;
-            console.log(this.activeFilters);
             this.filteredData = this.filterManager.applyFilters(data, this.activeFilters);
+            if (this.sortKeys) {
+              this.filteredData = this.sortData(this.filteredData);
+            }
           }
         },
         error: (err) => {
@@ -61,6 +67,42 @@ export class TableCardDataComponent implements OnInit, OnChanges {
     } else {
       console.error('Aucun service trouvé pour cette table:', this.tableName);
     }
+  }
+
+  private sortData(data: Record<string, string>[]): Record<string, string>[] {
+    if (this.sortKeys.length === 0) return data;
+
+    return data.sort((a, b) => {
+      for (const sortKey of this.sortKeys) {
+        const valueA = a[sortKey.key];
+        const valueB = b[sortKey.key];
+
+        if (valueA < valueB) {
+          return sortKey.direction === 'asc' ? -1 : 1;
+        }
+        if (valueA > valueB) {
+          return sortKey.direction === 'asc' ? 1 : -1;
+        }
+      }
+      return 0;
+    });
+  }
+
+  onSort(key: string): void {
+    const existingSortKeyIndex = this.sortKeys.findIndex(sort => sort.key === key);
+
+    if (existingSortKeyIndex !== -1) {
+      const existingSortKey = this.sortKeys[existingSortKeyIndex];
+      if (existingSortKey.direction === 'asc') {
+        existingSortKey.direction = 'desc';
+      } else {
+        this.sortKeys.splice(existingSortKeyIndex, 1);
+      }
+    } else {
+      this.sortKeys.push({ key, direction: 'asc' });
+    }
+
+    this.loadData();
   }
 
   toggleFilters() {

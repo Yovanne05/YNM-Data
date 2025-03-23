@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { API_CONFIG } from '../config/api.config';
@@ -14,9 +14,16 @@ export class GenericTableService implements GenericTableInterface {
 
   constructor(private http: HttpClient) {}
 
-  getTableData(tableName: string): Observable<Record<string, string>[]> {
+  getTableData(tableName: string, filters?: { [key: string]: string }): Observable<Record<string, string>[]> {
+    let params = new HttpParams();
+    if (filters) {
+      Object.keys(filters).forEach(key => {
+        params = params.append(key, filters[key]);
+      });
+    }
+
     return this.http
-      .get<Record<string, string>[]>(`${this.apiUrl}/${tableName}`)
+      .get<Record<string, string>[]>(`${this.apiUrl}/table/${tableName}/data`, { params })
       .pipe(
         catchError((err) => {
           console.error(

@@ -1,30 +1,25 @@
 import { Injectable } from '@angular/core';
-import { FilterStrategy } from '../models/interfaces/filter.interface';
-import { StatutAbonnementFilter, UtilisateurMajeur } from '../models/implementations/utilisateur.filter';
 
 @Injectable({ providedIn: 'root' })
 export class FilterRegistryService {
-  private filters: { [key: string]: { strategy: FilterStrategy; name: string } } = {};
+  private filters: { [key: string]: string } = {}; //key = cle json python, string = nom titre
 
   constructor() {
     this.registerDefaultFilters();
   }
 
   private registerDefaultFilters(): void {
-    this.registerFilter('statutAbonnement', new StatutAbonnementFilter(), 'Statut Abonnement');
-    this.registerFilter('userMajeur', new UtilisateurMajeur(), 'Utilisateur Majeur');
+    this.registerFilter('statutAbonnement', 'Statut Abonnement');
+    this.registerFilter('age', 'Utilisateur Majeur');
+    this.registerFilter('paysResidence', 'Pays de résidence');
   }
 
-  registerFilter(key: string, filter: FilterStrategy, name: string): void {
-    this.filters[key] = { strategy: filter, name };
-  }
-
-  getFilter(key: string): FilterStrategy | undefined {
-    return this.filters[key]?.strategy;
+  registerFilter(key: string, name: string): void {
+    this.filters[key] = name;
   }
 
   getFilterName(key: string): string {
-    return this.filters[key]?.name || '';
+    return this.filters[key] || '';
   }
 
   getFiltersForTable(tableName: string): { [key: string]: string } {
@@ -33,7 +28,7 @@ export class FilterRegistryService {
     switch (tableName) {
       case 'utilisateur':
         filtersChoose['statutAbonnement'] = this.getFilterName('statutAbonnement');
-        filtersChoose['userMajeur'] = this.getFilterName('userMajeur');
+        filtersChoose['age'] = this.getFilterName('age');
         break;
     }
     return filtersChoose;

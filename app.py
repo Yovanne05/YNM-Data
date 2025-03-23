@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from config import Config
 from controllers.utilisateur_controller import utilisateur_controller
@@ -50,3 +50,44 @@ def get_table_structure(table_name):
 
     finally:
         cursor.close()
+
+@app.route('/table/<table_name>/data', methods=['GET'])
+def get_table_data(table_name):
+    conn = db.get_db_connection()
+    try:
+        filters = request.args.to_dict()
+
+        with conn.cursor() as cursor:
+            cursor.execute(f"DESCRIBE `{table_name}`")
+            columns = [column['Field'] for column in cursor.fetchall()]
+
+        query = f"SELECT * FROM `{table_name}`"
+        params = []
+
+        if filters:
+            conditions = []
+            for key, value in filters.items():
+                if value and key in columns:
+                    is_greater_than = filters.get(f"{key}_isGreaterThan") == "true"
+
+                    if is_greater_than:
+                        conditions.append(f"`{key}` > %s")
+                    else:
+                        conditions.append(f"`{key}` LIKE %s")
+                    params.append(f"%{value}%" if not is_greater_than else value)
+
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
+
+        with conn.cursor() as cursor:
+            cursor.execute(query, tuple(params))
+            data = cursor.fetchall()
+
+        return jsonify(data)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cursor.close()
+        conn.close()

@@ -1,16 +1,10 @@
-import {
-  Component,
-  inject,
-  Input,
-  OnChanges,
-  SimpleChanges,
-  OnInit,
-} from '@angular/core';
+import { Component, inject, Input, OnChanges, SimpleChanges, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { getObjectKeys, getValue } from '../../../../utils/json.method';
 import { FilterRegistryService } from '../../../../services/filter.registry.service';
 import { FilterManagerService } from '../../../../services/filter.manager.service';
 import { GenericTableService } from '../../../../services/generic.service';
+import { ApiService } from '../../../../services/delete.edit.service.service'; // Importez le service ApiService
 
 @Component({
   selector: 'app-table-card-data',
@@ -22,6 +16,7 @@ export class TableCardDataComponent implements OnInit, OnChanges {
   private readonly genericTableService = inject(GenericTableService);
   private readonly filterRegistry = inject(FilterRegistryService);
   private readonly filterManager = inject(FilterManagerService);
+  private readonly apiService = inject(ApiService); // Injectez le service ApiService
 
   @Input() tableName!: string;
 
@@ -34,6 +29,7 @@ export class TableCardDataComponent implements OnInit, OnChanges {
   showFilters = false;
 
   sortKeys: { key: string; direction: 'asc' | 'desc' }[] = [];
+  actionMenuOpen: number | null = null;
 
   ngOnInit(): void {
     this.loadData();
@@ -50,6 +46,7 @@ export class TableCardDataComponent implements OnInit, OnChanges {
     this.activeFilters = {};
     this.sortKeys = [];
     this.filteredData = null;
+    this.actionMenuOpen = null;
   }
 
   private loadData(): void {
@@ -121,6 +118,64 @@ export class TableCardDataComponent implements OnInit, OnChanges {
   onFilterSelect(filterKey: string): void {
     this.activeFilters[filterKey] = !this.activeFilters[filterKey];
     this.applyFiltersAndSort();
+  }
+
+  toggleActionMenu(index: number): void {
+    this.actionMenuOpen = this.actionMenuOpen === index ? null : index;
+  }
+
+  tablePrimaryKeys: Record<string, string> = {
+    utilisateur: 'idUtilisateur',
+    Abonnement: 'idAbonnement',
+    Temps: 'idDate',
+    Genre: 'idGenre',
+    Titre: 'idTitre',
+    Serie: 'idSerie',
+    Film: 'idFilm',
+    Langue: 'idLangue',
+    Langue_Disponible: 'idLangueDispo',
+    Visionnage: 'idVisionnage',
+    Evaluation: 'idEvaluation',
+    Paiement: 'idPaiement',
+  };
+
+  onEdit(item: Record<string, string>): void {
+    // Récupérer la colonne d'identifiant pour la table actuelle
+    const primaryKey = this.tablePrimaryKeys[this.tableName];
+    if (!primaryKey) {
+      console.error(`Colonne d'identifiant non trouvée pour la table ${this.tableName}`);
+      return;
+    }
+  
+    // Exemple de logique pour modifier un élément
+    const updatedData = { ...item, name: 'Nouveau nom' }; // Remplacez par les nouvelles données
+    this.apiService.updateItem(this.tableName, item[primaryKey], updatedData).subscribe({
+      next: (response) => {
+        console.log('Élément modifié:', response);
+        this.loadData(); // Recharger les données après modification
+      },
+      error: (err) => console.error('Erreur lors de la modification:', err),
+    });
+    this.actionMenuOpen = null;
+  }
+
+  onDelete(item: Record<string, string>): void {
+    // Récupérer la colonne d'identifiant pour la table actuelle
+    const primaryKey = this.tablePrimaryKeys[this.tableName];
+    if (!primaryKey) {
+      console.error(`Colonne d'identifiant non trouvée pour la table ${this.tableName}`);
+      return;
+    }
+  
+    // Exemple de logique pour supprimer un élément
+    this.apiService.deleteItem(this.tableName, item[primaryKey]).subscribe({
+      next: (response) => {
+        console.log('Élément supprimé:', response);
+        this.loadData(); // Recharger les données après suppression
+      },
+      error: (err) => console.error('Erreur lors de la suppression:', err),
+    });
+    this.actionMenuOpen = null;
   }
 
   getObjectKeys(obj: Record<string, unknown>): string[] {

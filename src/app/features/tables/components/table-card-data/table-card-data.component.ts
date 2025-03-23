@@ -79,11 +79,11 @@ export class TableCardDataComponent implements OnInit, OnChanges {
   }
 
   private initFilterForm(): void {
-    const formControls = this.availableFilters.reduce((acc, filter) => {
-      acc[filter.key] = new FormControl('');
-      return acc;
-    }, {} as { [key: string]: FormControl });
-
+    const formControls: { [key: string]: FormControl } = {};
+    this.availableFilters.forEach((filter) => {
+      formControls[filter.key] = new FormControl('');
+      formControls[filter.key + '_isGreaterThan'] = new FormControl(false);
+    });
     this.filterForm = new FormGroup(formControls);
   }
 

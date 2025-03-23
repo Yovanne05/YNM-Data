@@ -15,9 +15,17 @@
         <input
           type="text"
           [formControlName]="filter.key"
-          placeholder="Entrez une valeur et appuyez sur Entrée"
+          placeholder="Entrez une valeur"
           class="w-full border rounded-md p-1 mt-1"
         />
+        <label class="flex items-center mt-1">
+          <input
+            type="checkbox"
+            [formControlName]="filter.key + '_isGreaterThan'"
+            class="mr-2"
+          />
+          Supérieur à
+        </label>
       </div>
       }
       <button type="submit" class="hidden">Submit</button>

@@ -12,6 +12,7 @@ export class FilterRegistryService {
     this.registerFilter('statutAbonnement', 'Statut Abonnement');
     this.registerFilter('age', 'Utilisateur Majeur');
     this.registerFilter('paysResidence', 'Pays de résidence');
+    this.registerFilter('prix', 'Prix');
   }
 
   registerFilter(key: string, name: string): void {
@@ -30,6 +31,8 @@ export class FilterRegistryService {
         filtersChoose['statutAbonnement'] = this.getFilterName('statutAbonnement');
         filtersChoose['age'] = this.getFilterName('age');
         break;
+      case 'abonnement':
+        filtersChoose['prix'] = this.getFilterName("prix");
     }
     return filtersChoose;
   }

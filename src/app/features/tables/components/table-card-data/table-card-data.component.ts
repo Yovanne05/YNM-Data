@@ -5,12 +5,15 @@ import {
   OnChanges,
   SimpleChanges,
   OnInit,
+  Output,
+  EventEmitter,
 } from '@angular/core';
 import { Observable } from 'rxjs';
 import { getObjectKeys, getValue } from '../../../../utils/json.method';
 import { FilterRegistryService } from '../../../../services/filter.registry.service';
 import { FilterManagerService } from '../../../../services/filter.manager.service';
 import { GenericTableService } from '../../../../services/generic.service';
+import { CsvExtractService } from '../../../../services/csv-extract.service';
 
 @Component({
   selector: 'app-table-card-data',
@@ -22,6 +25,7 @@ export class TableCardDataComponent implements OnInit, OnChanges {
   private readonly genericTableService = inject(GenericTableService);
   private readonly filterRegistry = inject(FilterRegistryService);
   private readonly filterManager = inject(FilterManagerService);
+  private readonly csvExtractService = inject(CsvExtractService)
 
   @Input() tableName!: string;
 
@@ -34,6 +38,8 @@ export class TableCardDataComponent implements OnInit, OnChanges {
   showFilters = false;
 
   sortKeys: { key: string; direction: 'asc' | 'desc' }[] = [];
+
+  @Output() sendTablesData = new EventEmitter<Record<string, string>[] | null>
 
   ngOnInit(): void {
     this.loadData();
@@ -61,6 +67,7 @@ export class TableCardDataComponent implements OnInit, OnChanges {
           this.tablesData = data;
           this.availableFilters = this.getAvailableFilters();
           this.applyFiltersAndSort();
+          this.sendTablesData.emit(this.tablesData);
         }
       },
       error: (err) => console.error('Erreur de souscription:', err),

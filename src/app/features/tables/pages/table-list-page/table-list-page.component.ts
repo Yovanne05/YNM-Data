@@ -21,6 +21,5 @@ export class TableListPageComponent{
 
   initTablesData(data: Record<string, string>[] | null): void {
     this.tablesData = data;
-    data?.forEach((data) => console.log(data))  
   }
 }

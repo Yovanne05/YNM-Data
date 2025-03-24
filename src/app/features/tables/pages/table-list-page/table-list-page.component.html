@@ -5,5 +5,5 @@
     <app-table-card-info (sendTablesData)="initTablesData($event)" [tableName]="selectedTable" />
   </div>
 
-  <app-export-data [tablesData]="tablesData"></app-export-data>
+  <app-export-data [tablesData]="tablesData" [tableName]="selectedTable"></app-export-data>
 </div>

@@ -13,10 +13,20 @@ export class ExportDataComponent {
   private readonly csvExtractService = inject(CsvExtractService)
 
   @Input() tablesData!: Record<string, string>[] | null;
+  @Input() tableName!: string;
+
+  showErrorMessage: boolean = false;
+
+  //TODO: Permettre de retirer tous les filtres avant l'export
+  //TODO: Permettre d'exporter les données en format MySQL/PostgreSQL
+
   exportCsv() {
-    console.log("Bouton cliqué")
-    if (this.tablesData) {
-      this.csvExtractService.exportToCsv('export.csv', this.tablesData);
+    if (this.tablesData && this.tablesData.length != 0) {
+      this.csvExtractService.exportToCsv(this.tableName + '.csv', this.tablesData);
+      this.showErrorMessage = false;
+    }
+    else {
+      this.showErrorMessage = true;
     }
   }
   

@@ -25,8 +25,6 @@ import { CsvExtractService } from '../../../../services/csv-extract.service';
 export class TableCardDataComponent implements OnInit, OnChanges {
   private readonly genericTableService = inject(GenericTableService);
   private readonly filterRegistry = inject(FilterRegistryService);
-  private readonly filterManager = inject(FilterManagerService);
-  private readonly csvExtractService = inject(CsvExtractService)
 
   @Input() tableName!: string;
 
@@ -67,8 +65,8 @@ export class TableCardDataComponent implements OnInit, OnChanges {
         if (data) {
           this.filteredData = this.applySort(data);
           this.availableFilters = this.getAvailableFilters();
-          this.applyFiltersAndSort();
-          this.sendTablesData.emit(this.tablesData);
+          this.initFilterForm();
+          this.sendTablesData.emit(this.filteredData);
         }
       },
       error: (err) => console.error('Erreur de souscription:', err),

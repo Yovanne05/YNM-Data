@@ -11,37 +11,56 @@
               }
             }
           </span>
-          <span>Actions</span> <!-- Ajout d'une colonne pour les actions -->
         }
+        <span>Actions</span>
       </div>
 
       @for (item of filteredData; track $index) {
         <div class="grid grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-2 text-sm border-b last:border-none py-1">
           @for (key of getObjectKeys(item); track $index) {
-            <span>{{ getValue(key, item) }}</span>
+            <span>
+              @if (editingItem === item) {
+                <input type="text" 
+                       [(ngModel)]="tempItem[key]" 
+                       class="border p-1 w-full text-sm">
+              } @else {
+                {{ getValue(key, item) }}
+              }
+            </span>
           }
-          <div class="relative">
-            <button
-              (click)="toggleActionMenu($index)"
-              class="bg-gray-100 text-gray-700 px-3 py-1 rounded-md text-sm hover:bg-gray-200 transition-colors"
-            >
-              ⋮
-            </button>
-            @if (actionMenuOpen === $index) {
-              <div class="absolute right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-md w-32 z-10">
-                <button
-                  (click)="onEdit(item)"
-                  class="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-                >
-                  Modifier
-                </button>
-                <button
-                  (click)="onDelete(item)"
-                  class="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-                >
-                  Supprimer
-                </button>
-              </div>
+          <div class="relative flex gap-2">
+            @if (editingItem === item) {
+              <button (click)="saveChanges()" 
+                      class="bg-green-500 text-white px-2 py-1 rounded text-sm">
+                Valider
+              </button>
+              <button (click)="cancelEditing()" 
+                      class="bg-gray-500 text-white px-2 py-1 rounded text-sm">
+                Annuler
+              </button>
+            } @else {
+              <button
+                (click)="toggleActionMenu($index)"
+                class="bg-gray-100 text-gray-700 px-3 py-1 rounded-md text-sm hover:bg-gray-200 transition-colors"
+              >
+                ⋮
+              </button>
+              @if (actionMenuOpen === $index) {
+                <div class="absolute right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-md w-32 z-10">
+                  <button
+                    (click)="startEditing(item)"
+                    class="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
+                  >
+                    Modifier
+                  </button>
+                  <button
+                    (click)="onDelete(item)"
+                    class="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
+                  >
+                    Supprimer
+                  </button>
+                </div>
+              }
             }
           </div>
         </div>

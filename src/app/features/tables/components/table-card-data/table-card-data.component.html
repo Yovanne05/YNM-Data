@@ -7,42 +7,60 @@
   </button>
 
   @if (showFilters) {
-    <div class="absolute mt-1 bg-white border border-gray-200 rounded-md shadow-md w-48 z-10">
+  <div class="absolute mt-1 bg-white border border-gray-200 rounded-md shadow-md w-48 z-10">
+    <form [formGroup]="filterForm" (ngSubmit)="onSubmit()">
       @for (filter of availableFilters; track filter.key) {
-        <button
-          (click)="onFilterSelect(filter.key)"
-          class="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-        >
-          {{ filter.name }}
-        </button>
+      <div class="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-gray-700">
+        <label>{{ filter.name }}</label>
+        <input
+          type="text"
+          [formControlName]="filter.key"
+          placeholder="Entrez une valeur"
+          class="w-full border rounded-md p-1 mt-1"
+        />
+        <label class="flex items-center mt-1">
+          <input
+            type="checkbox"
+            [formControlName]="filter.key + '_isGreaterThan'"
+            class="mr-2"
+          />
+          Supérieur à
+        </label>
+      </div>
       }
-    </div>
+      <button type="submit" class="hidden">Submit</button>
+    </form>
+  </div>
   }
 </div>
 
 <div class="p-2">
   @if (filteredData) {
+    @if (filteredData.length > 0) {
     <div class="bg-gray-100 rounded-md p-2 mb-2">
       <div class="grid grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-2 text-sm font-medium border-b py-1">
         @for (key of getObjectKeys(filteredData[0]); track $index) {
-          <span class="cursor-pointer hover:text-blue-500" (click)="onSort(key)">
-            {{ key }}
-            @for (sortKey of sortKeys; track $index) {
-              @if (sortKey.key === key) {
-                <span>{{ sortKey.direction === 'asc' ? '▲' : '▼' }}</span>
-              }
-            }
-          </span>
+        <span class="cursor-pointer hover:text-blue-500" (click)="onSort(key)">
+          {{ key }}
+          @for (sortKey of sortKeys; track $index) { @if (sortKey.key === key) {
+          <span>{{ sortKey.direction === "asc" ? "▲" : "▼" }}</span>
+          } }
+        </span>
         }
       </div>
 
       @for (item of filteredData; track $index) {
-        <div class="grid grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-2 text-sm border-b last:border-none py-1">
-          @for (key of getObjectKeys(item); track $index) {
-            <span>{{ getValue(key, item) }}</span>
-          }
-        </div>
+      <div class="grid grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-2 text-sm border-b last:border-none py-1">
+        @for (key of getObjectKeys(item); track $index) {
+        <span>{{ getValue(key, item) }}</span>
+        }
+      </div>
       }
     </div>
+    } @else {
+    <div class="bg-gray-100 rounded-md p-2 mb-2 text-center text-gray-500">
+      Aucun résultat trouvé
+    </div>
+    }
   }
 </div>

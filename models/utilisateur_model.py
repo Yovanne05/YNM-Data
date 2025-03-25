@@ -1,11 +1,11 @@
 from utils.statut_utilisateur import statut_autorise
 class Utilisateur:
-    def __init__(self, id_utilisateur: int, nom: str, prenom: str, age: int, pays_residence: str, email: str, numero: str, statut: str):
-        self.id_utilisateur = id_utilisateur
+    def __init__(self, idUtilisateur: int, nom: str, prenom: str, age: int, paysResidence: str, email: str, numero: str, statut: str):
+        self.idUtilisateur = idUtilisateur
         self.nom = nom
         self.prenom = prenom
         self.age = age
-        self.pays_residence = pays_residence
+        self.paysResidence = paysResidence
         self.email = email
         self.numero = numero
         self.statut = statut
@@ -18,11 +18,11 @@ class Utilisateur:
             raise ValueError(f"Invalid statutAbonnement: {statut_abonnement}")
 
         return cls(
-            id_utilisateur=data['idUtilisateur'],
+            idUtilisateur=data['idUtilisateur'],
             nom=data['nom'],
             prenom=data['prenom'],
             age=data['age'],
-            pays_residence=data['paysResidence'],
+            paysResidence=data['paysResidence'],
             email=data['email'],
             numero=data['numero'],
             statut=statut_abonnement
@@ -30,12 +30,12 @@ class Utilisateur:
 
     def as_dict(self):
         return {
-            'id_utilisateur': self.id_utilisateur,
+            'idUtilisateur': self.idUtilisateur,
             'nom': self.nom,
             'prenom': self.prenom,
             'age': self.age,
-            'pays_residence': self.pays_residence,
+            'paysResidence': self.paysResidence,
             'email': self.email,
             'numero': self.numero,
-            'statut_abonnement': self.statut
+            'statutAbonnement': self.statut
         }

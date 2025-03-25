@@ -7,7 +7,6 @@ export class CsvExtractService {
 
   //TODO: Essayer de refaire sans ChatGPT plus tard
 
-
   exportToCsv(filename: string, data: Record<string, string>[]): void {
 
     const headers = Object.keys(data[0]).join(',');

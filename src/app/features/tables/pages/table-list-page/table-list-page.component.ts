@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { TableNavBarComponent } from "../../components/table-nav-bar/table-nav-bar.component";
-import { Table } from '../../../../models/table';
 import { TableCardInfoComponent } from "../../components/table-card-info/table-card-info.component";
 import { ExportDataComponent } from '../../components/export-data/export-data.component';
+import { ImportDataComponent } from '../../components/import-data/import-data.component';
 
 @Component({
   selector: 'app-table-list-page',
   standalone: true,
-  imports: [TableNavBarComponent, TableCardInfoComponent, ExportDataComponent],
+  imports: [TableNavBarComponent, TableCardInfoComponent, ExportDataComponent, ImportDataComponent],
   templateUrl: './table-list-page.component.html',
   styleUrl: './table-list-page.component.scss',
 })

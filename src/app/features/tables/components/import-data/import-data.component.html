@@ -1,0 +1,12 @@
+<hr class="border-t border-gray-300 w-full mb-4 mt-4">
+<h3 class="text-3xl font-bold text-gray-800 mt-4">Importer des données</h3>
+<form [formGroup]="dataForm" (ngSubmit)="onSubmit()" class="flex flex-col items-start gap-4 bg-white p-4 rounded-lg shadow-md mt-4">
+    <label for="fichierImport" class="text-gray-700 font-medium">Fichier d'import (format CSV) :</label>
+    <input type="file" accept=".csv" id="fichierImport" formControlName="fichierImport" (change)="onFileSelected($event)" class="border border-gray-300 rounded-md p-2 text-gray-700 cursor-pointer"/>
+
+    @if (dataForm.get('file')?.invalid) {
+        <p>Fichier Requis</p>
+    }
+
+    <button type="submit" [disabled]="dataForm.invalid" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 disabled:bg-gray-400">Importer les données</button>
+</form>

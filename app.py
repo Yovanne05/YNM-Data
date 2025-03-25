@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from config import Config
 from controllers.genre_controller import genre_controller
+from controllers.import_data_controller import import_data_controller
 from controllers.paiement_controller import paiement_controller
 from controllers.temps_controller import temps_controller
 from controllers.titre_controller import titre_controller
@@ -19,6 +20,7 @@ app.register_blueprint(genre_controller)
 app.register_blueprint(temps_controller)
 app.register_blueprint(paiement_controller)
 app.register_blueprint(abonnemment_controller)
+app.register_blueprint(import_data_controller)
 
 @app.route('/tables', methods=['GET'])
 def get_tables():

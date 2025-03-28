@@ -10,7 +10,6 @@ from controllers.utilisateur_controller import utilisateur_controller
 from controllers.abonnement_controller import abonnemment_controller
 from controllers.delete_edit_controller import delete_edit_controller
 import db
-
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 app.config.from_object(Config)
@@ -22,9 +21,17 @@ app.register_blueprint(temps_controller)
 app.register_blueprint(paiement_controller)
 app.register_blueprint(abonnemment_controller)
 app.register_blueprint(import_data_controller)
-
 app.register_blueprint(delete_edit_controller)
 
+@app.before_request
+def handle_options():
+    if request.method == "OPTIONS":
+        response = jsonify({"message": "OK"})
+        response.headers.add("Access-Control-Allow-Origin", "http://localhost:4200")
+        response.headers.add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        response.headers.add("Access-Control-Max-Age", "86400")
+        return response, 200
 @app.route('/tables', methods=['GET'])
 def get_tables():
     conn = db.get_db_connection()

@@ -5,12 +5,15 @@ import {
   OnChanges,
   SimpleChanges,
   OnInit,
+  Output,
+  EventEmitter,
 } from '@angular/core';
 import { Observable } from 'rxjs';
 import { getObjectKeys, getValue } from '../../../../utils/json.method';
 import { FilterRegistryService } from '../../../../services/filter.registry.service';
 import { GenericTableService } from '../../../../services/generic.service';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
+import { CsvExtractService } from '../../../../services/csv-extract.service';
 
 @Component({
   selector: 'app-table-card-data',
@@ -33,6 +36,8 @@ export class TableCardDataComponent implements OnInit, OnChanges {
   filterForm: FormGroup = new FormGroup({});
 
   sortKeys: { key: string; direction: 'asc' | 'desc' }[] = [];
+
+  @Output() sendTablesData = new EventEmitter<Record<string, string>[] | null>
 
   ngOnInit(): void {
     this.loadData();
@@ -61,6 +66,7 @@ export class TableCardDataComponent implements OnInit, OnChanges {
           this.filteredData = this.applySort(data);
           this.availableFilters = this.getAvailableFilters();
           this.initFilterForm();
+          this.sendTablesData.emit(this.filteredData);
         }
       },
       error: (err) => console.error('Erreur de souscription:', err),

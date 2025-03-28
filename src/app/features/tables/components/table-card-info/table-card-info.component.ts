@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, inject, Input, OnInit, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { Table } from '../../../../models/table';
 import { TableCardDataComponent } from '../table-card-data/table-card-data.component';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -15,6 +15,8 @@ import { GenericTableService } from '../../../../services/generic.service';
 export class TableCardInfoComponent implements OnInit, OnChanges {
 
   @Input({ required: true }) tableName!: string;
+
+  @Output() sendTablesData = new EventEmitter<Record<string, string>[] | null>
 
   private readonly genericTableService = inject(GenericTableService);
   table$: Observable<TablesResponse> = new BehaviorSubject<TablesResponse>({});
@@ -39,5 +41,9 @@ export class TableCardInfoComponent implements OnInit, OnChanges {
         this.table = { name, columns };
       }
     });
+  }
+
+  emitTablesData(data: Record<string, string>[] | null): void {
+    this.sendTablesData.emit(data);
   }
 }

@@ -2,6 +2,9 @@
   <app-table-nav-bar (tableSelected)="handleTableSelection($event)"></app-table-nav-bar>
 
   <div class="card-info">
-    <app-table-card-info [tableName]="selectedTable" />
+    <app-table-card-info (sendTablesData)="initTablesData($event)" [tableName]="selectedTable" />
   </div>
+
+  <app-export-data [tablesData]="tablesData" [tableName]="selectedTable"></app-export-data>
+  <app-import-data></app-import-data>
 </div>

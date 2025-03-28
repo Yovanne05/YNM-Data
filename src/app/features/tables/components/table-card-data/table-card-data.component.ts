@@ -1,23 +1,39 @@
-import { Component, inject, Input, OnChanges, SimpleChanges, OnInit, Output, EventEmitter } from '@angular/core';
+import {
+  Component,
+  inject,
+  Input,
+  OnChanges,
+  SimpleChanges,
+  OnInit,
+  Output,
+  EventEmitter,
+} from '@angular/core';
 import { Observable } from 'rxjs';
 import { getObjectKeys, getValue } from '../../../../utils/json.method';
 import { FilterRegistryService } from '../../../../services/filter.registry.service';
 import { GenericTableService } from '../../../../services/generic.service';
-import { FormsModule, ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormGroup,
+  FormControl,
+} from '@angular/forms';
 
 @Component({
   selector: 'app-table-card-data',
   standalone: true,
   imports: [FormsModule, ReactiveFormsModule],
   templateUrl: './table-card-data.component.html',
-  styleUrls: ['./table-card-data.component.scss']
+  styleUrls: ['./table-card-data.component.scss'],
 })
 export class TableCardDataComponent implements OnInit, OnChanges {
   private readonly genericTableService = inject(GenericTableService);
   private readonly filterRegistry = inject(FilterRegistryService);
 
   @Input() tableName!: string;
-  @Output() sendTablesData = new EventEmitter<Record<string, string>[] | null>();
+  @Output() sendTablesData = new EventEmitter<
+    Record<string, string>[] | null
+  >();
 
   tablesData$!: Observable<Record<string, string>[]>;
   filteredData: Record<string, string>[] | null = null;
@@ -32,7 +48,6 @@ export class TableCardDataComponent implements OnInit, OnChanges {
   editingItem: Record<string, string> | null = null;
   tempItem: Record<string, string> = {};
   actionMenuOpen: number | null = null;
-
 
   ngOnInit(): void {
     this.loadData();
@@ -55,7 +70,10 @@ export class TableCardDataComponent implements OnInit, OnChanges {
 
   private loadData(): void {
     const activeFilters = this.getActiveFilters();
-    this.tablesData$ = this.genericTableService.getTableData(this.tableName, activeFilters);
+    this.tablesData$ = this.genericTableService.getTableData(
+      this.tableName,
+      activeFilters
+    );
 
     this.tablesData$.subscribe({
       next: (data) => {
@@ -72,7 +90,9 @@ export class TableCardDataComponent implements OnInit, OnChanges {
 
   private getActiveFilters(): { [key: string]: string } {
     return Object.fromEntries(
-      Object.entries(this.filterForm.value).filter(([_, value]) => value).map(([key, value]) => [key, value as string])
+      Object.entries(this.filterForm.value)
+        .filter(([_, value]) => value)
+        .map(([key, value]) => [key, value as string])
     );
   }
 
@@ -114,24 +134,21 @@ export class TableCardDataComponent implements OnInit, OnChanges {
 
   saveChanges(): void {
     if (!this.editingItem || !this.filteredData) return;
-
-    this.genericTableService.updateItem(this.tableName, this.editingItem, this.tempItem)
-        .subscribe({
-            next: () => {
-                const index = this.filteredData!.findIndex(i =>
-                    JSON.stringify(i) === JSON.stringify(this.editingItem!)
-                );
-                if (index !== -1) {
-                    this.filteredData![index] = { ...this.tempItem };
-                }
-                this.cancelEditing();
-                this.loadData(); // Recharger les données après modification
-            },
-            error: (err) => {
-                console.error('Erreur lors de la modification:', err);
-                this.loadData(); // Recharger en cas d'erreur
-            }
-        });
+    const updatedData = { ...this.tempItem };
+    this.genericTableService.updateItem(
+        this.tableName,
+        this.editingItem,
+        updatedData
+    ).subscribe({
+        next: () => {
+            this.loadData();
+            this.cancelEditing();
+        },
+        error: (err) => {
+            console.error('Erreur complète:', err);
+            alert(`Erreur lors de la modification: ${err.error?.error || err.message}`);
+        }
+    });
 }
 
   cancelEditing(): void {
@@ -143,7 +160,8 @@ export class TableCardDataComponent implements OnInit, OnChanges {
     const existingSortKey = this.sortKeys.find((sort) => sort.key === key);
 
     if (existingSortKey) {
-      existingSortKey.direction = existingSortKey.direction === 'asc' ? 'desc' : 'asc';
+      existingSortKey.direction =
+        existingSortKey.direction === 'asc' ? 'desc' : 'asc';
     } else {
       this.sortKeys.push({ key, direction: 'asc' });
     }
@@ -167,18 +185,18 @@ export class TableCardDataComponent implements OnInit, OnChanges {
 
   onDelete(item: Record<string, string>): void {
     if (confirm('Êtes-vous sûr de vouloir supprimer cet élément ?')) {
-        this.genericTableService.deleteItem(this.tableName, item).subscribe({
-            next: () => {
-                this.loadData();
-            },
-            error: (err) => {
-                console.error('Erreur lors de la suppression:', err);
-                this.loadData();
-            },
-        });
+      this.genericTableService.deleteItem(this.tableName, item).subscribe({
+        next: () => {
+          this.loadData();
+        },
+        error: (err) => {
+          console.error('Erreur lors de la suppression:', err);
+          this.loadData();
+        },
+      });
     }
     this.actionMenuOpen = null;
-}
+  }
 
   getObjectKeys(obj: Record<string, unknown>): string[] {
     return getObjectKeys(obj);

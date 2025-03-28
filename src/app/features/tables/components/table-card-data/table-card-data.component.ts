@@ -1,43 +1,56 @@
-import {
-  Component,
-  inject,
-  Input,
-  OnChanges,
-  SimpleChanges,
-  OnInit,
-  Output,
-  EventEmitter,
-} from '@angular/core';
+import { Component, inject, Input, OnChanges, SimpleChanges, OnInit, Output, EventEmitter } from '@angular/core';
 import { Observable } from 'rxjs';
 import { getObjectKeys, getValue } from '../../../../utils/json.method';
 import { FilterRegistryService } from '../../../../services/filter.registry.service';
 import { GenericTableService } from '../../../../services/generic.service';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
 import { CsvExtractService } from '../../../../services/csv-extract.service';
+import { ApiService } from '../../../../services/delete.edit.service.service';
 
 @Component({
   selector: 'app-table-card-data',
   standalone: true,
   imports: [FormsModule, ReactiveFormsModule],
   templateUrl: './table-card-data.component.html',
-  styleUrls: ['./table-card-data.component.scss'],
+  styleUrls: ['./table-card-data.component.scss']
 })
 export class TableCardDataComponent implements OnInit, OnChanges {
   private readonly genericTableService = inject(GenericTableService);
   private readonly filterRegistry = inject(FilterRegistryService);
+  private readonly apiService = inject(ApiService);
 
   @Input() tableName!: string;
+  @Output() sendTablesData = new EventEmitter<Record<string, string>[] | null>();
 
   tablesData$!: Observable<Record<string, string>[]>;
-
   filteredData: Record<string, string>[] | null = null;
+
+  // Filtres et tri
   availableFilters: { key: string; name: string }[] = [];
   showFilters = false;
   filterForm: FormGroup = new FormGroup({});
-
   sortKeys: { key: string; direction: 'asc' | 'desc' }[] = [];
 
-  @Output() sendTablesData = new EventEmitter<Record<string, string>[] | null>
+  // État d'édition
+  editingItem: Record<string, string> | null = null;
+  tempItem: Record<string, string> = {};
+  actionMenuOpen: number | null = null;
+
+  // Dictionnaire des clés primaires
+  tablePrimaryKeys: Record<string, string> = {
+    utilisateur: 'idUtilisateur',
+    abonnement: 'idAbonnement',
+    temps: 'idDate',
+    genre: 'idGenre',
+    titre: 'idTitre',
+    serie: 'idSerie',
+    film: 'idFilm',
+    langue: 'idLangue',
+    langue_Disponible: 'idLangueDispo',
+    visionnage: 'idVisionnage',
+    evaluation: 'idEvaluation',
+    paiement: 'idPaiement',
+  };
 
   ngOnInit(): void {
     this.loadData();
@@ -52,8 +65,10 @@ export class TableCardDataComponent implements OnInit, OnChanges {
 
   private resetState(): void {
     this.filteredData = null;
+    this.actionMenuOpen = null;
     this.sortKeys = [];
     this.filterForm.reset();
+    this.cancelEditing();
   }
 
   private loadData(): void {
@@ -108,6 +123,41 @@ export class TableCardDataComponent implements OnInit, OnChanges {
     });
   }
 
+  // Méthodes d'édition
+  startEditing(item: Record<string, string>): void {
+    this.editingItem = item;
+    this.tempItem = { ...item };
+    this.actionMenuOpen = null;
+  }
+
+  saveChanges(): void {
+    if (!this.editingItem || !this.filteredData) return;
+
+    const primaryKey = this.tablePrimaryKeys[this.tableName];
+    if (!primaryKey) {
+      console.error(`Colonne d'identifiant non trouvée pour la table ${this.tableName}`);
+      return;
+    }
+
+    this.apiService.updateItem(this.tableName, this.editingItem[primaryKey], this.tempItem)
+      .subscribe({
+        next: () => {
+          const index = this.filteredData!.findIndex(i => i[primaryKey] === this.editingItem![primaryKey]);
+          if (index !== -1) {
+            this.filteredData![index] = { ...this.tempItem };
+          }
+          this.cancelEditing();
+        },
+        error: (err) => console.error('Erreur lors de la modification:', err)
+      });
+  }
+
+  cancelEditing(): void {
+    this.editingItem = null;
+    this.tempItem = {};
+  }
+
+  // Méthodes existantes
   onSort(key: string): void {
     const existingSortKey = this.sortKeys.find((sort) => sort.key === key);
 
@@ -130,6 +180,31 @@ export class TableCardDataComponent implements OnInit, OnChanges {
     this.loadData();
   }
 
-  getObjectKeys = getObjectKeys;
-  getValue = getValue;
+  toggleActionMenu(index: number): void {
+    this.actionMenuOpen = this.actionMenuOpen === index ? null : index;
+  }
+
+  onDelete(item: Record<string, string>): void {
+    const primaryKey = this.tablePrimaryKeys[this.tableName];
+    if (!primaryKey) {
+      console.error(`Colonne d'identifiant non trouvée pour la table ${this.tableName}`);
+      return;
+    }
+
+    this.apiService.deleteItem(this.tableName, item[primaryKey]).subscribe({
+      next: () => {
+        this.loadData();
+      },
+      error: (err) => console.error('Erreur lors de la suppression:', err),
+    });
+    this.actionMenuOpen = null;
+  }
+
+  getObjectKeys(obj: Record<string, unknown>): string[] {
+    return getObjectKeys(obj);
+  }
+
+  getValue(key: string, item: Record<string, unknown>): unknown {
+    return getValue(key, item);
+  }
 }

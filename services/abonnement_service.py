@@ -19,37 +19,35 @@ def get_all_abonnements():
         con.close()
 
 
-def update_abonnement(current_data: dict, updated_data: dict) -> bool:
+def update_abonnement(id_abonnement: int, updated_data: dict) -> bool:
     """
     Met à jour un abonnement dans la base de données
     Args:
-        current_data: Données actuelles (doit contenir idAbonnement)
+        id_abonnement: ID de l'abonnement à mettre à jour
         updated_data: Nouvelles valeurs à mettre à jour
     Returns:
-        bool: True si la mise à jour a réussi
+        bool: True si la mise à jour a réussi, False sinon
     Raises:
+        ValueError: Si l'ID est invalide ou si aucune donnée à mettre à jour
         Exception: Si erreur lors de la mise à jour
     """
     con = db.get_db_connection()
     try:
-        if 'idAbonnement' not in current_data:
-            raise ValueError("ID abonnement manquant dans current_data")
+        if not id_abonnement or id_abonnement <= 0:
+            raise ValueError("ID abonnement invalide")
 
-        if current_data['idAbonnement'] != updated_data.get('idAbonnement'):
-            raise ValueError("Incohérence d'ID entre current_data et updated_data")
+        if not updated_data:
+            raise ValueError("Aucune donnée à mettre à jour fournie")
+
+        updated_data.pop('idAbonnement', None)
 
         set_clause = ", ".join([
             f"`{key}` = %s"
             for key in updated_data.keys()
-            if key != 'idAbonnement'
         ])
 
-        set_values = [
-            updated_data[key]
-            for key in updated_data.keys()
-            if key != 'idAbonnement'
-        ]
-        set_values.append(current_data['idAbonnement'])
+        set_values = list(updated_data.values())
+        set_values.append(id_abonnement)
 
         with con.cursor() as cursor:
             query = f"""

@@ -12,31 +12,34 @@ def get_series() -> tuple[Response, int]:
         return jsonify({"error": str(e)}), 500
 
 
-@abonnemment_controller.route("/", methods=["PUT"])
-def update() -> tuple[Response, int]:
+@abonnemment_controller.route("/<int:id_abonnement>", methods=["PUT"])
+def update(id_abonnement: int) -> tuple[Response, int]:
     try:
         data = request.get_json()
+        print("Received data:", data)
 
         if not data:
             return jsonify({"error": "No data provided"}), 400
 
-        current_item = data.get('currentItem')
-        updated_data = data.get('updatedData')
+        success = update_abonnement(id_abonnement, data)
 
-        if not all([current_item, updated_data]):
-            return jsonify({"error": "Missing required fields"}), 400
+        if not success:
+            print("Update failed - details:", {
+                "id_abonnement": id_abonnement,
+                "data": data,
+                "success": success
+            })
+            return jsonify({"error": "Update failed", "details": "Check server logs"}), 500
 
-        success = update_abonnement(current_item, updated_data)
-
-        if success:
-            return jsonify({
-                "success": True,
-                "message": "Abonnement mis à jour avec succès"
-            }), 200
-        else:
-            return jsonify({"error": "Update failed"}), 500
+        return jsonify({
+            "success": True,
+            "message": "Abonnement mis à jour avec succès",
+            "updated": data
+        }), 200
 
     except ValueError as e:
-        return jsonify({"error": str(e)}), 400
+        print("Validation error:", str(e))
+        return jsonify({"error": str(e), "type": "validation"}), 400
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print("Server error:", str(e))
+        return jsonify({"error": f"Internal error: {str(e)}", "type": "server"}), 500

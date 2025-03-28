@@ -4,8 +4,6 @@ import { getObjectKeys, getValue } from '../../../../utils/json.method';
 import { FilterRegistryService } from '../../../../services/filter.registry.service';
 import { GenericTableService } from '../../../../services/generic.service';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
-import { CsvExtractService } from '../../../../services/csv-extract.service';
-import { ApiService } from '../../../../services/delete.edit.service.service';
 
 @Component({
   selector: 'app-table-card-data',
@@ -17,7 +15,6 @@ import { ApiService } from '../../../../services/delete.edit.service.service';
 export class TableCardDataComponent implements OnInit, OnChanges {
   private readonly genericTableService = inject(GenericTableService);
   private readonly filterRegistry = inject(FilterRegistryService);
-  private readonly apiService = inject(ApiService);
 
   @Input() tableName!: string;
   @Output() sendTablesData = new EventEmitter<Record<string, string>[] | null>();
@@ -36,21 +33,6 @@ export class TableCardDataComponent implements OnInit, OnChanges {
   tempItem: Record<string, string> = {};
   actionMenuOpen: number | null = null;
 
-  // Dictionnaire des clés primaires
-  tablePrimaryKeys: Record<string, string> = {
-    utilisateur: 'idUtilisateur',
-    abonnement: 'idAbonnement',
-    temps: 'idDate',
-    genre: 'idGenre',
-    titre: 'idTitre',
-    serie: 'idSerie',
-    film: 'idFilm',
-    langue: 'idLangue',
-    langue_Disponible: 'idLangueDispo',
-    visionnage: 'idVisionnage',
-    evaluation: 'idEvaluation',
-    paiement: 'idPaiement',
-  };
 
   ngOnInit(): void {
     this.loadData();
@@ -133,31 +115,30 @@ export class TableCardDataComponent implements OnInit, OnChanges {
   saveChanges(): void {
     if (!this.editingItem || !this.filteredData) return;
 
-    const primaryKey = this.tablePrimaryKeys[this.tableName];
-    if (!primaryKey) {
-      console.error(`Colonne d'identifiant non trouvée pour la table ${this.tableName}`);
-      return;
-    }
-
-    this.apiService.updateItem(this.tableName, this.editingItem[primaryKey], this.tempItem)
-      .subscribe({
-        next: () => {
-          const index = this.filteredData!.findIndex(i => i[primaryKey] === this.editingItem![primaryKey]);
-          if (index !== -1) {
-            this.filteredData![index] = { ...this.tempItem };
-          }
-          this.cancelEditing();
-        },
-        error: (err) => console.error('Erreur lors de la modification:', err)
-      });
-  }
+    this.genericTableService.updateItem(this.tableName, this.editingItem, this.tempItem)
+        .subscribe({
+            next: () => {
+                const index = this.filteredData!.findIndex(i =>
+                    JSON.stringify(i) === JSON.stringify(this.editingItem!)
+                );
+                if (index !== -1) {
+                    this.filteredData![index] = { ...this.tempItem };
+                }
+                this.cancelEditing();
+                this.loadData(); // Recharger les données après modification
+            },
+            error: (err) => {
+                console.error('Erreur lors de la modification:', err);
+                this.loadData(); // Recharger en cas d'erreur
+            }
+        });
+}
 
   cancelEditing(): void {
     this.editingItem = null;
     this.tempItem = {};
   }
 
-  // Méthodes existantes
   onSort(key: string): void {
     const existingSortKey = this.sortKeys.find((sort) => sort.key === key);
 
@@ -185,20 +166,19 @@ export class TableCardDataComponent implements OnInit, OnChanges {
   }
 
   onDelete(item: Record<string, string>): void {
-    const primaryKey = this.tablePrimaryKeys[this.tableName];
-    if (!primaryKey) {
-      console.error(`Colonne d'identifiant non trouvée pour la table ${this.tableName}`);
-      return;
+    if (confirm('Êtes-vous sûr de vouloir supprimer cet élément ?')) {
+        this.genericTableService.deleteItem(this.tableName, item).subscribe({
+            next: () => {
+                this.loadData();
+            },
+            error: (err) => {
+                console.error('Erreur lors de la suppression:', err);
+                this.loadData();
+            },
+        });
     }
-
-    this.apiService.deleteItem(this.tableName, item[primaryKey]).subscribe({
-      next: () => {
-        this.loadData();
-      },
-      error: (err) => console.error('Erreur lors de la suppression:', err),
-    });
     this.actionMenuOpen = null;
-  }
+}
 
   getObjectKeys(obj: Record<string, unknown>): string[] {
     return getObjectKeys(obj);

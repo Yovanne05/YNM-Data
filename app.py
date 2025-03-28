@@ -8,7 +8,6 @@ from controllers.temps_controller import temps_controller
 from controllers.titre_controller import titre_controller
 from controllers.utilisateur_controller import utilisateur_controller
 from controllers.abonnement_controller import abonnemment_controller
-from controllers.delete_edit_controller import delete_edit_controller
 import db
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -21,7 +20,6 @@ app.register_blueprint(temps_controller)
 app.register_blueprint(paiement_controller)
 app.register_blueprint(abonnemment_controller)
 app.register_blueprint(import_data_controller)
-app.register_blueprint(delete_edit_controller)
 
 @app.before_request
 def handle_options():

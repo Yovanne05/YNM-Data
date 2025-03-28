@@ -27,11 +27,11 @@ export class FilterRegistryService {
     const filtersChoose: { [key: string]: string } = {};
 
     switch (tableName) {
-      case 'Utilisateur':
+      case 'utilisateur':
         filtersChoose['statutAbonnement'] = this.getFilterName('statutAbonnement');
         filtersChoose['age'] = this.getFilterName('age');
         break;
-      case 'Abonnement':
+      case 'abonnement':
         filtersChoose['prix'] = this.getFilterName("prix");
     }
     return filtersChoose;

@@ -1,17 +1,12 @@
--- Table Titre (Film et Série partagent cette table)
-CREATE TABLE Titre (
-    idTitre INT AUTO_INCREMENT PRIMARY KEY,
-    nom VARCHAR(255) NOT NULL,
-    annee INT NOT NULL CHECK (annee >= 1900),  -- Retirer la borne supérieure réaliste
-    dateDebutLicence DATE NOT NULL,
-    dateFinLicence DATE NOT NULL,
-    categorieAge VARCHAR(50) NOT NULL CHECK (categorieAge IN ('Tout public', '12+', '16+', '18+')),
-    description TEXT
-);
+-- Création du schéma NetflixDB
+CREATE SCHEMA IF NOT EXISTS NetflixDB;
+SET search_path TO NetflixDB;
+
+DROP TABLE IF EXISTS Paiement, Evaluation, Top10Titre, Soustitre, Audio, MaListe, Profil, Abonnement, Utilisateur, Realisation, Studio, Acting, Acteur, TitreGenre, Genre, Film, Serie, Langue CASCADE;
 
 -- Table des Utilisateurs
 CREATE TABLE Utilisateur (
-    idUtilisateur INT AUTO_INCREMENT PRIMARY KEY,
+    idUtilisateur SERIAL PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
     prenom VARCHAR(100) NOT NULL,
     age INT CHECK (age >= 0),
@@ -21,17 +16,21 @@ CREATE TABLE Utilisateur (
     statutAbonnement VARCHAR(20) DEFAULT 'Actif' CHECK (statutAbonnement IN ('Actif', 'Résilié'))
 );
 
+
 CREATE TABLE Abonnement (
-    idAbonnement INT AUTO_INCREMENT PRIMARY KEY,
+    idAbonnement SERIAL PRIMARY KEY,
     idUtilisateur INT UNIQUE NOT NULL,
-    typeAbonnement VARCHAR(50) NOT NULL CHECK (typeAbonnement IN ('Basic', 'Standard', 'Premium')),
-    prix DECIMAL(6,2) NOT NULL CHECK (prix > 0 AND prix <= 20.00),
+    typeAbonnement VARCHAR(50) NOT NULL
+        CHECK (typeAbonnement IN ('Basic', 'Standard', 'Premium')),
+    prix DECIMAL(6,2) NOT NULL
+        CHECK (prix > 0 AND prix <= 20.00),
     FOREIGN KEY (idUtilisateur) REFERENCES Utilisateur(idUtilisateur) ON DELETE CASCADE
 );
 
+
 -- Table de Paiement
 CREATE TABLE Paiement (
-    idPaiement INT AUTO_INCREMENT PRIMARY KEY,
+    idPaiement SERIAL PRIMARY KEY,
     idAbonnement INT NOT NULL,
     datePaiement DATE NOT NULL,
     montant DECIMAL(6,2) NOT NULL,
@@ -39,9 +38,10 @@ CREATE TABLE Paiement (
     FOREIGN KEY (idAbonnement) REFERENCES Abonnement(idAbonnement) ON DELETE CASCADE
 );
 
+
 -- Table des Profils
 CREATE TABLE Profil (
-    idProfil INT AUTO_INCREMENT PRIMARY KEY,
+    idProfil SERIAL PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
     typeProfil VARCHAR(10) CHECK (typeProfil IN ('Adulte', 'Enfant')) NOT NULL DEFAULT 'Adulte',
     idUtilisateur INT NOT NULL,
@@ -50,16 +50,30 @@ CREATE TABLE Profil (
 
 -- Table MaListe
 CREATE TABLE MaListe (
-    idMaListe INT AUTO_INCREMENT PRIMARY KEY,
+    idMaListe SERIAL PRIMARY KEY,
     idProfil INT NOT NULL,
     idTitre INT NOT NULL,
     FOREIGN KEY (idProfil) REFERENCES Profil(idProfil) ON DELETE CASCADE,
     FOREIGN KEY (idTitre) REFERENCES Titre(idTitre) ON DELETE CASCADE
 );
 
+
+-- Table Titre (Film et Série partagent cette table)
+CREATE TABLE Titre (
+    idTitre SERIAL PRIMARY KEY,
+    nom VARCHAR(255) NOT NULL,
+    annee INT NOT NULL CHECK (annee >= 1900 AND annee <= EXTRACT(YEAR FROM CURRENT_DATE) + 5),  -- Ajout d'une borne supérieure réaliste
+    dateDebutLicence DATE NOT NULL,
+    dateFinLicence DATE NOT NULL,
+    categorieAge VARCHAR(50) NOT NULL CHECK (categorieAge IN ('Tout public', '12+', '16+', '18+')),
+    description TEXT,
+    CONSTRAINT chk_validite_licence CHECK (dateFinLicence > dateDebutLicence),
+    CONSTRAINT chk_annee_coherente CHECK (annee <= EXTRACT(YEAR FROM dateDebutLicence))  -- L'année ne peut pas être postérieure à la date de début de licence
+);
+
 -- Table des Films
 CREATE TABLE Film (
-    idFilm INT AUTO_INCREMENT PRIMARY KEY,
+    idFilm SERIAL PRIMARY KEY,
     idTitre INT UNIQUE NOT NULL,
     duree INT CHECK (duree > 0),
     FOREIGN KEY (idTitre) REFERENCES Titre(idTitre) ON DELETE CASCADE
@@ -67,7 +81,7 @@ CREATE TABLE Film (
 
 -- Table des Séries
 CREATE TABLE Serie (
-    idSerie INT AUTO_INCREMENT PRIMARY KEY,
+    idSerie SERIAL PRIMARY KEY,
     idTitre INT UNIQUE NOT NULL,
     saison INT CHECK (saison > 0),
     FOREIGN KEY (idTitre) REFERENCES Titre(idTitre) ON DELETE CASCADE
@@ -75,7 +89,7 @@ CREATE TABLE Serie (
 
 -- Table des Genres
 CREATE TABLE Genre (
-    idGenre INT AUTO_INCREMENT PRIMARY KEY,
+    idGenre SERIAL PRIMARY KEY,
     nom VARCHAR(100) UNIQUE NOT NULL
 );
 
@@ -90,12 +104,12 @@ CREATE TABLE TitreGenre (
 
 -- Table des Langues
 CREATE TABLE Langue (
-    idLangue INT AUTO_INCREMENT PRIMARY KEY,
+    idLangue SERIAL PRIMARY KEY,
     nom VARCHAR(100) UNIQUE NOT NULL
 );
 
 CREATE TABLE Langue_Disponible (
-    idLangueDispo INT AUTO_INCREMENT PRIMARY KEY,
+    idLangueDispo SERIAL PRIMARY KEY,
     idTitre INT NOT NULL,
     idLangue INT NOT NULL,
     typeLangue VARCHAR(15) CHECK (typeLangue IN ('audio', 'sous-titre')),
@@ -103,9 +117,10 @@ CREATE TABLE Langue_Disponible (
     FOREIGN KEY (idLangue) REFERENCES Langue(idLangue) ON DELETE CASCADE
 );
 
+
 -- Table des Acteurs
 CREATE TABLE Acteur (
-    idActeur INT AUTO_INCREMENT PRIMARY KEY,
+    idActeur SERIAL PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
     prenom VARCHAR(100) NOT NULL,
     dateNaissance DATE NOT NULL,
@@ -114,7 +129,7 @@ CREATE TABLE Acteur (
 
 -- Table des relations entre Titres et Acteurs
 CREATE TABLE Acting (
-    idActing INT AUTO_INCREMENT PRIMARY KEY,
+    idActing SERIAL PRIMARY KEY,
     idTitre INT NOT NULL,
     idActeur INT NOT NULL,
     FOREIGN KEY (idTitre) REFERENCES Titre(idTitre) ON DELETE CASCADE,
@@ -123,23 +138,25 @@ CREATE TABLE Acting (
 
 -- Table des Studios
 CREATE TABLE Studio (
-    idStudio INT AUTO_INCREMENT PRIMARY KEY,
+    idStudio SERIAL PRIMARY KEY,
     nom VARCHAR(255) UNIQUE NOT NULL,
     pays VARCHAR(100) NOT NULL
 );
 
 -- Table des Réalisations
 CREATE TABLE Realisation (
-    idRealisation INT AUTO_INCREMENT PRIMARY KEY,
+    idRealisation SERIAL PRIMARY KEY,
     idTitre INT NOT NULL,
     idStudio INT NOT NULL,
     FOREIGN KEY (idTitre) REFERENCES Titre(idTitre) ON DELETE CASCADE,
     FOREIGN KEY (idStudio) REFERENCES Studio(idStudio) ON DELETE CASCADE
 );
 
+
+
 -- Table des Evaluations
 CREATE TABLE Evaluation (
-    idEvaluation INT AUTO_INCREMENT PRIMARY KEY,
+    idEvaluation SERIAL PRIMARY KEY,
     idProfil INT NOT NULL,
     idTitre INT NOT NULL,
     note INT CHECK (note BETWEEN 1 AND 5),

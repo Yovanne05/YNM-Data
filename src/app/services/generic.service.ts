@@ -15,29 +15,33 @@ export class GenericTableService implements GenericTableInterface {
   constructor(private http: HttpClient) {}
 
   getTableData(
-    tableName: string,
-    filters?: { [key: string]: string }
-  ): Observable<Record<string, string>[]> {
-    let queryParams = '';
+  tableName: string,
+  filters?: { [key: string]: { operator: string, value: string } }
+): Observable<Record<string, string>[]> {
+  let params = new HttpParams();
 
-    if (filters) {
-      queryParams = '?' + Object.keys(filters)
-        .map(key => `${key}${filters[key]}`)
-        .join('&');
-    }
-
-    return this.http.get<Record<string, string>[]>(
-      `${this.apiUrl}/${tableName}${queryParams}`
-    ).pipe(
-      catchError((err) => {
-        console.error(
-          `Erreur lors de la récupération des données de la table ${tableName}`,
-          err
-        );
-        throw new Error(`Une erreur est survenue: ${err}`);
-      })
-    );
+  if (filters) {
+    Object.keys(filters).forEach(key => {
+      const filter = filters[key];
+      if (filter.value) {
+        params = params.set(`${key}__${filter.operator}`, filter.value);
+      }
+    });
   }
+
+  return this.http.get<Record<string, string>[]>(
+    `${this.apiUrl}/${tableName}`,
+    { params }
+  ).pipe(
+    catchError((err) => {
+      console.error(
+        `Erreur lors de la récupération des données de la table ${tableName}`,
+        err
+      );
+      throw new Error(`Une erreur est survenue: ${err}`);
+    })
+  );
+}
 
   getTables(): Observable<TablesResponse> {
     return this.http.get<TablesResponse>(`${this.apiUrl}/tables`).pipe(
@@ -50,7 +54,7 @@ export class GenericTableService implements GenericTableInterface {
 
   getTableDataByTableName(table_name: string): Observable<TablesResponse> {
     return this.http
-      .get<TablesResponse>(`${this.apiUrl}/table/${table_name}`)
+      .get<TablesResponse>(`${this.apiUrl}/${table_name}/structure`)
       .pipe(
         catchError((err) => {
           console.error(

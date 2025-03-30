@@ -21,11 +21,12 @@
           @case ('number') {
             <div class="flex gap-2">
               <select [formControlName]="filter.key + '_operator'" class="border rounded-md p-1 text-sm">
-                <option value="=">=</option>
-                <option value=">">></option>
-                <option value="<"><</option>
-                <option value=">=">>=</option>
-                <option value="<="><=</option>
+                <option value="eq">=</option>
+                <option value="gt">></option>
+                <option value="lt"><</option>
+                <option value="gte">>=</option>
+                <option value="lte"><=</option>
+                <option value="ne">≠</option>
               </select>
               <input type="number" [formControlName]="filter.key" placeholder="Valeur"
                      class="flex-1 border rounded-md p-1 text-sm">

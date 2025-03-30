@@ -100,19 +100,19 @@ export class TableCardDataComponent implements OnInit, OnChanges {
   }
 
 
-  private getActiveFilters(): { [key: string]: string } {
-    const filters: { [key: string]: string } = {};
+  private getActiveFilters(): { [key: string]: { operator: string, value: string } } {
+    const filters: { [key: string]: { operator: string, value: string } } = {};
 
     Object.keys(this.filterForm.controls).forEach(key => {
       if (key.endsWith('_operator')) return;
 
       const value = this.filterForm.get(key)?.value;
       if (value) {
-        if (this.filterForm.get(`${key}_operator`)) {
-          filters[key] = `${this.filterForm.get(`${key}_operator`)?.value}${value}`;
-        } else {
-          filters[key] = value;
-        }
+        const operatorControl = this.filterForm.get(`${key}_operator`);
+        filters[key] = {
+          operator: operatorControl?.value || 'eq',
+          value: value
+        };
       }
     });
 

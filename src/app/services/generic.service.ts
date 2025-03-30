@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { API_CONFIG } from '../config/api.config';
 import { GenericTableInterface } from './interfaces/service.interface';
@@ -18,26 +18,25 @@ export class GenericTableService implements GenericTableInterface {
     tableName: string,
     filters?: { [key: string]: string }
   ): Observable<Record<string, string>[]> {
-    let params = new HttpParams();
+    let queryParams = '';
+
     if (filters) {
-      Object.keys(filters).forEach((key) => {
-        params = params.append(key, filters[key]);
-      });
+      queryParams = '?' + Object.keys(filters)
+        .map(key => `${key}${filters[key]}`)
+        .join('&');
     }
 
-    return this.http
-      .get<Record<string, string>[]>(`${this.apiUrl}/table/${tableName}/data`, {
-        params,
+    return this.http.get<Record<string, string>[]>(
+      `${this.apiUrl}/${tableName}${queryParams}`
+    ).pipe(
+      catchError((err) => {
+        console.error(
+          `Erreur lors de la récupération des données de la table ${tableName}`,
+          err
+        );
+        throw new Error(`Une erreur est survenue: ${err}`);
       })
-      .pipe(
-        catchError((err) => {
-          console.error(
-            `Erreur lors de la récupération des données de la table ${tableName}`,
-            err
-          );
-          throw new Error(`Une erreur est survenue: ${err}`);
-        })
-      );
+    );
   }
 
   getTables(): Observable<TablesResponse> {
@@ -100,6 +99,18 @@ export class GenericTableService implements GenericTableInterface {
         })
       );
   }
+
+  getTableSchema(tableName: string): Observable<{[key: string]: string}> {
+    return this.http.get<{[key: string]: string}>(
+      `${this.apiUrl}/${tableName}/schema`
+    ).pipe(
+      catchError(err => {
+        console.error('Error fetching schema', err);
+        return of({});
+      })
+    );
+  }
+
   private extractIdFromItem(tableName: string, item: any): number {
     const pascalCaseTable =
       tableName.charAt(0).toUpperCase() + tableName.slice(1);
@@ -122,4 +133,5 @@ export class GenericTableService implements GenericTableInterface {
     const numericId = Number(idValue)
     return numericId;
   }
+
 }

@@ -30,6 +30,9 @@ export class TableCardDataComponent implements OnInit, OnChanges {
   private readonly genericTableService = inject(GenericTableService);
   private readonly filterRegistry = inject(FilterRegistryService);
 
+  tempItemForm: FormGroup | null = null;
+  filters: any[] = [];
+
   @Input() tableName!: string;
   @Output() sendTablesData = new EventEmitter<
     Record<string, string>[] | null
@@ -50,13 +53,13 @@ export class TableCardDataComponent implements OnInit, OnChanges {
   actionMenuOpen: number | null = null;
 
   ngOnInit(): void {
-    this.loadData();
+    this.loadFiltersAndData();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['tableName']?.currentValue) {
       this.resetState();
-      this.loadData();
+      this.loadFiltersAndData();
     }
   }
 
@@ -66,6 +69,14 @@ export class TableCardDataComponent implements OnInit, OnChanges {
     this.sortKeys = [];
     this.filterForm.reset();
     this.cancelEditing();
+  }
+
+  private loadFiltersAndData(): void {
+    this.filterRegistry.getFiltersForTable(this.tableName).subscribe(filters => {
+      this.filters = filters;
+      this.initFilterForm();
+      this.loadData();
+    });
   }
 
   private loadData(): void {
@@ -88,12 +99,24 @@ export class TableCardDataComponent implements OnInit, OnChanges {
     });
   }
 
+
   private getActiveFilters(): { [key: string]: string } {
-    return Object.fromEntries(
-      Object.entries(this.filterForm.value)
-        .filter(([_, value]) => value)
-        .map(([key, value]) => [key, value as string])
-    );
+    const filters: { [key: string]: string } = {};
+
+    Object.keys(this.filterForm.controls).forEach(key => {
+      if (key.endsWith('_operator')) return;
+
+      const value = this.filterForm.get(key)?.value;
+      if (value) {
+        if (this.filterForm.get(`${key}_operator`)) {
+          filters[key] = `${this.filterForm.get(`${key}_operator`)?.value}${value}`;
+        } else {
+          filters[key] = value;
+        }
+      }
+    });
+
+    return filters;
   }
 
   private getAvailableFilters(): { key: string; name: string }[] {
@@ -103,10 +126,15 @@ export class TableCardDataComponent implements OnInit, OnChanges {
 
   private initFilterForm(): void {
     const formControls: { [key: string]: FormControl } = {};
-    this.availableFilters.forEach((filter) => {
+
+    this.filters.forEach(filter => {
       formControls[filter.key] = new FormControl('');
-      formControls[filter.key + '_isGreaterThan'] = new FormControl(false);
+
+      if (filter.type === 'number') {
+        formControls[`${filter.key}_operator`] = new FormControl('=');
+      }
     });
+
     this.filterForm = new FormGroup(formControls);
   }
 
@@ -123,6 +151,15 @@ export class TableCardDataComponent implements OnInit, OnChanges {
       }
       return 0;
     });
+  }
+
+  resetFilters(): void {
+    this.filterForm.reset();
+    this.onSubmit();
+  }
+
+  getEditControl(key: string): FormControl {
+    return this.tempItemForm?.get(key) as FormControl;
   }
 
   // Méthodes d'édition

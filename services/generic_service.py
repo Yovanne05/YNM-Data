@@ -167,24 +167,38 @@ class GenericService:
 
     def get_with_filters(self, filters: dict) -> List[Any]:
         """
-        Récupère les enregistrements correspondant aux filtres
-        Args:
-            filters: Dictionnaire de filtres {nom_colonne: valeur}
-        Returns:
-            Liste d'instances du modèle correspondant aux filtres
-        Raises:
-            Exception: Si une erreur survient lors de la requête
+        Récupère les enregistrements avec filtres avancés
+        Format des filtres: nom_champ__operateur=valeur
         """
         con = db.get_db_connection()
         try:
             with con.cursor() as cursor:
-                # Construction de la requête SQL
                 base_query = f"SELECT * FROM {self.table_name}"
                 where_clauses = []
                 params = []
 
-                for key, value in filters.items():
-                    where_clauses.append(f"{key} = %s")
+                for filter_key, value in filters.items():
+                    if "__" in filter_key:
+                        column, operator = filter_key.split("__")
+                    else:
+                        column = filter_key
+                        operator = "eq"
+
+                    sql_operator = {
+                        'eq': '=',
+                        'ne': '!=',
+                        'gt': '>',
+                        'lt': '<',
+                        'gte': '>=',
+                        'lte': '<=',
+                        'like': 'LIKE',
+                        'not_like': 'NOT LIKE'
+                    }.get(operator, '=')
+
+                    if operator in ['like', 'not_like']:
+                        value = f"%{value}%"
+
+                    where_clauses.append(f"{column} {sql_operator} %s")
                     params.append(value)
 
                 if where_clauses:
@@ -196,5 +210,24 @@ class GenericService:
             return [self.model_class.from_db(row) for row in result]
         except Exception as e:
             raise Exception(f"Erreur lors du filtrage: {str(e)}")
+        finally:
+            con.close()
+
+    def get_table_structure(self) -> Dict[str, List[str]]:
+        """
+        Retourne la structure de la table (noms des colonnes)
+        Returns:
+            Dictionnaire avec le nom de la table comme clé et la liste des colonnes comme valeur
+        Raises:
+            Exception: Si une erreur survient lors de l'accès à la base
+        """
+        con = db.get_db_connection()
+        try:
+            with con.cursor() as cursor:
+                cursor.execute(f"DESCRIBE `{self.table_name}`")
+                columns = [column['Field'] for column in cursor.fetchall()]
+                return {self.table_name.lower(): columns}
+        except Exception as e:
+            raise Exception(f"Erreur lors de la récupération de la structure: {str(e)}")
         finally:
             con.close()

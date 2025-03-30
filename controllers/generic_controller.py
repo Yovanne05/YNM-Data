@@ -137,3 +137,17 @@ class GenericController:
                 return jsonify(schema), 200
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
+
+        @self.blueprint.route("/structure", methods=["GET"])
+        def get_structure() -> tuple[Response, int]:
+            """
+            Récupère le schema de la table (noms des colonnes)
+            Retourne:
+                - Code 200 avec la structure si succès
+                - Code 500 en cas d'erreur
+            """
+            try:
+                structure = self.service.get_table_structure()
+                return jsonify(structure), 200
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500

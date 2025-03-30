@@ -132,3 +132,69 @@ class GenericService:
             raise Exception(f"Erreur lors de la suppression: {str(e)}")
         finally:
             con.close()
+
+    def get_table_schema(self) -> Dict[str, Dict[str, str]]:
+        """Retourne le schéma complet avec les infos nécessaires pour les filtres"""
+        con = db.get_db_connection()
+        try:
+            with con.cursor() as cursor:
+                cursor.execute("""
+                    SELECT 
+                        COLUMN_NAME,
+                        DATA_TYPE,
+                        COLUMN_TYPE,
+                        IS_NULLABLE,
+                        COLUMN_KEY,
+                        EXTRA
+                    FROM INFORMATION_SCHEMA.COLUMNS 
+                    WHERE TABLE_SCHEMA = 'entrepot_netflix'
+                    AND TABLE_NAME = %s
+                """, (self.table_name,))
+
+                schema = {}
+                for col in cursor.fetchall():
+                    schema[col['COLUMN_NAME']] = {
+                        'type': col['DATA_TYPE'],
+                        'nullable': col['IS_NULLABLE'] == 'YES',
+                        'is_key': 'PRI' in col['COLUMN_KEY'],
+                        'extra': col['EXTRA']
+                    }
+                return schema
+        except Exception as e:
+            raise Exception(f"Erreur récupération schéma: {str(e)}")
+        finally:
+            con.close()
+
+    def get_with_filters(self, filters: dict) -> List[Any]:
+        """
+        Récupère les enregistrements correspondant aux filtres
+        Args:
+            filters: Dictionnaire de filtres {nom_colonne: valeur}
+        Returns:
+            Liste d'instances du modèle correspondant aux filtres
+        Raises:
+            Exception: Si une erreur survient lors de la requête
+        """
+        con = db.get_db_connection()
+        try:
+            with con.cursor() as cursor:
+                # Construction de la requête SQL
+                base_query = f"SELECT * FROM {self.table_name}"
+                where_clauses = []
+                params = []
+
+                for key, value in filters.items():
+                    where_clauses.append(f"{key} = %s")
+                    params.append(value)
+
+                if where_clauses:
+                    base_query += " WHERE " + " AND ".join(where_clauses)
+
+                cursor.execute(base_query, params)
+                result = cursor.fetchall()
+
+            return [self.model_class.from_db(row) for row in result]
+        except Exception as e:
+            raise Exception(f"Erreur lors du filtrage: {str(e)}")
+        finally:
+            con.close()

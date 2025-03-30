@@ -22,15 +22,23 @@ class GenericController:
         @self.blueprint.route("/", methods=["GET"])
         def get_all() -> tuple[Response, int]:
             """
-            Récupère tous les éléments de la ressource.
-            Retourne:
-                - Code 200 avec la liste des éléments si succès
-                - Code 500 avec l'erreur si échec
+            Récupère tous les éléments ou les éléments filtrés
             """
             try:
-                items = self.service.get_all()
-                # Convertit chaque élément en dictionnaire et retourne en JSON
-                return jsonify([item.as_dict() for item in items]), 200
+                filters = request.args.to_dict()  # Récupère ?age=19 etc.
+
+                if filters:
+                    # Si filtres présents, utilisez get_with_filters
+                    items = self.service.get_with_filters(filters)
+                else:
+                    # Sinon récupère tout
+                    items = self.service.get_all()
+
+                # Convertit en dictionnaire seulement si ce sont des objets
+                if items and hasattr(items[0], 'as_dict'):
+                    return jsonify([item.as_dict() for item in items]), 200
+                return jsonify(items), 200
+
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
 
@@ -118,5 +126,14 @@ class GenericController:
 
                 self.service.delete(id)
                 return jsonify({"message": "Suppression effectuée"}), 200
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
+
+
+        @self.blueprint.route("/schema", methods=["GET"])
+        def get_schema():
+            try:
+                schema = self.service.get_table_schema()
+                return jsonify(schema), 200
             except Exception as e:
                 return jsonify({"error": str(e)}), 500

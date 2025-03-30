@@ -1,23 +1,10 @@
-class Serie:
-    def __init__(self, idSerie: int = 0, idTitre: int = 0, saison: int = 0):
-        self.idSerie = idSerie
-        self.idTitre = idTitre
+from models.generic_model import GenericModel
+
+class Serie(GenericModel):
+    def Serie(self, id_serie: int = 0, id_titre: int = 0, saison: int = 0):
+        self.id_serie = id_serie
+        self.id_titre = id_titre
         self.saison = saison
-    
-    @classmethod
-    def from_db(cls, data):
-        return cls(
-            idSerie=data['idSerie'],
-            idTitre=data['idTitre'],
-            saison=data['saison']
-        )
-    
-    def as_dict(self):
-        return {
-            'idSerie': self.idSerie,
-            'idTitre': self.idTitre,
-            'saison': self.saison
-        }
 
     def init_from_list(self, data: list) -> None:
         try:

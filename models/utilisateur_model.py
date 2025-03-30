@@ -1,6 +1,10 @@
-from utils.statut_utilisateur import statut_autorise
-class Utilisateur:
-    def __init__(self, idUtilisateur: int = 0, nom: str = "", prenom: str = "", age: int = 0, paysResidence: str = "", email: str = "", numero: str = "", statut_abonnement: str = ""):
+from models.generic_model import GenericModel
+import re
+
+class Utilisateur(GenericModel):
+    def __init__(self, idUtilisateur: int = 0, nom: str = "", prenom: str = "", age: int = 0, paysResidence: str = "", email: str = "", numero: str = "",
+                 statutAbonnement: str = 'Actif'):
+        super().__init__()
         self.idUtilisateur = idUtilisateur
         self.nom = nom
         self.prenom = prenom
@@ -8,37 +12,12 @@ class Utilisateur:
         self.paysResidence = paysResidence
         self.email = email
         self.numero = numero
-        self.statut_abonnement = statut_abonnement
+        self.statutAbonnement = statutAbonnement
 
-    @classmethod
-    def from_db(cls, data):
-        statut_abonnement_recu = data['statutAbonnement']
 
-        if statut_abonnement_recu not in statut_autorise :
-            raise ValueError(f"Invalid statutAbonnement: {statut_abonnement_recu}")
-
-        return cls(
-            idUtilisateur=data['idUtilisateur'],
-            nom=data['nom'],
-            prenom=data['prenom'],
-            age=data['age'],
-            paysResidence=data['paysResidence'],
-            email=data['email'],
-            numero=data['numero'],
-            statut_abonnement=statut_abonnement_recu
-        )
-
-    def as_dict(self):
-        return {
-            'idUtilisateur': self.idUtilisateur,
-            'nom': self.nom,
-            'prenom': self.prenom,
-            'age': self.age,
-            'paysResidence': self.paysResidence,
-            'email': self.email,
-            'numero': self.numero,
-            'statutAbonnement': self.statut_abonnement
-        }
+    def validate_email(self):
+        if not re.match(r"[^@]+@[^@]+\.[^@]+", self.email):
+            raise ValueError("Email invalide")
 
     def init_from_list(self, data: list) -> None:
         try:
@@ -51,7 +30,7 @@ class Utilisateur:
                 self.paysResidence = data[4]
                 self.email = data[5]
                 self.numero = data[6]
-                self.statut_abonnement = data[7]
+                self.statutAbonnement = data[7]
             else:
                 raise IndexError("Une des lignes du fichier CSV n'a pas assez de colonnes")
         except TypeError:

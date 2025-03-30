@@ -1,39 +1,12 @@
-class Paiement:
-    def __init__(self, id_paiement: int = 0, id_utilisateur: int = 0, id_abonnement: int = 0, id_date: int = 0, status_paiement: str = ""):
-        self.id_paiement = id_paiement
-        self.id_utilisateur = id_utilisateur
-        self.id_abonnement = id_abonnement
-        self.id_date = id_date
-        self.status_paiement = status_paiement
+from models.generic_model import GenericModel
 
-    @classmethod
-    def from_db(cls, data):
-        return cls(
-            id_paiement=data["idPaiement"],
-            id_utilisateur=data["idUtilisateur"],
-            id_abonnement=data["idAbonnement"],
-            id_date=data["idDate"],
-            status_paiement=data["statusPaiement"]
-        )
-
-    @classmethod
-    def from_db_add(cls, data):
-        return cls(
-            id_paiement=0,
-            id_utilisateur=data["idUtilisateur"],
-            id_abonnement=data["idAbonnement"],
-            id_date=data["idDate"],
-            status_paiement=data["statusPaiement"]
-        )
-
-    def as_dict(self):
-        return {
-            "id_paiement": self.id_paiement,
-            "id_utilisateur": self.id_utilisateur,
-            "id_abonnement": self.id_abonnement,
-            "id_date": self.id_date,
-            "status_paiement": self.status_paiement
-        }
+class Paiement(GenericModel):
+    def __init__(self, idPaiement: int = 0, idAbonnement: int = 0, datePaiement: int = 0, montant: float = 0, statusPaiement: str = ""):
+        self.idPaiement = idPaiement
+        self.idAbonnement = idAbonnement
+        self.datePaiement = datePaiement
+        self.montant = montant
+        self.statusPaiement = statusPaiement
 
     def init_from_list(self, data: list) -> None:
         try:

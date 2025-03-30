@@ -8,7 +8,6 @@ import { Observable } from 'rxjs';
 })
 export class CsvImportService {
   private apiUrl = API_CONFIG.API_URL;
-  aaa: string = "oui";
 
   constructor(private http: HttpClient) {}
 
@@ -16,7 +15,6 @@ export class CsvImportService {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('tableName', tableName);
-    //TODO : envoyer le nom de la table dans le composant pour pouvoir ajouter correctement les données
     return this.http.post<any>(this.apiUrl + '/import_data', formData);
   }
 }

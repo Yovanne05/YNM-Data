@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CsvImportService } from '../../../../services/csv-import.service';
 
@@ -12,6 +12,8 @@ import { CsvImportService } from '../../../../services/csv-import.service';
 export class ImportDataComponent {
   fichierCSV!: File;
   private readonly csvImportService = inject(CsvImportService);
+
+  @Input() tableName!: string;
   
   dataForm = new FormGroup({
     fichierImport: new FormControl('', [Validators.required]),
@@ -19,7 +21,7 @@ export class ImportDataComponent {
 
   onSubmit(): void {
     if (this.dataForm.valid) {
-      this.csvImportService.sendCSVData(this.fichierCSV).subscribe();
+      this.csvImportService.sendCSVData(this.fichierCSV, this.tableName).subscribe();
     }
   }
 

@@ -125,7 +125,7 @@ export class TableCardDataComponent implements OnInit, OnChanges {
     });
   }
 
-  // Méthodes d'édition
+  
   startEditing(item: Record<string, string>): void {
     this.editingItem = item;
     this.tempItem = { ...item };
@@ -205,4 +205,83 @@ export class TableCardDataComponent implements OnInit, OnChanges {
   getValue(key: string, item: Record<string, unknown>): unknown {
     return getValue(key, item);
   }
+
+
+// Propriétés à ajouter
+isAddingMode = false;
+newItem: {[key: string]: any} = {};
+requiredFields: string[] = [];
+errorMessage: string | null = null;
+
+// Méthodes à ajouter
+startAdding(): void {
+  this.isAddingMode = true;
+  this.newItem = {};
+  this.errorMessage = null;
+  this.loadRequiredFields();
+  this.cancelEditing(); // Annule l'édition en cours si elle existe
+}
+
+private loadRequiredFields(): void {
+  // Cette méthode devrait idéalement faire un appel API pour récupérer
+  // les champs requis depuis le backend. Pour l'exemple, nous utilisons
+  // une solution temporaire:
+  
+  const requiredFieldsMap: {[key: string]: string[]} = {
+    'Utilisateur': ['nom', 'prenom', 'email', 'numero'],
+    'Abonnement': ['typeAbonnement', 'prix', 'idUtilisateur'],
+    'Titre': ['nom', 'annee', 'dateDebutLicence', 'dateFinLicence']
+  };
+  
+  this.requiredFields = requiredFieldsMap[this.tableName] || [];
+}
+
+saveNewItem(): void {
+  // Validation des champs requis
+  const missingFields = this.requiredFields.filter(field => !this.newItem[field]);
+  
+  if (missingFields.length > 0) {
+    this.errorMessage = `Champs requis manquants: ${missingFields.join(', ')}`;
+    return;
+  }
+
+  // Conversion des types si nécessaire
+  this.convertDataTypes();
+
+  this.genericTableService.createItem(this.tableName, this.newItem).subscribe({
+    next: (response) => {
+      this.loadData(); // Recharge les données
+      this.isAddingMode = false;
+      this.newItem = {};
+    },
+    error: (err) => {
+      this.errorMessage = err.message;
+      console.error('Erreur détaillée:', err);
+    }
+  });
+}
+
+private convertDataTypes(): void {
+  // Convertit les champs numériques
+  const numericFields = ['id', 'age', 'prix', 'annee', 'duree', 'saison'];
+  numericFields.forEach(field => {
+    if (this.newItem[field] !== undefined) {
+      this.newItem[field] = Number(this.newItem[field]);
+    }
+  });
+
+  // Convertit les champs date
+  const dateFields = ['dateDebutLicence', 'dateFinLicence'];
+  dateFields.forEach(field => {
+    if (this.newItem[field]) {
+      this.newItem[field] = new Date(this.newItem[field]).toISOString().split('T')[0];
+    }
+  });
+}
+
+cancelAdding(): void {
+  this.isAddingMode = false;
+  this.newItem = {};
+  this.errorMessage = null;
+}
 }

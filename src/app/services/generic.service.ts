@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable,throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { API_CONFIG } from '../config/api.config';
 import { GenericTableInterface } from './interfaces/service.interface';
@@ -100,6 +100,31 @@ export class GenericTableService implements GenericTableInterface {
         })
       );
   }
+
+  createItem(tableName: string, data: any): Observable<{id: number}> {
+    // Vérification des données avant envoi
+    if (!data || typeof data !== 'object') {
+      return throwError(() => new Error('Données invalides'));
+    }
+  
+    return this.http.post<{id: number}>(`${this.apiUrl}/${tableName}`, data).pipe(
+      catchError((error) => {
+        console.error(`Erreur lors de la création dans ${tableName}`, error);
+        let errorMessage = 'Erreur inconnue';
+        
+        if (error.status === 400) {
+          errorMessage = error.error?.error || 'Champs requis manquants';
+        } else if (error.status === 500) {
+          errorMessage = 'Erreur serveur - veuillez réessayer plus tard';
+        }
+        
+        return throwError(() => new Error(errorMessage));
+      })
+    );
+  }
+
+
+
   private extractIdFromItem(tableName: string, item: any): number {
     const pascalCaseTable =
       tableName.charAt(0).toUpperCase() + tableName.slice(1);

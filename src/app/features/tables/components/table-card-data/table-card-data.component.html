@@ -7,46 +7,44 @@
   </button>
 
   @if (showFilters) {
-    <app-table-filters
-      [filters]="filters"
-      [filterForm]="filterForm"
-      (filterSubmit)="onSubmitFilters()"
-      (filterReset)="onResetFilters()"
-    ></app-table-filters>
+  <app-table-filters
+    [filters]="filters"
+    [filterForm]="filterForm"
+    (filterSubmit)="onSubmitFilters()"
+    (filterReset)="onResetFilters()"
+  ></app-table-filters>
   }
 </div>
 
 <div class="p-2">
-  @if (filteredData) {
-    @if (filteredData.length > 0) {
-      <div class="bg-gray-100 rounded-md p-2 mb-2">
-        <app-table-header
-          [columns]="getObjectKeys(filteredData[0])"
-          [sortKeys]="sortKeys"
-          (sort)="onSort($event)"
-        ></app-table-header>
+  @if (filteredData) { @if (filteredData.length > 0) {
+  <div class="bg-gray-100 rounded-md p-2 mb-2">
+    <app-table-header
+      [columns]="getObjectKeys(filteredData[0])"
+      [sortKeys]="sortKeys"
+      (sort)="onSort($event)"
+    ></app-table-header>
 
-        @for (item of filteredData; track $index) {
-          <app-table-row
-            [item]="item"
-            [columns]="getObjectKeys(item)"
-            [isEditing]="editingItem === item"
-            [editForm]="tempItemForm"
-            (edit)="startEditing(item)"
-            (delete)="onDelete(item)"
-            (save)="saveChanges()"
-            (cancel)="cancelEditing()"
-          ></app-table-row>
-        }
-      </div>
-    } @else {
-      <div class="bg-gray-100 rounded-md p-2 mb-2 text-center text-gray-500">
-        Aucun résultat trouvé
-      </div>
+    @for (item of filteredData; track $index) {
+    <app-table-row
+      [item]="item"
+      [columns]="getObjectKeys(item)"
+      [isEditing]="editingItem === item"
+      [editForm]="tempItemForm"
+      (edit)="startEditing(item)"
+      (delete)="onDelete(item)"
+      (save)="saveChanges()"
+      (cancel)="cancelEditing()"
+    ></app-table-row>
     }
+  </div>
   } @else {
-    <div class="bg-gray-100 rounded-md p-2 mb-2 text-center text-gray-500">
-      Chargement en cours...
-    </div>
+  <div class="bg-gray-100 rounded-md p-2 mb-2 text-center text-gray-500">
+    Aucun résultat trouvé
+  </div>
+  } } @else {
+  <div class="bg-gray-100 rounded-md p-2 mb-2 text-center text-gray-500">
+    Chargement en cours...
+  </div>
   }
 </div>

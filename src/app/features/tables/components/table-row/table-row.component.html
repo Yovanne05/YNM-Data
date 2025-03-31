@@ -1,0 +1,29 @@
+<div class="grid grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-2 text-sm border-b last:border-none py-1">
+  @for (column of columns; track $index) {
+    <span>
+      @if (isEditing) {
+        <input type="text" [formControl]="getFormControl(column)"
+               class="border p-1 w-full text-sm">
+      } @else {
+        {{ getValue(column) }}
+      }
+    </span>
+  }
+  <div class="relative flex gap-2">
+    @if (isEditing) {
+      <button (click)="save.emit()"
+              class="bg-green-500 text-white px-2 py-1 rounded text-sm hover:bg-green-600">
+        Valider
+      </button>
+      <button (click)="cancel.emit()"
+              class="bg-gray-500 text-white px-2 py-1 rounded text-sm hover:bg-gray-600">
+        Annuler
+      </button>
+    } @else {
+      <app-action-menu
+        (edit)="edit.emit()"
+        (delete)="delete.emit()">
+      </app-action-menu>
+    }
+  </div>
+</div>

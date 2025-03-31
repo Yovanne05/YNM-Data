@@ -1,0 +1,16 @@
+<button (click)="toggleMenu()"
+        class="bg-gray-100 text-gray-700 px-3 py-1 rounded-md text-sm hover:bg-gray-200 transition-colors">
+  ⋮
+</button>
+@if (isOpen) {
+  <div class="absolute right-0 mt-7 bg-white border border-gray-200 rounded-md shadow-md w-32 z-10">
+    <button (click)="edit.emit(); isOpen = false"
+            class="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-gray-700">
+      Modifier
+    </button>
+    <button (click)="delete.emit(); isOpen = false"
+            class="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-gray-700">
+      Supprimer
+    </button>
+  </div>
+}

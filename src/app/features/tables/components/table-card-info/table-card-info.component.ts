@@ -34,12 +34,25 @@ export class TableCardInfoComponent implements OnInit, OnChanges {
 
   private loadTableData(): void {
     this.table$ = this.genericTableService.getTableDataByTableName(this.tableName);
-    this.table$.subscribe((data: TablesResponse) => {
-      const firstTable = Object.entries(data)[0];
-      if (firstTable) {
-        const [name, columns] = firstTable;
-        this.table = { name, columns };
-      }
+
+    this.table$.subscribe({
+      next: (data: TablesResponse) => {
+        const firstTable = Object.entries(data)[0];
+        if (firstTable) {
+          const [name, columns] = firstTable;
+
+          this.genericTableService.getTableData(this.tableName).subscribe({
+            next: (tableData) => {
+              this.table = { name, columns, data: tableData };
+            },
+            error: (err) => {
+              console.error('Erreur lors du chargement des données:', err);
+              this.table = { name, columns, data: [] };
+            }
+          });
+        }
+      },
+      error: (err) => console.error('Erreur lors du chargement de la table:', err)
     });
   }
 

@@ -1,113 +1,139 @@
-import {
-  Component,
-  inject,
-  Input,
-  OnChanges,
-  SimpleChanges,
-  OnInit,
-  Output,
-  EventEmitter,
-} from '@angular/core';
-import { Observable } from 'rxjs';
-import { getObjectKeys, getValue } from '../../../../utils/json.method';
+import { Component, EventEmitter, Input, OnChanges, SimpleChanges, inject, output, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
+import { TableFiltersComponent } from '../table-filters/table-filters.component';
+import { TableHeaderComponent } from '../table-header/table-header.component';
+import { TableRowComponent } from '../table-row/table-row.component';
 import { FilterRegistryService } from '../../../../services/filter.registry.service';
 import { GenericTableService } from '../../../../services/generic.service';
-import {
-  FormsModule,
-  ReactiveFormsModule,
-  FormGroup,
-  FormControl,
-} from '@angular/forms';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-table-card-data',
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule, TableFiltersComponent, TableHeaderComponent, TableRowComponent],
   templateUrl: './table-card-data.component.html',
-  styleUrls: ['./table-card-data.component.scss'],
+  styleUrls: ['./table-card-data.component.scss']
 })
-export class TableCardDataComponent implements OnInit, OnChanges {
-  private readonly genericTableService = inject(GenericTableService);
-  private readonly filterRegistry = inject(FilterRegistryService);
-
-  tempItemForm: FormGroup | null = null;
-  filters: any[] = [];
+export class TableCardDataComponent implements OnChanges, OnDestroy {
+  private filterRegistry = inject(FilterRegistryService);
+  private genericTableService = inject(GenericTableService);
+  private cdr = inject(ChangeDetectorRef);
+  private dataSubscription?: Subscription;
 
   @Input() tableName!: string;
-  @Output() sendTablesData = new EventEmitter<
-    Record<string, string>[] | null
-  >();
+  @Input() data: any[] = [];
+  @Input() filters: any[] = [];
 
-  tablesData$!: Observable<Record<string, string>[]>;
-  filteredData: Record<string, string>[] | null = null;
-
-  // Filtres et tri
-  availableFilters: { key: string; name: string }[] = [];
+  editForm = new FormGroup({});
   showFilters = false;
   filterForm: FormGroup = new FormGroup({});
   sortKeys: { key: string; direction: 'asc' | 'desc' }[] = [];
+  editingItem: any = null;
+  tempItemForm: FormGroup = new FormGroup({});
+  filteredData: any[] = [];
 
-  // État d'édition
-  editingItem: Record<string, string> | null = null;
-  tempItem: Record<string, string> = {};
-  actionMenuOpen: number | null = null;
-
-  ngOnInit(): void {
-    this.loadFiltersAndData();
-  }
+  filterSubmit = output<void>();
+  filterReset = output<void>();
+  itemEdited = output<any>();
+  itemDeleted = output<any>();
+  sortChanged = output<{key: string, direction: 'asc' | 'desc'}[]>();
+  sendTablesData = new EventEmitter<any[]>();
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['tableName']?.currentValue) {
-      this.resetState();
-      this.loadFiltersAndData();
+    console.log('Data changed:', this.data);
+    if (changes['data']) {
+      this.filteredData = [...this.data];
+      this.applySort();
+    }
+    if (changes['filters'] || changes['tableName']) {
+      this.loadFilters();
     }
   }
 
-  private resetState(): void {
-    this.filteredData = null;
-    this.actionMenuOpen = null;
-    this.sortKeys = [];
-    this.filterForm.reset();
-    this.cancelEditing();
+  ngOnDestroy(): void {
+    this.dataSubscription?.unsubscribe();
   }
 
-  private loadFiltersAndData(): void {
-    this.filterRegistry.getFiltersForTable(this.tableName).subscribe(filters => {
-      this.filters = filters;
-      this.initFilterForm();
-      this.loadData();
+  toggleFilters() {
+    this.showFilters = !this.showFilters;
+    this.cdr.detectChanges();
+  }
+
+  onSort(key: string) {
+    const existingSort = this.sortKeys.find(s => s.key === key);
+
+    if (existingSort) {
+      existingSort.direction = existingSort.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortKeys = [{ key, direction: 'asc' }];
+    }
+
+    this.applySort();
+    this.sortChanged.emit(this.sortKeys);
+  }
+
+  private applySort() {
+    if (this.sortKeys.length === 0 || !this.filteredData) return;
+
+    const sortedData = [...this.filteredData].sort((a, b) => {
+      for (const sort of this.sortKeys) {
+        const valA = a[sort.key];
+        const valB = b[sort.key];
+
+        if (valA < valB) return sort.direction === 'asc' ? -1 : 1;
+        if (valA > valB) return sort.direction === 'asc' ? 1 : -1;
+      }
+      return 0;
     });
+
+    this.filteredData = sortedData;
   }
 
-  private loadData(): void {
-    const activeFilters = this.getActiveFilters();
-    this.tablesData$ = this.genericTableService.getTableData(
-      this.tableName,
-      activeFilters
-    );
+  private initFilterForm() {
+    const controls: Record<string, FormControl> = {};
+    this.filters?.forEach(filter => {
+      controls[filter.key] = new FormControl('');
+      if (filter.type === 'number') {
+        controls[`${filter.key}_operator`] = new FormControl('eq');
+      }
+    });
+    this.filterForm = new FormGroup(controls);
+  }
 
-    this.tablesData$.subscribe({
-      next: (data) => {
-        if (data) {
-          this.filteredData = this.applySort(data);
-          this.availableFilters = this.getAvailableFilters();
-          this.initFilterForm();
-          this.sendTablesData.emit(this.filteredData);
-        }
+  private loadFilters(): void {
+    this.filterRegistry.getFiltersForTable(this.tableName).subscribe({
+      next: (filters) => {
+        this.filters = filters;
+        this.initFilterForm();
+        this.loadDataWithFilters();
       },
-      error: (err) => console.error('Erreur de souscription:', err),
+      error: (err) => console.error('Error loading filters:', err)
     });
   }
 
+  private loadDataWithFilters(): void {
+    const activeFilters = this.getActiveFilters();
 
-  private getActiveFilters(): { [key: string]: { operator: string, value: string } } {
-    const filters: { [key: string]: { operator: string, value: string } } = {};
+    this.dataSubscription = this.genericTableService.getTableData(this.tableName, activeFilters)
+      .subscribe({
+        next: (data) => {
+          this.filteredData = [...data];
+          this.applySort();
+          this.sendTablesData.emit([...data]);
+          this.cdr.detectChanges();
+        },
+        error: (err) => console.error('Error loading filtered data:', err)
+      });
+  }
+
+  private getActiveFilters(): { [key: string]: { operator: string, value: any } } {
+    const filters: { [key: string]: { operator: string, value: any } } = {};
 
     Object.keys(this.filterForm.controls).forEach(key => {
       if (key.endsWith('_operator')) return;
 
       const value = this.filterForm.get(key)?.value;
-      if (value) {
+      if (value !== null && value !== undefined && value !== '') {
         const operatorControl = this.filterForm.get(`${key}_operator`);
         filters[key] = {
           operator: operatorControl?.value || 'eq',
@@ -119,127 +145,62 @@ export class TableCardDataComponent implements OnInit, OnChanges {
     return filters;
   }
 
-  private getAvailableFilters(): { key: string; name: string }[] {
-    const filters = this.filterRegistry.getFiltersForTable(this.tableName);
-    return Object.entries(filters).map(([key, name]) => ({ key, name }));
+  onSubmitFilters() {
+    this.loadDataWithFilters();
+    this.filterSubmit.emit();
   }
 
-  private initFilterForm(): void {
-    const formControls: { [key: string]: FormControl } = {};
-
-    this.filters.forEach(filter => {
-      formControls[filter.key] = new FormControl('');
-
-      if (filter.type === 'number') {
-        formControls[`${filter.key}_operator`] = new FormControl('=');
-      }
-    });
-
-    this.filterForm = new FormGroup(formControls);
-  }
-
-  private applySort(data: Record<string, string>[]): Record<string, string>[] {
-    if (this.sortKeys.length === 0) return data;
-
-    return data.sort((a, b) => {
-      for (const { key, direction } of this.sortKeys) {
-        const valueA = a[key];
-        const valueB = b[key];
-
-        if (valueA < valueB) return direction === 'asc' ? -1 : 1;
-        if (valueA > valueB) return direction === 'asc' ? 1 : -1;
-      }
-      return 0;
-    });
-  }
-
-  resetFilters(): void {
+  onResetFilters() {
     this.filterForm.reset();
-    this.onSubmit();
+    this.loadDataWithFilters();
+    this.filterReset.emit();
   }
 
-  getEditControl(key: string): FormControl {
-    return this.tempItemForm?.get(key) as FormControl;
-  }
-
-  // Méthodes d'édition
-  startEditing(item: Record<string, string>): void {
+  startEditing(item: any) {
     this.editingItem = item;
-    this.tempItem = { ...item };
-    this.actionMenuOpen = null;
-  }
+    this.tempItemForm = new FormGroup({});
 
-  saveChanges(): void {
-    if (!this.editingItem || !this.filteredData) return;
-    const updatedData = { ...this.tempItem };
-    this.genericTableService.updateItem(
-        this.tableName,
-        this.editingItem,
-        updatedData
-    ).subscribe({
-        next: () => {
-            this.loadData();
-            this.cancelEditing();
-        },
-        error: (err) => {
-            console.error('Erreur complète:', err);
-            alert(`Erreur lors de la modification: ${err.error?.error || err.message}`);
-        }
+    this.getObjectKeys(item).forEach(key => {
+      this.tempItemForm.addControl(key, new FormControl(item[key]));
     });
-}
+  }
 
-  cancelEditing(): void {
+  saveChanges() {
+    if (this.tempItemForm.valid && this.editingItem) {
+      const updatedItem = { ...this.editingItem, ...this.tempItemForm.value };
+
+      this.genericTableService.updateItem(this.tableName, this.editingItem, updatedItem)
+        .subscribe({
+          next: () => {
+            this.loadDataWithFilters();
+            this.cancelEditing();
+            this.cdr.detectChanges();
+          },
+          error: (err) => console.error('Error updating item:', err)
+        });
+    }
+  }
+
+  cancelEditing() {
     this.editingItem = null;
-    this.tempItem = {};
+    this.tempItemForm = new FormGroup({});
+    this.cdr.detectChanges();
   }
 
-  onSort(key: string): void {
-    const existingSortKey = this.sortKeys.find((sort) => sort.key === key);
-
-    if (existingSortKey) {
-      existingSortKey.direction =
-        existingSortKey.direction === 'asc' ? 'desc' : 'asc';
-    } else {
-      this.sortKeys.push({ key, direction: 'asc' });
-    }
-
-    if (this.filteredData) {
-      this.filteredData = this.applySort(this.filteredData);
-    }
-  }
-
-  toggleFilters(): void {
-    this.showFilters = !this.showFilters;
-  }
-
-  onSubmit(): void {
-    this.loadData();
-  }
-
-  toggleActionMenu(index: number): void {
-    this.actionMenuOpen = this.actionMenuOpen === index ? null : index;
-  }
-
-  onDelete(item: Record<string, string>): void {
+  onDelete(item: any) {
     if (confirm('Êtes-vous sûr de vouloir supprimer cet élément ?')) {
-      this.genericTableService.deleteItem(this.tableName, item).subscribe({
-        next: () => {
-          this.loadData();
-        },
-        error: (err) => {
-          console.error('Erreur lors de la suppression:', err);
-          this.loadData();
-        },
-      });
+      this.genericTableService.deleteItem(this.tableName, item)
+        .subscribe({
+          next: () => {
+            this.loadDataWithFilters();
+            this.cdr.detectChanges();
+          },
+          error: (err) => console.error('Error deleting item:', err)
+        });
     }
-    this.actionMenuOpen = null;
   }
 
-  getObjectKeys(obj: Record<string, unknown>): string[] {
-    return getObjectKeys(obj);
-  }
-
-  getValue(key: string, item: Record<string, unknown>): unknown {
-    return getValue(key, item);
+  getObjectKeys(obj: any): string[] {
+    return obj ? Object.keys(obj) : [];
   }
 }

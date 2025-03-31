@@ -1,0 +1,13 @@
+<div class="grid grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-2 text-sm font-medium border-b py-1">
+  @for (column of columns; track $index) {
+  <span class="cursor-pointer hover:text-blue-500" (click)="onSort(column)">
+    {{ column }}
+    @for (sortKey of sortKeys; track $index) {
+      @if (sortKey.key === column) {
+        <span>{{ sortKey.direction === "asc" ? "▲" : "▼" }}</span>
+      }
+    }
+  </span>
+  }
+  <span>Actions</span>
+</div>

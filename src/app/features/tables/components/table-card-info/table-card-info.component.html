@@ -18,7 +18,11 @@
   <div
     class="flex-1 bg-white shadow-lg rounded-xl p-6 h-[400px] overflow-auto transition-transform transform"
   >
-    <app-table-card-data (sendTablesData)="emitTablesData($event)" [tableName]="table.name" />
+  <app-table-card-data
+  [tableName]="table.name"
+  [data]="table.data || []"
+  >
+</app-table-card-data>
   </div>
 </div>
 

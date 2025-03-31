@@ -1,7 +1,7 @@
 from models.generic_model import GenericModel
 
 class Temps(GenericModel):
-    def Temps(self, id_date: int = 0, jour: int = 0, mois: int = 0, annee: int = 0, trimestre: int = 0):
+    def __init__(self, id_date: int = 0, jour: int = 0, mois: int = 0, annee: int = 0, trimestre: int = 0):
         self.id_date = id_date
         self.jour = jour
         self.mois = mois

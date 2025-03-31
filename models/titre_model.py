@@ -16,10 +16,9 @@ class Titre(GenericModel):
                 print(data)
                 self.nom = data[7]
                 self.annee = int(data[0])
-                self.id_date_debut_licence = int(data[3])
-                self.id_date_fin_licence = int(data[4])
-                self.id_genre = int(data[5])
-                self.categorie_age = data[1]
+                self.dateDebutLicence = data[3]
+                self.dateFinLicence = data[4]
+                self.categorieAge = data[1]
                 self.description = data[2]
                 print("ça passe hein")
             else:

@@ -10,10 +10,9 @@ class Paiement(GenericModel):
 
     def init_from_list(self, data: list) -> None:
         try:
-            self.id_utilisateur = int(data[3])
-            self.id_abonnement = int(data[0])
-            self.id_date = int(data[1])
-            self.status_paiement = data[4]
+            self.idAbonnement = int(data[0])
+            self.datePaiement = int(data[1])
+            self.statusPaiement = data[4]
         except IndexError:
             raise IndexError("Une des lignes du fichier CSV n'a pas assez de colonnes")
         except TypeError:

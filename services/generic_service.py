@@ -75,6 +75,9 @@ class GenericService:
             # Prépare les noms de colonnes et les valeurs à insérer
             columns = ", ".join(data.keys())
             placeholders = ", ".join(["%s"] * len(data))
+            print(columns)
+            print(placeholders)
+            print("ah ouais ?")
 
             with con.cursor() as cursor:
 
@@ -85,6 +88,7 @@ class GenericService:
                 con.commit()
                 return cursor.lastrowid
         except Exception as e:
+            print(str(e))
             raise Exception(f"Erreur lors de la création: {str(e)}")
         finally:
             con.close()

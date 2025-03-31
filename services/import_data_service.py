@@ -11,14 +11,7 @@ from models.serie_model import Serie
 from models.temps_model import Temps
 from models.titre_model import Titre
 from models.utilisateur_model import Utilisateur
-
-# from services.abonnement_service import create_abonnement
-from services.genre_service import create_genre
-from services.paiement_service import create_paiement
-# from services.serie_service import create_serie
-from services.temps_service import create_temps
-from services.titre_service import create_titre
-# from services.utilisateur_service import create_utilisateur
+import services.generic_service as generic_service
 
 MODELS = {
     "abonnement": Abonnement(),
@@ -32,11 +25,11 @@ MODELS = {
 
 SERVICES = {
     # "abonnement": create_abonnement,
-    "genre": create_genre,
-    "paiement": create_paiement,
+    "genre": generic_service.GenericService("genre", Genre).create,
+    "paiement": generic_service.GenericService("paiement", Paiement).create,
     # "serie": create_serie,
-    "temps": create_temps,
-    "titre": create_titre,
+    "temps": generic_service.GenericService("temps", Temps).create,
+    "titre": generic_service.GenericService("titre", Titre).create,
     # "utilisateur": create_utilisateur,
 }
 
@@ -54,11 +47,16 @@ def save_file(request: Request) -> None:
 
 
 def import_data_to_db(table_name: str) -> None:
+    print("1")
     model = get_instance(table_name)
+    print("2")
     data = read_data(model, table_name)
+    print("3")
     if table_name in SERVICES:
         for d in data:
-            SERVICES[table_name](d)
+            print("Ah ouais ?")
+            print(d.as_dict())
+            SERVICES[table_name](d.as_dict())
 
 
 def get_instance(table_name: str) -> netflix_object :
@@ -76,10 +74,13 @@ def read_data(model: netflix_object, table_name: str) -> list[netflix_object]:
         separateur = get_separateur(FILE_PATH)
         headers = get_headers(FILE_PATH, separateur)
         if headers:
-            if sorted(camel_to_snake(headers)) != sorted(vars(model).keys()):
+            if sorted(headers) != sorted(vars(model).keys()):
+                print(sorted(headers))
+                print(sorted(vars(model).keys()))
                 raise Exception("Les en-tête du fichier ne correspondent pas aux attributs de la table")
         #TODO: faire en sorte de pouvoir éviter la colonne id
         with open(FILE_PATH, mode="r", encoding="utf-8") as file:
+            print("c'est l'exception")
             reader = csv.reader(file)
             all_lines = []
             if headers:
@@ -88,6 +89,7 @@ def read_data(model: netflix_object, table_name: str) -> list[netflix_object]:
                 all_lines.append(init_object(table_name, row))
         return all_lines
     except Exception as e:
+        print(str(e))
         raise Exception(e)
 
 

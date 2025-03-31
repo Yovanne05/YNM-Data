@@ -2,12 +2,19 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  padding-top: 4em;
 }
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
 .main-container {
   border: 1px solid #ff0000;
-  margin-left: 16em; // Pour laisser de l'espace à la sidebar
-  flex: 1; // Occupe tout l'espace disponible
+  margin: 1em;
+  flex: 1;
   padding: 1em;
-  display: flex;
-  flex-direction: column;
 }

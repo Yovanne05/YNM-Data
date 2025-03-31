@@ -3,32 +3,66 @@
     (click)="toggleFilters()"
     class="bg-gray-100 text-gray-700 px-3 py-1 rounded-md text-sm hover:bg-gray-200 transition-colors"
   >
-    Filtre
+    Filtres
   </button>
 
   @if (showFilters) {
-  <div class="absolute mt-1 bg-white border border-gray-200 rounded-md shadow-md w-48 z-10">
+  <div class="absolute mt-1 bg-white border border-gray-200 rounded-md shadow-md w-64 z-10 p-3">
     <form [formGroup]="filterForm" (ngSubmit)="onSubmit()">
-      @for (filter of availableFilters; track filter.key) {
-      <div class="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-gray-700">
-        <label>{{ filter.name }}</label>
-        <input
-          type="text"
-          [formControlName]="filter.key"
-          placeholder="Entrez une valeur"
-          class="w-full border rounded-md p-1 mt-1"
-        />
-        <label class="flex items-center mt-1">
-          <input
-            type="checkbox"
-            [formControlName]="filter.key + '_isGreaterThan'"
-            class="mr-2"
-          />
-          Supérieur à
-        </label>
+      @for (filter of filters; track filter.key) {
+      <div class="block w-full text-left mb-3">
+        <label class="block text-sm font-medium text-gray-700 mb-1">{{ filter.label }}</label>
+
+        @switch (filter.type) {
+          @case ('text') {
+            <input type="text" [formControlName]="filter.key" placeholder="Rechercher..."
+                   class="w-full border rounded-md p-1 text-sm">
+          }
+          @case ('number') {
+            <div class="flex gap-2">
+              <select [formControlName]="filter.key + '_operator'" class="border rounded-md p-1 text-sm">
+                <option value="eq">=</option>
+                <option value="gt">></option>
+                <option value="lt"><</option>
+                <option value="gte">>=</option>
+                <option value="lte"><=</option>
+                <option value="ne">≠</option>
+              </select>
+              <input type="number" [formControlName]="filter.key" placeholder="Valeur"
+                     class="flex-1 border rounded-md p-1 text-sm">
+            </div>
+          }
+          @case ('date') {
+            <input type="date" [formControlName]="filter.key"
+                   class="w-full border rounded-md p-1 text-sm">
+          }
+          @case ('select') {
+            <select [formControlName]="filter.key" class="w-full border rounded-md p-1 text-sm">
+              <option value="">Tous</option>
+              @for (option of filter.options; track option) {
+                <option [value]="option">{{ option }}</option>
+              }
+            </select>
+          }
+          @case ('boolean') {
+            <div class="flex items-center">
+              <input type="checkbox" [formControlName]="filter.key" class="mr-2">
+              <span>Oui/Non</span>
+            </div>
+          }
+        }
       </div>
       }
-      <button type="submit" class="hidden">Submit</button>
+      <div class="flex justify-between mt-2">
+        <button type="button" (click)="resetFilters()"
+                class="bg-gray-100 text-gray-700 px-3 py-1 rounded-md text-sm hover:bg-gray-200 transition-colors">
+          Réinitialiser
+        </button>
+        <button type="submit"
+                class="bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 transition-colors">
+          Appliquer
+        </button>
+      </div>
     </form>
   </div>
   }
@@ -42,19 +76,58 @@
         @for (key of getObjectKeys(filteredData[0]); track $index) {
         <span class="cursor-pointer hover:text-blue-500" (click)="onSort(key)">
           {{ key }}
-          @for (sortKey of sortKeys; track $index) { @if (sortKey.key === key) {
-          <span>{{ sortKey.direction === "asc" ? "▲" : "▼" }}</span>
-          } }
+          @for (sortKey of sortKeys; track $index) {
+            @if (sortKey.key === key) {
+              <span>{{ sortKey.direction === "asc" ? "▲" : "▼" }}</span>
+            }
+          }
         </span>
         }
+        <span>Actions</span>
       </div>
 
       @for (item of filteredData; track $index) {
-      <div class="grid grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-2 text-sm border-b last:border-none py-1">
-        @for (key of getObjectKeys(item); track $index) {
-        <span>{{ getValue(key, item) }}</span>
-        }
-      </div>
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-2 text-sm border-b last:border-none py-1">
+          @for (key of getObjectKeys(item); track $index) {
+            <span>
+              @if (editingItem === item) {
+                <input type="text" [formControl]="getEditControl(key)"
+                       class="border p-1 w-full text-sm">
+              } @else {
+                {{ getValue(key, item) }}
+              }
+            </span>
+          }
+          <div class="relative flex gap-2">
+            @if (editingItem === item) {
+              <button (click)="saveChanges()"
+                      class="bg-green-500 text-white px-2 py-1 rounded text-sm hover:bg-green-600">
+                Valider
+              </button>
+              <button (click)="cancelEditing()"
+                      class="bg-gray-500 text-white px-2 py-1 rounded text-sm hover:bg-gray-600">
+                Annuler
+              </button>
+            } @else {
+              <button (click)="toggleActionMenu($index)"
+                      class="bg-gray-100 text-gray-700 px-3 py-1 rounded-md text-sm hover:bg-gray-200 transition-colors">
+                ⋮
+              </button>
+              @if (actionMenuOpen === $index) {
+                <div class="absolute right-0 mt-7 bg-white border border-gray-200 rounded-md shadow-md w-32 z-10">
+                  <button (click)="startEditing(item)"
+                          class="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-gray-700">
+                    Modifier
+                  </button>
+                  <button (click)="onDelete(item)"
+                          class="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-gray-700">
+                    Supprimer
+                  </button>
+                </div>
+              }
+            }
+          </div>
+        </div>
       }
     </div>
     } @else {

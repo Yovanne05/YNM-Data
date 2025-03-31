@@ -2,13 +2,13 @@ import { Component, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
-  selector: 'app-side-bar',
+  selector: 'app-header',
   standalone: true,
   imports: [RouterLink],
-  templateUrl: './side-bar.component.html',
-  styleUrl: './side-bar.component.scss'
+  templateUrl: './header.component.html',
+  styleUrl: './header.component.scss'
 })
-export class SideBarComponent {
+export class HeaderComponent {
 @Input() title: string = "Netflix";
 
 @Input() links: { label: string, path: string}[] = [

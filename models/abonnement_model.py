@@ -1,15 +1,15 @@
 from models.generic_model import GenericModel
 
 class Abonnement(GenericModel):
-    def __init__(self, idAbonnement: int = 0, typeAbonnement: str = "", prix: float = 0):
-        self.idAbonnement = idAbonnement
-        self.typeAbonnement = typeAbonnement
+    def __init__(self, id_abonnement: int = 0, type_abonnement: str = "", prix: float = 0):
+        self.id_abonnement = id_abonnement
+        self.type_abonnement = type_abonnement
         self.prix = prix
 
     def init_from_list(self, data: list[str]) -> None:
         try:
             if isinstance(data[1], str) and isinstance(data[2], float):
-                self.typeAbonnement = data[1]
+                self.type_abonnement = data[1]
                 self.prix = data[2]
         except IndexError:
             raise IndexError("Une des lignes du fichier CSV n'a pas assez de colonnes")

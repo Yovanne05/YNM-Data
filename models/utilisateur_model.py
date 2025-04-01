@@ -2,17 +2,17 @@ from models.generic_model import GenericModel
 import re
 
 class Utilisateur(GenericModel):
-    def __init__(self, idUtilisateur: int = 0, nom: str = "", prenom: str = "", age: int = 0, paysResidence: str = "", email: str = "", numero: str = "",
-                 statutAbonnement: str = 'Actif'):
+    def __init__(self, id_utilisateur: int = 0, nom: str = "", prenom: str = "", age: int = 0, pays_residence: str = "", email: str = "", numero: str = "",
+                 statut_abonnement: str = 'Actif'):
         super().__init__()
-        self.idUtilisateur = idUtilisateur
+        self.id_utilisateur = id_utilisateur
         self.nom = nom
         self.prenom = prenom
         self.age = age
-        self.paysResidence = paysResidence
+        self.pays_residence = pays_residence
         self.email = email
         self.numero = numero
-        self.statutAbonnement = statutAbonnement
+        self.statut_abonnement = statut_abonnement
 
 
     def validate_email(self):
@@ -27,10 +27,10 @@ class Utilisateur(GenericModel):
                 self.nom = data[1]
                 self.prenom = data[2]
                 self.age = data[3]
-                self.paysResidence = data[4]
+                self.pays_residence = data[4]
                 self.email = data[5]
                 self.numero = data[6]
-                self.statutAbonnement = data[7]
+                self.statut_abonnement = data[7]
             else:
                 raise IndexError("Une des lignes du fichier CSV n'a pas assez de colonnes")
         except TypeError:

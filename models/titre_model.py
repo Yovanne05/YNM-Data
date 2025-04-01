@@ -1,13 +1,13 @@
 from models.generic_model import GenericModel
 
 class Titre(GenericModel):
-    def __init__(self, idTitre: int = 0, nom: str = 0, annee: int = 0, dateDebutLicence: int = 0, dateFinLicence: int = 0, categorieAge: str = "", description: str = ""):
-        self.idTitre = idTitre
+    def __init__(self, id_titre: int = 0, nom: str = 0, annee: int = 0, date_debut_licence: int = 0, date_fin_licence: int = 0, categorie_age: str = "", description: str = ""):
+        self.id_titre = id_titre
         self.nom = nom
         self.annee = annee
-        self.dateDebutLicence = dateDebutLicence
-        self.dateFinLicence = dateFinLicence
-        self.categorieAge = categorieAge
+        self.date_debut_licence = date_debut_licence
+        self.date_fin_licence = date_fin_licence
+        self.categorie_age = categorie_age
         self.description = description
 
     def init_from_list(self, data: list) -> None:
@@ -16,9 +16,9 @@ class Titre(GenericModel):
                 print(data)
                 self.nom = data[7]
                 self.annee = int(data[0])
-                self.dateDebutLicence = data[3]
-                self.dateFinLicence = data[4]
-                self.categorieAge = data[1]
+                self.date_debut_licence = data[3]
+                self.date_fin_licence = data[4]
+                self.categorie_age = data[1]
                 self.description = data[2]
                 print("ça passe hein")
             else:

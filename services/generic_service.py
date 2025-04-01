@@ -31,6 +31,7 @@ class GenericService:
             with con.cursor() as cursor:
                 cursor.execute(f"SELECT * FROM {self.table_name}")
                 result = cursor.fetchall()
+                
             return [self.model_class.from_db(row) for row in result]
         except Exception as e:
             raise Exception(f"Erreur lors de la récupération des données: {str(e)}")

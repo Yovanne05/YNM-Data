@@ -1,14 +1,14 @@
 from models.generic_model import GenericModel
 
 class Genre(GenericModel):
-    def __init__(self, idGenre: int = 0, nomGenre: str = ""):
-        self.idGenre = idGenre
-        self.nomGenre = nomGenre
+    def __init__(self, id_genre: int = 0, nom_genre: str = ""):
+        self.id_genre = id_genre
+        self.nom_genre = nom_genre
 
     def init_from_list(self, data: list[str]) -> None:
         try:
             if isinstance(data[1], str):
-                self.nomGenre = data[1]
+                self.nom_genre = data[1]
         except IndexError:
             raise IndexError("Une des lignes du fichier CSV n'a pas assez de colonnes")
         except TypeError:

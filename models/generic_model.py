@@ -1,9 +1,11 @@
-from typing import TypeVar, Dict, Any
+import re
+from typing import TypeVar, Dict, Any, List
+
+from utils.camel_to_snake_converter import str_camel_to_snake
 
 # TypeVar : type générique qui sera lié à la classe GenericModel
 # T : type qui doit être une sous-classe de GenericModel
 T = TypeVar('T', bound='GenericModel')
-
 
 class GenericModel:
     """
@@ -22,6 +24,7 @@ class GenericModel:
         Returns:
             Une instance de la classe modèle avec les données chargées
         """
+        data = {str_camel_to_snake(k): v for k, v in data.items()}
         return cls(**data)  # Déballe le dictionnaire en clé-valeur
 
     @classmethod
@@ -42,3 +45,4 @@ class GenericModel:
             Dictionnaire avec toutes les propriétés de l'objet
         """
         return self.__dict__
+

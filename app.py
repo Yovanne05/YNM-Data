@@ -4,24 +4,24 @@ from config import Config
 from databases.db import db, init_app
 from sqlalchemy import inspect
 
-from controllers.abonnement_controller import abonnement_controller
-from controllers.acteur_controller import acteur_controller
-from controllers.acting_controller import acting_controller
-from controllers.evaluation_controller import evaluation_controller
-from controllers.film_controller import film_controller
-from controllers.genre_controller import genre_controller
-from controllers.import_data_controller import import_data_controller
-from controllers.langue_controller import langue_controller
-from controllers.languedispo_controller import languedisponible_controller
-from controllers.maliste_controller import maliste_controller
-from controllers.paiement_controller import paiement_controller
-from controllers.profil_controller import profil_controller
-from controllers.realisation_controller import realisation_controller
-from controllers.serie_controller import serie_controller
-from controllers.studio_controller import studio_controller
-from controllers.titre_controller import titre_controller
-from controllers.titregenre_controller import titregenre_controller
-from controllers.utilisateur_controller import utilisateur_controller
+from controllers.transactional.abonnement_controller import abonnement_controller
+from controllers.transactional.acteur_controller import acteur_controller
+from controllers.transactional.acting_controller import acting_controller
+from controllers.transactional.evaluation_controller import evaluation_controller
+from controllers.transactional.film_controller import film_controller
+from controllers.transactional.genre_controller import genre_controller
+from controllers.transactional.import_data_controller import import_data_controller
+from controllers.transactional.langue_controller import langue_controller
+from controllers.transactional.languedispo_controller import languedisponible_controller
+from controllers.transactional.maliste_controller import maliste_controller
+from controllers.transactional.paiement_controller import paiement_controller
+from controllers.transactional.profil_controller import profil_controller
+from controllers.transactional.realisation_controller import realisation_controller
+from controllers.transactional.serie_controller import serie_controller
+from controllers.transactional.studio_controller import studio_controller
+from controllers.transactional.titre_controller import titre_controller
+from controllers.transactional.titregenre_controller import titregenre_controller
+from controllers.transactional.utilisateur_controller import utilisateur_controller
 
 blueprints = [
     abonnement_controller,

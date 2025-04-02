@@ -1,0 +1,4 @@
+from services.transactional.generic_service import GenericService
+from models.transactional.languedispo_model import LangueDisponible
+
+languedisponible_service = GenericService(LangueDisponible)

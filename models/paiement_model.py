@@ -1,19 +1,12 @@
 from models.generic_model import GenericModel
+from databases.db import db
 
 class Paiement(GenericModel):
-    def __init__(self, id_paiement: int = 0, id_abonnement: int = 0, date_paiement: int = 0, montant: float = 0, status_paiement: str = ""):
-        self.id_paiement = id_paiement
-        self.id_abonnement = id_abonnement
-        self.date_paiement = date_paiement
-        self.montant = montant
-        self.status_paiement = status_paiement
+    __tablename__ = 'paiement'
 
-    def init_from_list(self, data: list) -> None:
-        try:
-            self.id_abonnement = int(data[0])
-            self.date_paiement = int(data[1])
-            self.status_paiement = data[4]
-        except IndexError:
-            raise IndexError("Une des lignes du fichier CSV n'a pas assez de colonnes")
-        except TypeError:
-            raise TypeError("Une des variables n'a pas le type demandé")
+    idPaiement = db.Column(db.Integer, primary_key=True)
+    idAbonnement = db.Column(db.Integer, db.ForeignKey('abonnement.idAbonnement'), nullable=False)
+    datePaiement = db.Column(db.Date, nullable=False)
+    montant = db.Column(db.Numeric(6, 2), nullable=False)
+    statusPaiement = db.Column(db.Enum('Effectué', 'Échoué'))
+    abonnement = db.relationship('Abonnement', backref='paiements')

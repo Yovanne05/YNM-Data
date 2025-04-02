@@ -1,9 +1,12 @@
 from models.generic_model import GenericModel
+from databases.db import db
+
 
 class Acteur(GenericModel):
-    def __init__(self, id_acteur: int = 0, nom: str = "", prenom: str = "", date_naissance: str = "", date_deces: str = ""):
-        self.id_acteur = id_acteur
-        self.nom = nom
-        self.prenom = prenom
-        self.date_naissance = date_naissance
-        self.date_deces = date_deces
+    __tablename__ = 'acteur'
+
+    idActeur = db.Column(db.Integer, primary_key=True)
+    nom = db.Column(db.String(100), nullable=False)
+    prenom = db.Column(db.String(100), nullable=False)
+    dateNaissance = db.Column(db.Date, nullable=False)
+    dateDeces = db.Column(db.Date)

@@ -1,7 +1,10 @@
 from models.generic_model import GenericModel
+from databases.db import db
+
 
 class MaListe(GenericModel):
-    def __init__(self, id_maliste: int, id_profil: int, id_titre: int):
-        self.id_maliste = id_maliste
-        self.id_profil = id_profil
-        self.id_titre = id_titre
+    __tablename__ = 'maliste'
+
+    idMaListe = db.Column(db.Integer, primary_key=True)
+    idProfil = db.Column(db.Integer, db.ForeignKey('profil.idProfil'), nullable=False)
+    idTitre = db.Column(db.Integer, db.ForeignKey('titre.idTitre'), nullable=False)

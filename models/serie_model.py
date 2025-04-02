@@ -1,17 +1,10 @@
 from models.generic_model import GenericModel
+from databases.db import db
+
 
 class Serie(GenericModel):
-    def __init__(self, id_serie: int = 0, id_titre: int = 0, saison: int = 0):
-        self.id_serie = id_serie
-        self.id_titre = id_titre
-        self.saison = saison
+    __tablename__ = 'serie'
 
-    def init_from_list(self, data: list) -> None:
-        try:
-            if len(data) >= 3 and isinstance(data[1], int) and isinstance(data[2], int):
-                self.id_titre = data[1]
-                self.saison = data[2]
-            else:
-                raise IndexError("Une des lignes du fichier CSV n'a pas assez de colonnes")
-        except TypeError:
-            raise TypeError("Une des variables n'a pas le type demandé")
+    idSerie = db.Column(db.Integer, primary_key=True)
+    idTitre = db.Column(db.Integer, db.ForeignKey('titre.idTitre'), unique=True, nullable=False)
+    saison = db.Column(db.Integer)

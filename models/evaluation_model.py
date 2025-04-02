@@ -1,9 +1,11 @@
 from models.generic_model import GenericModel
+from databases.db import db
 
 class Evaluation(GenericModel):
-    def __init__(self, id_evaluation: int, id_profil: int, id_titre: int, note: int, avis: str = ""):
-        self.id_evaluation = id_evaluation
-        self.id_profil = id_profil
-        self.id_titre = id_titre
-        self.note = note
-        self.avis = avis
+    __tablename__ = 'evaluation'
+
+    idEvaluation = db.Column(db.Integer, primary_key=True)
+    idProfil = db.Column(db.Integer, db.ForeignKey('profil.idProfil'), nullable=False)
+    idTitre = db.Column(db.Integer, db.ForeignKey('titre.idTitre'), nullable=False)
+    note = db.Column(db.Integer)
+    avis = db.Column(db.Text)

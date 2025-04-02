@@ -1,7 +1,10 @@
 from models.generic_model import GenericModel
+from databases.db import db
+
 
 class Studio(GenericModel):
-    def __init__(self, id_studio: int, nom: str, pays: str):
-        self.id_studio = id_studio
-        self.nom = nom
-        self.pays = pays
+    __tablename__ = 'studio'
+
+    idStudio = db.Column(db.Integer, primary_key=True)
+    nom = db.Column(db.String(255), unique=True, nullable=False)
+    pays = db.Column(db.String(100), nullable=False)

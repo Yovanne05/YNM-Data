@@ -1,5 +1,6 @@
 from typing import Type, List, Any, Dict, Optional
 import db
+from utils.case_converter import list_snake_to_camel
 
 
 class GenericService:
@@ -74,11 +75,9 @@ class GenericService:
         con = db.get_db_connection()
         try:
             # Prépare les noms de colonnes et les valeurs à insérer
-            columns = ", ".join(data.keys())
+            columns = ", ".join(list_snake_to_camel(data.keys()))
             placeholders = ", ".join(["%s"] * len(data))
             print(columns)
-            print(placeholders)
-            print("ah ouais ?")
 
             with con.cursor() as cursor:
 

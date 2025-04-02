@@ -1,7 +1,7 @@
 import re
 from typing import TypeVar, Dict, Any, List
 
-from utils.camel_to_snake_converter import str_camel_to_snake
+from utils.case_converter import str_camel_to_snake
 
 # TypeVar : type générique qui sera lié à la classe GenericModel
 # T : type qui doit être une sous-classe de GenericModel

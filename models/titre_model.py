@@ -13,14 +13,12 @@ class Titre(GenericModel):
     def init_from_list(self, data: list) -> None:
         try:
             if len(data) >= 8:
-                print(data)
                 self.nom = data[7]
                 self.annee = int(data[0])
                 self.date_debut_licence = data[3]
                 self.date_fin_licence = data[4]
                 self.categorie_age = data[1]
                 self.description = data[2]
-                print("ça passe hein")
             else:
                 raise IndexError("Une des lignes du fichier CSV n'a pas assez de colonnes")
         except TypeError:

@@ -47,15 +47,13 @@ def save_file(request: Request) -> None:
 
 
 def import_data_to_db(table_name: str) -> None:
-    print("1")
     model = get_instance(table_name)
-    print("2")
+    print("1")
     data = read_data(model, table_name)
-    print("3")
+    print("2")
     if table_name in SERVICES:
         for d in data:
-            print("Ah ouais ?")
-            print(d.as_dict())
+            print("boucle")
             SERVICES[table_name](d.as_dict())
 
 
@@ -75,12 +73,9 @@ def read_data(model: netflix_object, table_name: str) -> list[netflix_object]:
         headers = get_headers(FILE_PATH, separateur)
         if headers:
             if sorted(headers) != sorted(vars(model).keys()):
-                print(sorted(headers))
-                print(sorted(vars(model).keys()))
                 raise Exception("Les en-tête du fichier ne correspondent pas aux attributs de la table")
         #TODO: faire en sorte de pouvoir éviter la colonne id
         with open(FILE_PATH, mode="r", encoding="utf-8") as file:
-            print("c'est l'exception")
             reader = csv.reader(file)
             all_lines = []
             if headers:
@@ -89,7 +84,6 @@ def read_data(model: netflix_object, table_name: str) -> list[netflix_object]:
                 all_lines.append(init_object(table_name, row))
         return all_lines
     except Exception as e:
-        print(str(e))
         raise Exception(e)
 
 

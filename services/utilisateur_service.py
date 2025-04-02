@@ -1,7 +1,5 @@
 from services.generic_service import GenericService
 from models.utilisateur_model import Utilisateur
-import db
-import re
 
 
 class UtilisateurService(GenericService):

@@ -1,6 +1,13 @@
 from typing import Type, List, Any, Dict, Optional
-import db
+from databases import db
 
+def snake_to_camel(text: str) -> str:
+    """
+    Convertit un texte en snake_case en camelCase.
+    Exemple : 'id_langue_disponible' -> 'idLangueDisponible'
+    """
+    components = text.lower().split('_')
+    return components[0] + ''.join(x.title() for x in components[1:])
 
 class GenericService:
     """
@@ -50,7 +57,10 @@ class GenericService:
         con = db.get_db_connection()
         try:
             with con.cursor() as cursor:
-                cursor.execute(f"SELECT * FROM {self.table_name} WHERE id{self.table_name}=%s", (id,))
+                id_column = snake_to_camel(f"id_{self.table_name}")
+                print(id_column)
+                print(self.table_name)
+                cursor.execute(f"SELECT * FROM {self.table_name} WHERE {id_column}=%s", (id,))
                 result = cursor.fetchone()
                 if result:
                     return self.model_class.from_db(result)

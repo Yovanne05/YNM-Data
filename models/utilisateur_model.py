@@ -2,18 +2,17 @@ from models.generic_model import GenericModel
 import re
 
 class Utilisateur(GenericModel):
-    def __init__(self, idUtilisateur: int, nom: str, prenom: str, age: int,
-                 paysResidence: str, email: str, numero: str,
-                 statutAbonnement: str = 'Actif'):
-        super().__init__()
-        self.idUtilisateur = idUtilisateur
+    def __init__(self, id_utilisateur: int, nom: str, prenom: str, age: int,
+                 pays_residance: str, email: str, numero: str,
+                 statut_abonnement: str = 'Actif'):
+        self.id_utilisateur = id_utilisateur
         self.nom = nom
         self.prenom = prenom
         self.age = age
-        self.paysResidence = paysResidence
+        self.pays_residance = pays_residance
         self.email = email
         self.numero = numero
-        self.statutAbonnement = statutAbonnement
+        self.statut_abonnement = statut_abonnement
 
 
     def validate_email(self):

@@ -2,7 +2,10 @@ class Config:
     MYSQL_HOST = 'localhost'
     MYSQL_USER = 'root'
     MYSQL_PASSWORD = ''
-    MYSQL_DB = 'entrepot_netflix'
+    MYSQL_DB = 'netflixdb'
+    MYSQL_DB_ENTREPOT = 'entrepot_netflix'
+
+
 
 # class Config:
 #     MYSQL_HOST = 'database-etudiants.iut.univ-paris8.fr'

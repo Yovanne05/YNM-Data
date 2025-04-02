@@ -22,7 +22,8 @@ from controllers.titre_controller import titre_controller
 from controllers.titregenre_controller import titregenre_controller
 from controllers.utilisateur_controller import utilisateur_controller
 
-import db
+from databases import db
+
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 app.config.from_object(Config)

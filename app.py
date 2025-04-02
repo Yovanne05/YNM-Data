@@ -1,6 +1,8 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from config import Config
+from databases.db import db, init_app
+from sqlalchemy import inspect
 
 from controllers.abonnement_controller import abonnement_controller
 from controllers.acteur_controller import acteur_controller
@@ -17,36 +19,40 @@ from controllers.profil_controller import profil_controller
 from controllers.realisation_controller import realisation_controller
 from controllers.serie_controller import serie_controller
 from controllers.studio_controller import studio_controller
-from controllers.temps_controller import temps_controller
 from controllers.titre_controller import titre_controller
 from controllers.titregenre_controller import titregenre_controller
 from controllers.utilisateur_controller import utilisateur_controller
 
-from databases import db
+blueprints = [
+    abonnement_controller,
+    acteur_controller,
+    acting_controller,
+    evaluation_controller,
+    film_controller,
+    genre_controller,
+    import_data_controller,
+    langue_controller,
+    languedisponible_controller,
+    maliste_controller,
+    paiement_controller,
+    profil_controller,
+    realisation_controller,
+    serie_controller,
+    studio_controller,
+    titre_controller,
+    titregenre_controller,
+    utilisateur_controller
+]
 
 app = Flask(__name__)
+init_app(app)
+
 CORS(app, resources={r"/*": {"origins": "*"}})
 app.config.from_object(Config)
 
-app.register_blueprint(abonnement_controller)
-app.register_blueprint(acteur_controller)
-app.register_blueprint(acting_controller)
-app.register_blueprint(evaluation_controller)
-app.register_blueprint(film_controller)
-app.register_blueprint(genre_controller)
-app.register_blueprint(import_data_controller)
-app.register_blueprint(langue_controller)
-app.register_blueprint(languedisponible_controller)
-app.register_blueprint(maliste_controller)
-app.register_blueprint(paiement_controller)
-app.register_blueprint(profil_controller)
-app.register_blueprint(realisation_controller)
-app.register_blueprint(serie_controller)
-app.register_blueprint(studio_controller)
-app.register_blueprint(temps_controller)
-app.register_blueprint(titre_controller)
-app.register_blueprint(titregenre_controller)
-app.register_blueprint(utilisateur_controller)
+for blueprint in blueprints:
+    app.register_blueprint(blueprint)
+
 
 @app.before_request
 def handle_options():
@@ -57,25 +63,30 @@ def handle_options():
         response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization")
         response.headers.add("Access-Control-Max-Age", "86400")
         return response, 200
-@app.route('/tables', methods=['GET'])
+
+
+@app.route('/tables')
 def get_tables():
-    conn = db.get_db_connection()
     try:
-        with conn.cursor() as cursor:
-            cursor.execute("SHOW TABLES")
-            tables = [table['Tables_in_' + Config.MYSQL_DB] for table in cursor.fetchall()]
+        inspector = inspect(db.engine)
+        tables_data = {}
 
-        result = {}
-        for table in tables:
-            with conn.cursor() as cursor:
-                cursor.execute(f"DESCRIBE `{table}`")
-                columns = [column['Field'] for column in cursor.fetchall()]
-                result[table] = columns
+        for table_name in inspector.get_table_names():
+            columns = [column['name'] for column in inspector.get_columns(table_name)]
+            tables_data[table_name] = columns
 
-        return jsonify(result)
+        return jsonify(tables_data)
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-    finally:
-        cursor.close()
+        app.logger.error(f"Error fetching tables: {str(e)}")
+        return jsonify({"error": "Unable to fetch database structure"}), 500
+@app.route('/test-db')
+def test_db():
+    try:
+        with app.app_context():
+            engine = db.get_engine()
+            conn = engine.connect()
+            conn.close()
+            return jsonify({"status": "success", "message": "Connexion à la BDD réussie !"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500

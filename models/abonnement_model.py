@@ -1,8 +1,12 @@
 from models.generic_model import GenericModel
+from databases.db import db
 
 class Abonnement(GenericModel):
-    def __init__(self, id_abonnement: int, id_utilisateur: int, type_abonnement: str, prix: float):
-        self.id_abonnement = id_abonnement
-        self.id_utilisateur = id_utilisateur
-        self.type_abonnement = type_abonnement
-        self.prix = prix
+    __tablename__ = 'abonnement'
+
+    idAbonnement = db.Column(db.Integer, primary_key=True)
+    idUtilisateur = db.Column(db.Integer, db.ForeignKey('utilisateur.idUtilisateur'), unique=True, nullable=False)
+    typeAbonnement = db.Column(db.Enum('Basic', 'Standard', 'Premium'), nullable=False)
+    prix = db.Column(db.Numeric(6, 2), nullable=False)
+
+    utilisateur = db.relationship('Utilisateur', backref='abonnements')

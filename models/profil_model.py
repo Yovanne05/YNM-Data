@@ -1,9 +1,12 @@
 from models.generic_model import GenericModel
+from databases.db import db
 
 class Profil(GenericModel):
-    def __init__(self, id_profil: int, nom: str,
-                 type_profil: str, id_utilisateur: int):
-        self.id_profil = id_profil
-        self.nom = nom
-        self.type_profil = type_profil
-        self.id_utilisateur = id_utilisateur
+    __tablename__ = 'profil'
+
+    idProfil = db.Column(db.Integer, primary_key=True)
+    nom = db.Column(db.String(100), nullable=False)
+    typeProfil = db.Column(db.Enum('Adulte', 'Enfant'), default='Adulte', nullable=False)
+    idUtilisateur = db.Column(db.Integer, db.ForeignKey('utilisateur.idUtilisateur'), nullable=False)
+
+    utilisateur = db.relationship('Utilisateur', backref='profils')

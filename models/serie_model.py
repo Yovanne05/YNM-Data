@@ -1,7 +1,10 @@
 from models.generic_model import GenericModel
+from databases.db import db
+
 
 class Serie(GenericModel):
-    def __init__(self, id_serie: int, id_titre: int, saison: int):
-        self.id_serie = id_serie
-        self.id_titre = id_titre
-        self.saison = saison
+    __tablename__ = 'serie'
+
+    idSerie = db.Column(db.Integer, primary_key=True)
+    idTitre = db.Column(db.Integer, db.ForeignKey('titre.idTitre'), unique=True, nullable=False)
+    saison = db.Column(db.Integer)

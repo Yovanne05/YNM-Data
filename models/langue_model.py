@@ -1,6 +1,9 @@
 from models.generic_model import GenericModel
+from databases.db import db
+
 
 class Langue(GenericModel):
-    def __init__(self, id_langue: int, nom: str):
-        self.id_langue = id_langue
-        self.nom = nom
+    __tablename__ = 'langue'
+
+    idLangue = db.Column(db.Integer, primary_key=True)
+    nom = db.Column(db.String(100), unique=True, nullable=False)

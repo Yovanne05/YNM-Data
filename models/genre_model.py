@@ -1,6 +1,9 @@
 from models.generic_model import GenericModel
+from databases.db import db
+
 
 class Genre(GenericModel):
-    def __init__(self, id_genre: int, nom_genre: str):
-        self.id_genre = id_genre
-        self.nom_genre = nom_genre
+    __tablename__ = 'genre'
+
+    idGenre = db.Column(db.Integer, primary_key=True)
+    nom = db.Column(db.String(100), unique=True, nullable=False)

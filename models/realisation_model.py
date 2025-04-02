@@ -1,7 +1,10 @@
 from models.generic_model import GenericModel
+from databases.db import db
+
 
 class Realisation(GenericModel):
-    def __init__(self, id_realisation: int, id_titre: int, id_studio: int):
-        self.id_realisation = id_realisation
-        self.id_titre = id_titre
-        self.id_studio = id_studio
+    __tablename__ = 'realisation'
+
+    idRealisation = db.Column(db.Integer, primary_key=True)
+    idTitre = db.Column(db.Integer, db.ForeignKey('titre.idTitre'), nullable=False)
+    idStudio = db.Column(db.Integer, db.ForeignKey('studio.idStudio'), nullable=False)

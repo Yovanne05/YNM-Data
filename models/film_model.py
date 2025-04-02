@@ -1,7 +1,10 @@
 from models.generic_model import GenericModel
+from databases.db import db
+
 
 class Film(GenericModel):
-    def __init__(self, id_film: int, id_titre: int, duree: int):
-        self.id_film = id_film
-        self.id_titre = id_titre
-        self.duree = duree
+    __tablename__ = 'film'
+
+    idFilm = db.Column(db.Integer, primary_key=True)
+    idTitre = db.Column(db.Integer, db.ForeignKey('titre.idTitre'), unique=True, nullable=False)
+    duree = db.Column(db.Integer)

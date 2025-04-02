@@ -1,15 +1,21 @@
+from sqlalchemy.engine.url import URL
+
 class Config:
-    MYSQL_HOST = 'localhost'
-    MYSQL_USER = 'root'
-    MYSQL_PASSWORD = ''
-    MYSQL_DB = 'netflixdb'
-    MYSQL_DB_ENTREPOT = 'entrepot_netflix'
+    DB = {
+        'drivername': 'mysql',
+        'host': 'localhost',
+        'username': 'root',
+        'password': '',
+        'database': 'netflixdb',
+    }
+
+    @property
+    def current_db(self):
+        return self.DB
+
+    def get_db_url(self, config_name='current_db'):
+        config = getattr(self, config_name)
+        return URL.create(**config)
 
 
-
-# class Config:
-#     MYSQL_HOST = 'database-etudiants.iut.univ-paris8.fr'
-#     MYSQL_USER = 'dutinfopw201655'
-#     MYSQL_PASSWORD = 'hevenequ'
-#     MYSQL_DB = 'dutinfopw201655'
-
+config = Config()

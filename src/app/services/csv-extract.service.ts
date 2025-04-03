@@ -5,15 +5,20 @@ import { Injectable } from '@angular/core';
 })
 export class CsvExtractService {
 
-  //TODO: Essayer de refaire sans ChatGPT plus tard
-
   exportToCsv(filename: string, data: Record<string, string>[]): void {
 
     const headers = Object.keys(data[0]).join(',');
 
     const rows = data.map(row => 
       Object.values(row)
-        .map(value => `"${String(value).replace(/"/g, '""')}"`)
+        .map(value => {
+          const strValue = String(value);
+          if (strValue.includes('GMT')) { 
+            return `"${new Date(strValue).toISOString().split("T")[0]}"`;
+          }
+    
+          return `"${strValue.replace(/"/g, '""')}"`;
+        })
         .join(',')
     );
 

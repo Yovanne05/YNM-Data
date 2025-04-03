@@ -6,3 +6,5 @@ class LangueDim(db.Model):
 
     idLangue = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nomLangue = db.Column(db.String(50))
+
+    _langues_disponibles = db.relationship("LangueDisponibleDim", backref="langue")

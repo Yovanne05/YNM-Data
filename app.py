@@ -5,8 +5,6 @@ from databases.db import db, init_app
 from sqlalchemy import inspect
 from config import config
 
-from bd_analytics.models.relations import setup_relationships
-
 from sqlalchemy import text
 from bd_transactional.controllers.abonnement_controller import abonnement_controller
 from bd_transactional.controllers.acteur_controller import acteur_controller
@@ -54,9 +52,6 @@ blueprints = [
 app = Flask(__name__)
 app.config.from_object(config)
 init_app(app)
-
-with app.app_context():
-    setup_relationships()
 
 CORS(app, resources={r"/*": {"origins": "*"}})
 app.config.from_object(Config)

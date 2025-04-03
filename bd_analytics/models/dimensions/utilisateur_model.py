@@ -12,3 +12,7 @@ class UtilisateurDim(db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False)
     numero = db.Column(db.String(15), unique=True, nullable=False)
     statutAbonnement = db.Column(db.String(20), default='Actif')
+
+    _visionnages = db.relationship("VisionnageFact", backref="utilisateur")
+    _evaluations = db.relationship("EvaluationFact", backref="utilisateur")
+    _paiements = db.relationship("PaiementFact", backref="utilisateur")

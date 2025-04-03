@@ -13,3 +13,6 @@ class TitreDim(db.Model):
     typeTitre = db.Column(db.String(10))
     description = db.Column(db.Text)
     idGenre = db.Column(db.Integer, db.ForeignKey('Genre.idGenre'))
+
+    _visionnages = db.relationship("VisionnageFact", backref="titre")
+    _evaluations = db.relationship("EvaluationFact", backref="titre")

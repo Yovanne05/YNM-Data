@@ -10,3 +10,5 @@ class EvaluationFact(db.Model):
     idGenre = db.Column(db.Integer, db.ForeignKey('Genre.idGenre'))
     idDate = db.Column(db.Integer, db.ForeignKey('Temps.idDate'))
     note = db.Column(db.Integer)
+
+    # Les relations sont déjà couvertes par backref dans les autres modèles

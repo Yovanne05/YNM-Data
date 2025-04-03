@@ -3,6 +3,8 @@ from flask_cors import CORS
 from config import Config
 from databases.db import db, init_app
 from sqlalchemy import inspect
+from config import config
+from sqlalchemy import text
 
 from controllers.transactional.abonnement_controller import abonnement_controller
 from controllers.transactional.acteur_controller import acteur_controller
@@ -22,6 +24,7 @@ from controllers.transactional.studio_controller import studio_controller
 from controllers.transactional.titre_controller import titre_controller
 from controllers.transactional.titregenre_controller import titregenre_controller
 from controllers.transactional.utilisateur_controller import utilisateur_controller
+from controllers.analytics.temps_controller import test_controller
 
 blueprints = [
     abonnement_controller,
@@ -41,10 +44,12 @@ blueprints = [
     studio_controller,
     titre_controller,
     titregenre_controller,
-    utilisateur_controller
+    utilisateur_controller,
+    test_controller
 ]
 
 app = Flask(__name__)
+app.config.from_object(config)
 init_app(app)
 
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -68,6 +73,7 @@ def handle_options():
 @app.route('/tables')
 def get_tables():
     try:
+        __bind_key__ = 'transactional'
         inspector = inspect(db.engine)
         tables_data = {}
 
@@ -90,3 +96,15 @@ def test_db():
             return jsonify({"status": "success", "message": "Connexion à la BDD réussie !"})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/check-db')
+def check_db():
+    try:
+        # Utilisez text() pour les requêtes SQL brutes
+        engine = db.get_engine(app, bind='entrepot')
+        with engine.connect() as conn:
+            result = conn.execute(text("SELECT COUNT(*) FROM Temps"))
+            count = result.scalar()
+            return f"La table Temps contient {count} enregistrements"
+    except Exception as e:
+        return f"Erreur: {str(e)}", 500

@@ -1,13 +1,20 @@
 from flask_sqlalchemy import SQLAlchemy
-from config import Config
+from config import config
 
+# Une seule instance SQLAlchemy pour toutes les bases
 db = SQLAlchemy()
 
+
 def init_app(app):
-    app.config['SQLALCHEMY_DATABASE_URI'] = Config().get_db_url("get_db")
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    """Initialise les connexions aux bases de données"""
+    # Configuration principale
+    app.config['SQLALCHEMY_DATABASE_URI'] = config.db_uri
 
+    # Configuration des bases supplémentaires (binds)
+    app.config['SQLALCHEMY_BINDS'] = {
+        'entrepot': config.entrepot_db_uri
+    }
+
+
+    # Initialisation
     db.init_app(app)
-
-    with app.app_context():
-        db.create_all()

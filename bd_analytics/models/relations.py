@@ -1,13 +1,13 @@
-from dimensions.abonnement_model import AbonnementDim
-from facts.evaluation_model import EvaluationFact
-from dimensions.genre_model import GenreDim
-from dimensions.langue_model import LangueDim
-from dimensions.languedisponible_model import LangueDisponibleDim
-from facts.paiement_model import PaiementFact
-from dimensions.temps_model import TempsDim
-from dimensions.titre_model import TitreDim
-from dimensions.utilisateur_model import UtilisateurDim
-from facts.visionnage_model import VisionnageFact
+from .dimensions.abonnement_model import AbonnementDim
+from .facts.evaluation_model import EvaluationFact
+from .dimensions.genre_model import GenreDim
+from .dimensions.langue_model import LangueDim
+from .dimensions.languedisponible_model import LangueDisponibleDim
+from .facts.paiement_model import PaiementFact
+from .dimensions.temps_model import TempsDim
+from .dimensions.titre_model import TitreDim
+from .dimensions.utilisateur_model import UtilisateurDim
+from .facts.visionnage_model import VisionnageFact
 from databases.db import db
 
 

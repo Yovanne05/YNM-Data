@@ -38,12 +38,15 @@ class GenericController:
             """Crée un nouvel élément"""
             try:
                 data = request.get_json()
-                required_fields = self.service.model_class.__annotations__.keys() - {'id'}
-                if not all(field in data for field in required_fields):
+
+                required_fields = {column.name for column in self.service.model_class.__table__.columns if
+                                   not column.nullable and not column.primary_key}
+
+                if not required_fields.issubset(data.keys()):
                     return jsonify({"error": "Champs requis manquants"}), 400
 
                 item = self.service.create(data)
-                return jsonify({"id": item.id, **data}), 201
+                return jsonify({"id": item.idGenre, **data}), 201
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
 

@@ -14,11 +14,3 @@ def list_snake_to_camel(liste: Iterable[str]) -> List[str]:
 def str_snake_to_camel(string: str) -> str:
     new_string = "".join(x.capitalize() for x in string.lower().split("_"))
     return string[0].lower() + new_string[1:]
-
-
-def to_camel_case(snake_str):
-    return "".join(x.capitalize() for x in snake_str.lower().split("_"))
-
-def to_lower_camel_case(snake_str):
-    new_string = "".join(x.capitalize() for x in snake_str.lower().split("_"))
-    return snake_str[0].lower() + new_string[1:]

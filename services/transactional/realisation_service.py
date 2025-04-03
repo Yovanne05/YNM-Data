@@ -1,4 +1,0 @@
-from services.transactional.generic_service import GenericService
-from models.transactional.realisation_model import Realisation
-
-realisation_service = GenericService(Realisation)

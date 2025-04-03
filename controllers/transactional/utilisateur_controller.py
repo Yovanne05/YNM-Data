@@ -1,4 +1,0 @@
-from controllers.transactional.generic_controller import GenericController
-from services.transactional.utilisateur_service import utilisateur_service
-
-utilisateur_controller = GenericController(utilisateur_service, "utilisateur").blueprint

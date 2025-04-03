@@ -4,27 +4,30 @@ from config import Config
 from databases.db import db, init_app
 from sqlalchemy import inspect
 from config import config
-from sqlalchemy import text
 
-from controllers.transactional.abonnement_controller import abonnement_controller
-from controllers.transactional.acteur_controller import acteur_controller
-from controllers.transactional.acting_controller import acting_controller
-from controllers.transactional.evaluation_controller import evaluation_controller
-from controllers.transactional.film_controller import film_controller
-from controllers.transactional.genre_controller import genre_controller
-from controllers.transactional.import_data_controller import import_data_controller
-from controllers.transactional.langue_controller import langue_controller
-from controllers.transactional.languedispo_controller import languedisponible_controller
-from controllers.transactional.maliste_controller import maliste_controller
-from controllers.transactional.paiement_controller import paiement_controller
-from controllers.transactional.profil_controller import profil_controller
-from controllers.transactional.realisation_controller import realisation_controller
-from controllers.transactional.serie_controller import serie_controller
-from controllers.transactional.studio_controller import studio_controller
-from controllers.transactional.titre_controller import titre_controller
-from controllers.transactional.titregenre_controller import titregenre_controller
-from controllers.transactional.utilisateur_controller import utilisateur_controller
-from controllers.analytics.temps_controller import test_controller
+from bd_analytics.models.relations import setup_relationships
+
+from sqlalchemy import text
+from bd_transactional.controllers.abonnement_controller import abonnement_controller
+from bd_transactional.controllers.acteur_controller import acteur_controller
+from bd_transactional.controllers.acting_controller import acting_controller
+from bd_transactional.controllers.evaluation_controller import evaluation_controller
+from bd_transactional.controllers.film_controller import film_controller
+from bd_transactional.controllers.genre_controller import genre_controller
+from bd_transactional.controllers.import_data_controller import import_data_controller
+from bd_transactional.controllers.langue_controller import langue_controller
+from bd_transactional.controllers.languedispo_controller import languedisponible_controller
+from bd_transactional.controllers.maliste_controller import maliste_controller
+from bd_transactional.controllers.paiement_controller import paiement_controller
+from bd_transactional.controllers.profil_controller import profil_controller
+from bd_transactional.controllers.realisation_controller import realisation_controller
+from bd_transactional.controllers.serie_controller import serie_controller
+from bd_transactional.controllers.studio_controller import studio_controller
+from bd_transactional.controllers.titre_controller import titre_controller
+from bd_transactional.controllers.titregenre_controller import titregenre_controller
+from bd_transactional.controllers.utilisateur_controller import utilisateur_controller
+
+from bd_analytics.controllers.analysis_conroller import analysis_controller
 
 blueprints = [
     abonnement_controller,
@@ -45,12 +48,15 @@ blueprints = [
     titre_controller,
     titregenre_controller,
     utilisateur_controller,
-    test_controller
+    analysis_controller
 ]
 
 app = Flask(__name__)
 app.config.from_object(config)
 init_app(app)
+
+with app.app_context():
+    setup_relationships()
 
 CORS(app, resources={r"/*": {"origins": "*"}})
 app.config.from_object(Config)

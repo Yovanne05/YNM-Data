@@ -32,24 +32,41 @@ class CubeService:
         """Récupère les contenus les plus populaires"""
         try:
             with CubeService._get_session() as session:
-                # Construction de la requête de base
+                # Sous-requête pour les visionnages
+                subq_vues = session.query(
+                    VisionnageFact.idTitre,
+                    func.count(VisionnageFact.idVisionnage).label('vues')
+                ).group_by(VisionnageFact.idTitre).subquery()
+
+                # Sous-requête pour les évaluations
+                subq_notes = session.query(
+                    EvaluationFact.idTitre,
+                    func.avg(EvaluationFact.note).label('note_moyenne')
+                ).group_by(EvaluationFact.idTitre).subquery()
+
+                # Requête principale
                 query = session.query(
                     TitreDim.nom.label('titre'),
-                    func.count(VisionnageFact.idVisionnage).label('vues'),
-                    func.avg(EvaluationFact.note).label('note_moyenne')
+                    func.coalesce(subq_vues.c.vues, 0).label('vues'),
+                    subq_notes.c.note_moyenne.label('note_moyenne')
                 )
 
-                # Jointures
-                query = query.join(VisionnageFact, TitreDim.idTitre == VisionnageFact.idTitre, isouter=True)
-                query = query.join(EvaluationFact, TitreDim.idTitre == EvaluationFact.idTitre, isouter=True)
+                # Jointures avec les sous-requêtes
+                query = query.outerjoin(
+                    subq_vues,
+                    TitreDim.idTitre == subq_vues.c.idTitre
+                )
+                query = query.outerjoin(
+                    subq_notes,
+                    TitreDim.idTitre == subq_notes.c.idTitre
+                )
 
-                # Filtres
+                # Filtre par genre si spécifié
                 if genre_id:
                     query = query.filter(TitreDim.idGenre == genre_id)
 
-                # Groupement et tri
-                query = query.group_by(TitreDim.idTitre, TitreDim.nom)
-                query = query.order_by(func.count(VisionnageFact.idVisionnage).desc())
+                # Tri et limite
+                query = query.order_by(func.coalesce(subq_vues.c.vues, 0).desc())
                 query = query.limit(limit)
 
                 # Exécution
@@ -58,7 +75,7 @@ class CubeService:
                 # Formatage des résultats
                 return [{
                     'titre': row.titre,
-                    'vues': row.vues or 0,
+                    'vues': row.vues,
                     'note_moyenne': float(row.note_moyenne) if row.note_moyenne is not None else None
                 } for row in results]
 

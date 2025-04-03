@@ -35,9 +35,11 @@ def test_simple():
     try:
         # Test plus simple et plus fiable
         with CubeService._get_session() as session:
+            count = session.query(CubeService._get_model('TitreDim')).count()
             return jsonify({
                 'status': 'success',
                 'message': 'Requête simple exécutée',
+                'count': count
             }), 200
 
     except Exception as e:
@@ -48,11 +50,11 @@ def test_simple():
         }), 500
 
 
-@analysis_controller.route('/analyze', methods=['GET'])
-def analyze_data():
-    """Route pour analyser les données"""
+@analysis_controller.route('/top-content', methods=['GET'])
+def get_top_content():
+    """Route pour obtenir les contenus les plus populaires"""
     try:
-        # Paramètres par défaut
+        # Paramètres de requête
         limit = int(request.args.get('limit', 10))
         genre_id = request.args.get('genre_id', type=int)
 
@@ -77,9 +79,9 @@ def analyze_data():
         }), 500
 
 
-@analysis_controller.route('/top-content', methods=['GET'])
-def get_top_content():
-    """Route pour obtenir les contenus les plus populaires"""
+@analysis_controller.route('/visionnages', methods=['GET'])
+def get_visionnages():
+    """Route pour obtenir les statistiques de visionnage par période"""
     try:
         # Paramètres de période
         debut = request.args.get('debut', '2023-01-01')

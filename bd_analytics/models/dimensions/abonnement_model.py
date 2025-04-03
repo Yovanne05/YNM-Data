@@ -8,4 +8,5 @@ class AbonnementDim(db.Model):
     typeAbonnement = db.Column(db.String(50))
     prix = db.Column(db.Numeric(6, 2))
 
+    # backref : relation bidirectionnelle (dans les deux sens)
     _paiements = db.relationship("PaiementFact", backref="abonnement")

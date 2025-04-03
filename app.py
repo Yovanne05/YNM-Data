@@ -25,10 +25,15 @@ from bd_transactional.controllers.titre_controller import titre_controller
 from bd_transactional.controllers.titregenre_controller import titregenre_controller
 from bd_transactional.controllers.utilisateur_controller import utilisateur_controller
 
-from bd_analytics.controllers.analysis_conroller import analysis_controller
+from bd_analytics.controllers.content_analysis_controller import content_analysis_blueprint
+from bd_analytics.controllers.behavior_analysis_controller import behavior_analysis_blueprint
+from bd_analytics.controllers.temporal_analysis_controller import temporal_analysis_blueprint
 
 blueprints = [
+    content_analysis_blueprint,
+    behavior_analysis_blueprint,
     abonnement_controller,
+    temporal_analysis_blueprint,
     acteur_controller,
     acting_controller,
     evaluation_controller,
@@ -46,7 +51,6 @@ blueprints = [
     titre_controller,
     titregenre_controller,
     utilisateur_controller,
-    analysis_controller
 ]
 
 app = Flask(__name__)

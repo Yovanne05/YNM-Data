@@ -26,14 +26,14 @@ from bd_transactional.controllers.titregenre_controller import titregenre_contro
 from bd_transactional.controllers.utilisateur_controller import utilisateur_controller
 
 from bd_analytics.controllers.content_analysis_controller import content_analysis_blueprint
-from bd_analytics.controllers.behavior_analysis_controller import behavior_analysis_blueprint
-from bd_analytics.controllers.temporal_analysis_controller import temporal_analysis_blueprint
+from bd_analytics.controllers.comportement_analysis_controller import behavior_analysis_blueprint
+from bd_analytics.controllers.temporal_analysis_controller import temporal_analysis_controller
 
 blueprints = [
     content_analysis_blueprint,
     behavior_analysis_blueprint,
     abonnement_controller,
-    temporal_analysis_blueprint,
+    temporal_analysis_controller,
     acteur_controller,
     acting_controller,
     evaluation_controller,

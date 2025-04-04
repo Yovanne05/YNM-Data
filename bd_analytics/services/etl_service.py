@@ -28,6 +28,7 @@ class ETLService:
     def transform_and_load(self, raw_data, data_type):
         #TODO : A CONTINUER POUR TOUTES LES TABLES
         """Transforme et charge les données dans l'entrepôt"""
+
         if data_type == 'visionnage':
             self._process_visionnage_data(raw_data)
         elif data_type == 'utilisateur':

@@ -1,71 +1,73 @@
-from sqlalchemy import func, distinct
+from sqlalchemy import func
 import pandas as pd
-from ..utils.filters import ContentFilters
-from ..utils.olap_query_builder import OLAPQueryBuilder
-from ..utils.time_utils import TimeDimensionHelper
 from databases.db import db
+from databases.database_session import get_db_session
 
-class ComportementAnalysisService:
-    def __init__(self):
-        engine = db.get_engine(bind='entrepot')
-        Session = db.sessionmaker(bind=engine)
-        self.session = Session()
-        self.query_builder = OLAPQueryBuilder(self.session)
-        self.filters = ContentFilters()
+def get_viewing_analytics(user_id=None):
+    """
+    Mesure l'activité de visionnage d'un utilisateur ou de l'ensemble des utilisateurs
 
-    def get_viewing_behavior(self, time_dimension='month', content_filter=None):
-        try:
-            TempsDim = db.models.TempsDim
-            VisionnageFact = db.models.VisionnageFact
+    Args:
+        user_id (int, optional): ID utilisateur spécifique. None pour une analyse globale.
 
-            # Construction de la requête
-            time_cols = TimeDimensionHelper.get_time_columns(time_dimension)
-            time_attributes = [getattr(TempsDim, col) for col in time_cols]
-
-            query = self.session.query(
-                *time_attributes,
-                func.count(VisionnageFact.idVisionnage).label('view_count'),
-                func.sum(VisionnageFact.dureeVisionnage).label('total_watch_time'),
-                func.count(distinct(VisionnageFact.idUtilisateur)).label('unique_users')
-            ).join(
-                TempsDim,
-                VisionnageFact.idDate == TempsDim.idDate
-            )
-
-            if content_filter:
-                query = self.filters.apply_content_filters(query, content_filter)
-
-            query = query.group_by(*time_attributes)
-            return pd.read_sql(query.statement, self.session.bind)
-
-        except Exception as e:
-            self.session.rollback()
-            raise Exception(f"Erreur de base de données : {str(e)}")
-        finally:
-            self.session.close()
-
-    def analyze_engagement_metrics(self, user_id=None):
+    Returns:
+        dict: {
+            'total_views': (int) nombre total de contenus visionnés,
+            'avg_duration_minutes': (float) durée moyenne en minutes
+        }
+    """
+    with get_db_session() as session:
         try:
             VisionnageFact = db.models.VisionnageFact
 
-            query = self.session.query(
-                func.avg(VisionnageFact.dureeVisionnage).label('avg_duration'),
-                func.count(VisionnageFact.idVisionnage).label('total_sessions'),
-                func.count(distinct(VisionnageFact.idTitre)).label('unique_content')
+            query = session.query(
+                func.count(VisionnageFact.idVisionnage).label('total_views'),
+                func.avg(VisionnageFact.dureeVisionnage).label('avg_duration')
             )
 
             if user_id:
                 query = query.filter(VisionnageFact.idUtilisateur == user_id)
 
             result = query.one()
+
             return {
-                'avg_session_minutes': round((result.avg_duration or 0) / 60, 2),
-                'sessions_per_user': result.total_sessions or 0,
-                'content_variety': result.unique_content or 0
+                'total_views': result.total_views,
+                'avg_duration_minutes': round(result.avg_duration / 60, 2) if result.avg_duration else 0
             }
 
         except Exception as e:
-            self.session.rollback()
-            raise Exception(f"Erreur de base de données : {str(e)}")
-        finally:
-            self.session.close()
+            raise Exception(f"Database error: {str(e)}")
+
+def get_daily_viewing_activity():
+    """
+    Analyse les habitudes de visionnage par date en utilisant les champs disponibles (année, mois, jour).
+
+    Returns:
+        dict: {
+            'by_date': [
+                {'date': 'YYYY-MM-DD', 'view_count': int},
+                ...
+            ]
+        }
+    """
+    with get_db_session() as session:
+        try:
+            TempsDim = db.models.TempsDim
+            VisionnageFact = db.models.VisionnageFact
+
+            query_date = session.query(
+                func.concat(
+                    TempsDim.annee, '-',
+                    func.lpad(TempsDim.mois, 2, '0'), '-',
+                    func.lpad(TempsDim.jour, 2, '0')
+                ).label('date'),
+                func.count(VisionnageFact.idVisionnage).label('view_count')
+            ).join(VisionnageFact
+            ).group_by(TempsDim.annee, TempsDim.mois, TempsDim.jour)
+
+            return {
+                'by_date': pd.read_sql(query_date.statement, session.bind).to_dict('records')
+            }
+
+        except Exception as e:
+            raise Exception(f"Database error: {str(e)}")

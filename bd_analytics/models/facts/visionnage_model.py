@@ -12,4 +12,3 @@ class VisionnageFact(db.Model):
     idLangueDisponible = db.Column(db.Integer, db.ForeignKey('Langue_Disponible.idLangueDisponible'))
     dureeVisionnage = db.Column(db.Integer)
     nombreVues = db.Column(db.Integer, default=1)
-

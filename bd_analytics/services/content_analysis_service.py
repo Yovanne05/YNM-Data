@@ -1,84 +1,80 @@
-from operator import and_
-
+from sqlalchemy import func
 import pandas as pd
-from sqlalchemy import func, desc
-from sqlalchemy.orm import sessionmaker
-
-from ..models.dimensions.temps_model import TempsDim
-from ..models.dimensions.titre_model import TitreDim
-from ..models.dimensions.genre_model import GenreDim
-from ..models.facts.visionnage_model import VisionnageFact
-from ..models.facts.evaluation_model import EvaluationFact
+from ..utils.filters import ContentFilters
 from databases.db import db
-
 
 class ContentAnalysisService:
     def __init__(self):
-
         engine = db.get_engine(bind='entrepot')
-        session = sessionmaker(bind=engine)
-        self.session = session()
+        Session = db.sessionmaker(bind=engine)
+        self.session = Session()
+        self.filters = ContentFilters()
 
-    def get_content_performance(self, performance_metric='views', time_range=None):
-        """
-        Analyse la performance des contenus selon différents critères
-        Args:
-            performance_metric: 'views', 'watch_time', 'rating'
-            time_range: (start_date, end_date)
-        Returns:
-            DataFrame avec classement des contenus
-        """
-        metrics = {
-            'views': func.count(VisionnageFact.idVisionnage),
-            'watch_time': func.sum(VisionnageFact.dureeVisionnage),
-            'rating': func.avg(EvaluationFact.note)
-        }
+    def get_content_performance(self, metric='views', time_range=None):
+        try:
+            TitreDim = db.models.TitreDim
+            VisionnageFact = db.models.VisionnageFact
+            EvaluationFact = db.models.EvaluationFact
 
-        query = self.session.query(
-            TitreDim.nom.label('content_title'),
-            TitreDim.typeTitre.label('content_type'),
-            metrics[performance_metric].label('metric_value')
-        )
+            if metric == 'rating':
+                query = self.session.query(
+                    TitreDim.nom.label('content_title'),
+                    TitreDim.typeTitre.label('content_type'),
+                    func.count(EvaluationFact.idEvaluation).label('rating_count'),
+                    func.avg(EvaluationFact.note).label('avg_rating')
+                ).join(EvaluationFact)
+            else:
+                query = self.session.query(
+                    TitreDim.nom.label('content_title'),
+                    TitreDim.typeTitre.label('content_type'),
+                    func.count(VisionnageFact.idVisionnage).label('view_count'),
+                    func.sum(VisionnageFact.dureeVisionnage).label('total_watch_time')
+                ).join(VisionnageFact)
 
-        if performance_metric == 'rating':
-            query = query.join(EvaluationFact)
-        else:
-            query = query.join(VisionnageFact)
+            if time_range:
+                query = self.filters.apply_time_filter(query, {
+                    'date_range': time_range
+                })
 
-        if time_range:
-            query = query.join(TempsDim).filter(
-                and_(
-                    TempsDim.annee >= time_range[0].year,
-                    TempsDim.annee <= time_range[1].year
-                )
+            query = query.group_by(
+                TitreDim.idTitre,
+                TitreDim.nom,
+                TitreDim.typeTitre
             )
 
-        query = query.group_by(TitreDim.idTitre, TitreDim.nom, TitreDim.typeTitre)
-        query = query.order_by(desc('metric_value')).limit(100)
+            return pd.read_sql(query.statement, self.session.bind)
 
-        return pd.read_sql(query.statement, self.session.bind)
+        except Exception as e:
+            self.session.rollback()
+            raise Exception(f"Database error: {str(e)}")
+        finally:
+            self.session.close()
 
     def analyze_genre_performance(self):
-        """Analyse comparative des performances par genre"""
-        query = self.session.query(
-            GenreDim.nomGenre.label('genre'),
-            func.count(VisionnageFact.idVisionnage).label('view_count'),
-            func.avg(EvaluationFact.note).label('avg_rating'),
-            func.sum(VisionnageFact.dureeVisionnage).label('total_watch_time')
-        )
+        try:
+            GenreDim = db.models.GenreDim
+            VisionnageFact = db.models.VisionnageFact
+            EvaluationFact = db.models.EvaluationFact
 
-        query = query.join(
-            VisionnageFact,
-            VisionnageFact.idGenre == GenreDim.idGenre
-        ).join(
-            EvaluationFact,
-            EvaluationFact.idTitre == VisionnageFact.idTitre
-        )
+            query = self.session.query(
+                GenreDim.nomGenre.label('genre'),
+                func.count(VisionnageFact.idVisionnage).label('view_count'),
+                func.sum(VisionnageFact.dureeVisionnage).label('total_watch_time'),
+                func.avg(EvaluationFact.note).label('avg_rating')
+            ).join(
+                VisionnageFact
+            ).join(
+                EvaluationFact
+            ).group_by(
+                GenreDim.nomGenre
+            )
 
-        query = query.group_by(GenreDim.nomGenre)
-        query = query.order_by(desc('view_count'))
+            df = pd.read_sql(query.statement, self.session.bind)
+            df['watch_time_per_view'] = df['total_watch_time'] / df['view_count']
+            return df
 
-        df = pd.read_sql(query.statement, self.session.bind)
-
-        df['watch_time_per_view'] = df['total_watch_time'] / df['view_count']
-        return df
+        except Exception as e:
+            self.session.rollback()
+            raise Exception(f"Database error: {str(e)}")
+        finally:
+            self.session.close()

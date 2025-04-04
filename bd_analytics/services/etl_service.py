@@ -32,7 +32,6 @@ class ETLService:
             self._process_visionnage_data(raw_data)
         elif data_type == 'utilisateur':
             self._process_user_data(raw_data)
-        # Ajouter d'autres types au besoin
 
     def _process_visionnage_data(self, raw_data):
         """Traitement des données de visionnage"""

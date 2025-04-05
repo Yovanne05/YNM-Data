@@ -1,3 +1,3 @@
-export type TablesResponse = {
+export type TableStructure = {
   [tableName: string]: string[];
 };

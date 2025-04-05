@@ -4,7 +4,7 @@ import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { API_CONFIG } from '../config/api.config';
 import { GenericTableInterface } from './interfaces/service.interface';
-import { TablesResponse } from '../models/table_response';
+import { TableStructure } from '../models/transactionnal/table_response';
 
 @Injectable({
   providedIn: 'root',
@@ -43,8 +43,8 @@ export class GenericTableService implements GenericTableInterface {
   );
 }
 
-  getTables(): Observable<TablesResponse> {
-    return this.http.get<TablesResponse>(`${this.apiUrl}/tables`).pipe(
+  getTables(): Observable<TableStructure> {
+    return this.http.get<TableStructure>(`${this.apiUrl}/tables`).pipe(
       catchError((err) => {
         console.error('Erreur lors de la récupération des tables', err);
         throw new Error(`Une erreur est survenue: ${err}`);
@@ -52,9 +52,9 @@ export class GenericTableService implements GenericTableInterface {
     );
   }
 
-  getTableDataByTableName(table_name: string): Observable<TablesResponse> {
+  getTableDataByTableName(table_name: string): Observable<TableStructure> {
     return this.http
-      .get<TablesResponse>(`${this.apiUrl}/${table_name}/structure`)
+      .get<TableStructure>(`${this.apiUrl}/${table_name}/structure`)
       .pipe(
         catchError((err) => {
           console.error(

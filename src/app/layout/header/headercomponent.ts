@@ -13,6 +13,7 @@ export class HeaderComponent {
 
 @Input() links: { label: string, path: string}[] = [
   { label: 'Tables', path: 'tables' },
+  { label: 'Analyses', path: 'analysis' },
   { label: 'Logs', path: 'logs' },
 ]
 }

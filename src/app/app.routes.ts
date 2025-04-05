@@ -1,3 +1,4 @@
+import { AnalysisCardComponent } from './features/analysis/pages/analysis-card/analysis-card.component';
 import { Routes } from '@angular/router';
 import { NotFoundComponent } from './shared/pages/not-found/not-found.component';
 import { TableListPageComponent } from './features/tables/pages/table-list-page/table-list-page.component';
@@ -16,6 +17,10 @@ export const routes: Routes = [
   {
     path: 'tables',
     component: TableListPageComponent
+  },
+  {
+    path: 'analysis',
+    component: AnalysisCardComponent
   },
   {
     path: '**',

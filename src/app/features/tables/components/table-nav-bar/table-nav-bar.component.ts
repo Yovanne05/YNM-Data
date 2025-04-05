@@ -1,6 +1,6 @@
 import { Component, EventEmitter, inject, Output, OnInit, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { TablesResponse } from '../../../../models/table_response';
+import { TableStructure } from '../../../../models/transactionnal/table_response';
 import { TableCardComponent } from '../table-card-name/table-card-name.component';
 import { GenericTableService } from '../../../../services/generic.service';
 
@@ -13,7 +13,7 @@ import { GenericTableService } from '../../../../services/generic.service';
 })
 export class TableNavBarComponent implements OnInit {
   private readonly genericTableService = inject(GenericTableService);
-  tables$: Observable<TablesResponse> = new BehaviorSubject<TablesResponse>({});
+  tables$: Observable<TableStructure> = new BehaviorSubject<TableStructure>({});
 
   tableNames: string[] = [];
   currentPage: number = 1;
@@ -25,7 +25,7 @@ export class TableNavBarComponent implements OnInit {
   ngOnInit() {
     this.updateTablesPerPage();
     this.tables$ = this.genericTableService.getTables();
-    this.tables$.subscribe((data: TablesResponse) => {
+    this.tables$.subscribe((data: TableStructure) => {
       this.tableNames = Object.keys(data);
       this.totalPages = Math.ceil(this.tableNames.length / this.tablesPerPage);
     });

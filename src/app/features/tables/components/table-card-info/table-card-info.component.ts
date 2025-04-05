@@ -1,8 +1,8 @@
 import { Component, inject, Input, OnInit, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
-import { Table } from '../../../../models/table';
+import { Table } from '../../../../models/transactionnal/table';
 import { TableCardDataComponent } from '../table-card-data/table-card-data.component';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { TablesResponse } from '../../../../models/table_response';
+import { TableStructure } from '../../../../models/transactionnal/table_response';
 import { GenericTableService } from '../../../../services/generic.service';
 
 @Component({
@@ -19,7 +19,7 @@ export class TableCardInfoComponent implements OnInit, OnChanges {
   @Output() sendTablesData = new EventEmitter<Record<string, string>[] | null>
 
   private readonly genericTableService = inject(GenericTableService);
-  table$: Observable<TablesResponse> = new BehaviorSubject<TablesResponse>({});
+  table$: Observable<TableStructure> = new BehaviorSubject<TableStructure>({});
   table?: Table;
 
   ngOnInit(): void {
@@ -36,7 +36,7 @@ export class TableCardInfoComponent implements OnInit, OnChanges {
     this.table$ = this.genericTableService.getTableDataByTableName(this.tableName);
 
     this.table$.subscribe({
-      next: (data: TablesResponse) => {
+      next: (data: TableStructure) => {
         const firstTable = Object.entries(data)[0];
         if (firstTable) {
           const [name, columns] = firstTable;

@@ -1,5 +1,6 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
+import { ChartBaseComponent } from '../../utils/base-chart';
 
 @Component({
   selector: 'app-viewing-trends-chart',
@@ -8,31 +9,18 @@ import { Chart, registerables } from 'chart.js';
   templateUrl: './viewing-trends-chart.component.html',
   styleUrl: './viewing-trends-chart.component.scss'
 })
-export class ViewingTrendsChartComponent implements OnChanges {
-  @Input() viewingTrends: any[] = [];
-  private chart: Chart | null = null;
-
-  constructor() {
-    Chart.register(...registerables);
+export class ViewingTrendsChartComponent extends ChartBaseComponent {
+  @Input() set viewingTrends(value: any[]) {
+    this.chartData = value;
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['viewingTrends'] && this.viewingTrends) {
-      this.renderChart();
-    }
-  }
+  protected override chartId = 'viewingTrendsChart';
+  protected override chartType: 'line' = 'line';
+  protected override chartTitle = 'Tendances de visionnage';
 
-  renderChart(): void {
-    const ctx = document.getElementById('viewingTrendsChart') as HTMLCanvasElement;
-    if (!ctx) return;
-
-    if (this.chart) {
-      this.chart.destroy();
-      this.chart = null;
-    }
-
+  protected override getChartConfig(): any {
     const periodMap = new Map<string, number>();
-    this.viewingTrends.forEach(item => {
+    this.chartData.forEach(item => {
       const total = periodMap.get(item.period) || 0;
       periodMap.set(item.period, total + item.view_count);
     });
@@ -40,8 +28,8 @@ export class ViewingTrendsChartComponent implements OnChanges {
     const labels = Array.from(periodMap.keys());
     const data = Array.from(periodMap.values());
 
-    this.chart = new Chart(ctx, {
-      type: 'line',
+    return {
+      type: this.chartType,
       data: {
         labels: labels,
         datasets: [{
@@ -53,17 +41,11 @@ export class ViewingTrendsChartComponent implements OnChanges {
         }]
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          title: {
-            display: true,
-            text: 'Tendances de visionnage'
-          },
-        },
+        ...this.getDefaultOptions(),
         scales: {
+          ...this.getDefaultOptions().scales,
           y: {
-            beginAtZero: true,
+            ...this.getDefaultOptions().scales?.y,
             title: {
               display: true,
               text: 'Nombre de visionnages'
@@ -77,6 +59,6 @@ export class ViewingTrendsChartComponent implements OnChanges {
           }
         }
       }
-    });
+    };
   }
 }

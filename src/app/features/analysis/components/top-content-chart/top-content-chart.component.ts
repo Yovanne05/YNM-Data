@@ -1,5 +1,6 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
+import { ChartBaseComponent } from '../../utils/base-chart';
 
 @Component({
   selector: 'app-top-content-chart',
@@ -8,34 +9,21 @@ import { Chart, registerables } from 'chart.js';
   templateUrl: './top-content-chart.component.html',
   styleUrl: './top-content-chart.component.scss'
 })
-export class TopContentChartComponent implements OnChanges {
-  @Input() topContent: any[] = [];
-  private chart: Chart | null = null;
-
-  constructor() {
-    Chart.register(...registerables);
+export class TopContentChartComponent extends ChartBaseComponent {
+  @Input() set topContent(value: any[]) {
+    this.chartData = value;
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['topContent'] && this.topContent) {
-      this.renderChart();
-    }
-  }
+  protected override chartId = 'topContentChart';
+  protected override chartType: 'bar' = 'bar';
+  protected override chartTitle = 'Top 3 des contenus les plus regardés';
 
-  renderChart(): void {
-    const ctx = document.getElementById('topContentChart') as HTMLCanvasElement;
-    if (!ctx) return;
+  protected override getChartConfig(): any {
+    const labels = this.chartData.map(item => item.content_title);
+    const data = this.chartData.map(item => item.view_count);
 
-    if (this.chart) {
-      this.chart.destroy();
-      this.chart = null;
-    }
-
-    const labels = this.topContent.map(item => item.content_title);
-    const data = this.topContent.map(item => item.view_count);
-
-    this.chart = new Chart(ctx, {
-      type: 'bar',
+    return {
+      type: this.chartType,
       data: {
         labels: labels,
         datasets: [{
@@ -47,17 +35,11 @@ export class TopContentChartComponent implements OnChanges {
         }]
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          title: {
-            display: true,
-            text: 'Top 3 des contenus les plus regardés'
-          },
-        },
+        ...this.getDefaultOptions(),
         scales: {
+          ...this.getDefaultOptions().scales,
           y: {
-            beginAtZero: true,
+            ...this.getDefaultOptions().scales?.y,
             title: {
               display: true,
               text: 'Nombre de visionnages'
@@ -65,6 +47,6 @@ export class TopContentChartComponent implements OnChanges {
           }
         }
       }
-    });
+    };
   }
 }

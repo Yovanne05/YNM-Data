@@ -1,5 +1,6 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
+import { ChartBaseComponent } from '../../utils/base-chart';
 
 @Component({
   selector: 'app-content-performance-chart',
@@ -8,34 +9,21 @@ import { Chart, registerables } from 'chart.js';
   templateUrl: './content-performance-chart.component.html',
   styleUrl: './content-performance-chart.component.scss'
 })
-export class ContentPerformanceChartComponent implements OnChanges {
-  @Input() contentPerformance: any[] = [];
-  private chart: Chart | null = null;
-
-  constructor() {
-    Chart.register(...registerables);
+export class ContentPerformanceChartComponent extends ChartBaseComponent {
+  @Input() set contentPerformance(value: any[]) {
+    this.chartData = value;
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['contentPerformance'] && this.contentPerformance) {
-      this.renderChart();
-    }
-  }
+  protected override chartId = 'contentPerformanceChart';
+  protected override chartType: 'pie' = 'pie';
+  protected override chartTitle = 'Performance du contenu';
 
-  renderChart(): void {
-    const ctx = document.getElementById('contentPerformanceChart') as HTMLCanvasElement;
-    if (!ctx) return;
+  protected override getChartConfig(): any {
+    const labels = this.chartData.map(item => item.content_title);
+    const data = this.chartData.map(item => item.view_count);
 
-    if (this.chart) {
-      this.chart.destroy();
-      this.chart = null;
-    }
-
-    const labels = this.contentPerformance.map(item => item.content_title);
-    const data = this.contentPerformance.map(item => item.view_count);
-
-    this.chart = new Chart(ctx, {
-      type: 'pie',
+    return {
+      type: this.chartType,
       data: {
         labels: labels,
         datasets: [{
@@ -59,18 +47,12 @@ export class ContentPerformanceChartComponent implements OnChanges {
         }]
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
+        ...this.getDefaultOptions(),
         plugins: {
-          title: {
-            display: true,
-            text: 'Performance du contenu'
-          },
+          ...this.getDefaultOptions().plugins,
           tooltip: {
             callbacks: {
-              label: function (tooltipItem: any) {
-                return `${tooltipItem.label}: ${tooltipItem.raw} vues`;
-              }
+              label: (tooltipItem: any) => `${tooltipItem.label}: ${tooltipItem.raw} vues`
             }
           },
           legend: {
@@ -78,6 +60,6 @@ export class ContentPerformanceChartComponent implements OnChanges {
           }
         }
       }
-    });
+    };
   }
 }

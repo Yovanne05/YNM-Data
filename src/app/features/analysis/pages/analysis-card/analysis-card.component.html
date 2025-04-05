@@ -1,29 +1,5 @@
-<div class="carousel-container">
-  <button class="carousel-button prev" (click)="prevSlide()">&#10094;</button>
-
-  <div class="carousel-slides">
-    @for (slide of slides; track $index) {
-      <div class="carousel-slide" [class.hidden]="currentSlide !== $index">
-        @switch ($index) {
-          @case (0) {
-            <app-top-content-chart [topContent]="topContent" />
-          }
-          @case (1) {
-            <app-content-performance-chart [contentPerformance]="contentPerformance" />
-          }
-          @case (2) {
-            <app-viewing-trends-chart [viewingTrends]="viewingTrends" />
-          }
-          @case (3) {
-            <app-daily-activity-chart [dailyActivity]="dailyActivity" />
-          }
-          @case (4) {
-            <app-user-engagement-chart [userEngagement]="userEngagement" />
-          }
-        }
-      </div>
-    }
-  </div>
-
-  <button class="carousel-button next" (click)="nextSlide()">&#10095;</button>
-</div>
+<app-top-content-chart [topContent]="topContent" />
+<app-content-performance-chart [contentPerformance]="contentPerformance" />
+<app-viewing-trends-chart [viewingTrends]="viewingTrends" />
+<app-daily-activity-chart [dailyActivity]="dailyActivity" />
+<app-user-engagement-chart [userEngagement]="userEngagement" />

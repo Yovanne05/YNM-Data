@@ -1,5 +1,6 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
+import { ChartBaseComponent } from '../../utils/base-chart';
 
 @Component({
   selector: 'app-user-engagement-chart',
@@ -8,36 +9,22 @@ import { Chart, registerables } from 'chart.js';
   templateUrl: './user-engagement-chart.component.html',
   styleUrl: './user-engagement-chart.component.scss'
 })
-export class UserEngagementChartComponent implements OnChanges {
-  @Input() userEngagement: any;
-  private chart: Chart | null = null;
-
-  constructor() {
-    Chart.register(...registerables);
+export class UserEngagementChartComponent extends ChartBaseComponent {
+  @Input() set userEngagement(value: any) {
+    this.chartData = value?.users || [];
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['userEngagement'] && this.userEngagement) {
-      this.renderChart();
-    }
-  }
+  protected override chartId = 'userEngagementChart';
+  protected override chartType: 'bar' | 'line' | 'pie' | 'doughnut' = 'bar';
+  protected override chartTitle = 'Engagement par utilisateur';
 
-  renderChart(): void {
-    const ctx = document.getElementById('userEngagementChart') as HTMLCanvasElement;
-    if (!ctx) return;
+  protected override getChartConfig(): any {
+    const labels = this.chartData.map((user: any) => `Utilisateur ${user.user_id}`);
+    const viewCounts = this.chartData.map((user: any) => user.total_views);
+    const avgDurations = this.chartData.map((user: any) => parseFloat(user.avg_duration_minutes));
 
-    if (this.chart) {
-      this.chart.destroy();
-      this.chart = null;
-    }
-
-    const users = this.userEngagement?.users || [];
-    const labels = users.map((user: { user_id: any; }) => `Utilisateur ${user.user_id}`);
-    const viewCounts = users.map((user: { total_views: any; }) => user.total_views);
-    const avgDurations = users.map((user: { avg_duration_minutes: string; }) => parseFloat(user.avg_duration_minutes));
-
-    this.chart = new Chart(ctx, {
-      type: 'bar',
+    return {
+      type: this.chartType,
       data: {
         labels: labels,
         datasets: [
@@ -58,24 +45,19 @@ export class UserEngagementChartComponent implements OnChanges {
         ]
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
+        ...this.getDefaultOptions(),
         plugins: {
-          title: {
-            display: true,
-            text: 'Engagement par utilisateur'
-          },
+          ...this.getDefaultOptions().plugins,
           tooltip: {
             callbacks: {
-              label: function(tooltipItem: any) {
-                return `${tooltipItem.dataset.label}: ${tooltipItem.raw}`;
-              }
+              label: (tooltipItem: any) => `${tooltipItem.dataset.label}: ${tooltipItem.raw}`
             }
           }
         },
         scales: {
+          ...this.getDefaultOptions().scales,
           y: {
-            beginAtZero: true,
+            ...this.getDefaultOptions().scales?.y,
             title: {
               display: true,
               text: 'Valeur'
@@ -89,6 +71,6 @@ export class UserEngagementChartComponent implements OnChanges {
           }
         }
       }
-    });
+    };
   }
 }

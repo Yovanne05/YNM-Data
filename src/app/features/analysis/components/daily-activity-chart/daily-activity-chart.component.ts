@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Chart} from 'chart.js';
+import { ChartBaseComponent } from '../../utils/base-chart';
 
 @Component({
   selector: 'app-daily-activity-chart',
@@ -8,27 +9,22 @@ import { Chart} from 'chart.js';
   templateUrl: './daily-activity-chart.component.html',
   styleUrl: './daily-activity-chart.component.scss'
 })
-export class DailyActivityChartComponent implements OnInit {
-  @Input() dailyActivity: any[] = [];
-
-  ngOnInit(): void {
-    this.renderChart();
+export class DailyActivityChartComponent extends ChartBaseComponent {
+  @Input() set dailyActivity(data: any[]) {
+    this.chartData = data;
   }
 
-  renderChart(): void {
-    const ctx = document.getElementById('dailyActivityChart') as HTMLCanvasElement;
-    if (!ctx) return;
 
-    const existingChart = Chart.getChart(ctx);
-    if (existingChart) {
-      existingChart.destroy();
-    }
+  protected chartId = 'dailyActivityChart';
+  protected chartType = 'line' as const;
+  protected chartTitle = 'Activité quotidienne des utilisateurs';
 
-    const labels = this.dailyActivity.map(item => item.date);
-    const data = this.dailyActivity.map(item => item.view_count);
+  protected getChartConfig() {
+    const labels = this.chartData.map(item => item.date);
+    const data = this.chartData.map(item => item.view_count);
 
-    new Chart(ctx, {
-      type: 'line',
+    return {
+      type: this.chartType,
       data: {
         labels: labels,
         datasets: [{
@@ -39,31 +35,7 @@ export class DailyActivityChartComponent implements OnInit {
           tension: 0.1
         }]
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          title: {
-            display: true,
-            text: 'Activité quotidienne des utilisateurs'
-          },
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            title: {
-              display: true,
-              text: 'Nombre de vues'
-            }
-          },
-          x: {
-            title: {
-              display: true,
-              text: 'Date'
-            }
-          }
-        }
-      }
-    });
+      options: this.getDefaultOptions()
+    };
   }
 }

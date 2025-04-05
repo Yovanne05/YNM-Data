@@ -56,7 +56,6 @@ export class AnalysisCardComponent implements OnInit {
     this.statsService.getContentPerformance().subscribe({
       next: (response) => {
         this.contentPerformance = response.data || [];
-        console.log(this.contentPerformance);
       },
       error: (err) => console.error('Error loading content performance', err)
     });
@@ -80,7 +79,6 @@ export class AnalysisCardComponent implements OnInit {
       },
       error: (err) => console.error('Error loading viewing trends', err)
     });
-    console.log(this.viewingTrends);
   }
 
   loadDailyActivity(): void {
@@ -92,7 +90,7 @@ export class AnalysisCardComponent implements OnInit {
     });
 
   }
-  
+
   nextSlide(): void {
     this.currentSlide = (this.currentSlide + 1) % this.slides.length;
   }

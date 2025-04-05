@@ -1,5 +1,35 @@
-<app-top-content-chart [topContent]="topContent" />
-<app-content-performance-chart [contentPerformance]="contentPerformance" />
-<app-viewing-trends-chart [viewingTrends]="viewingTrends" />
-<app-daily-activity-chart [dailyActivity]="dailyActivity" />
-<app-user-engagement-chart [userEngagement]="userEngagement" />
+<div class="dashboard-container">
+  <h1>Data Analytics Dashboard</h1>
+
+  <div class="grid-container">
+    <div class="card full-width-card">
+      <div class="chart-container">
+        <app-top-content-chart [topContent]="topContent" />
+      </div>
+    </div>
+
+    <div class="card uniform-card">
+      <div class="chart-container">
+        <app-content-performance-chart [contentPerformance]="contentPerformance" />
+      </div>
+    </div>
+
+    <div class="card uniform-card">
+      <div class="chart-container">
+        <app-viewing-trends-chart [viewingTrends]="viewingTrends" />
+      </div>
+    </div>
+
+    <div class="card uniform-card">
+      <div class="chart-container">
+        <app-user-engagement-chart [userEngagement]="userEngagement" />
+      </div>
+    </div>
+
+    <div class="card full-width-card">
+      <div class="chart-container">
+        <app-daily-activity-chart [dailyActivity]="dailyActivity" />
+      </div>
+    </div>
+  </div>
+</div>

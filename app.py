@@ -28,8 +28,10 @@ from bd_transactional.controllers.utilisateur_controller import utilisateur_cont
 from bd_analytics.controllers.content_analysis_controller import content_analysis_controller
 from bd_analytics.controllers.comportement_analysis_controller import behavior_analysis_controller
 from bd_analytics.controllers.temporal_analysis_controller import temporal_analysis_controller
+from bd_analytics.controllers.etl_controller import etl_controller
 
 blueprints = [
+    etl_controller,
     content_analysis_controller,
     behavior_analysis_controller,
     abonnement_controller,

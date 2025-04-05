@@ -1,6 +1,6 @@
 from sqlalchemy import func
 from databases.db import db
-from databases.database_session import get_db_session
+from databases.database_session import get_db_entrepot_session
 from ..services.olap_service import OLAPService
 
 
@@ -22,7 +22,7 @@ def get_viewing_analytics():
             ]
         }
     """
-    with get_db_session() as session:
+    with get_db_entrepot_session() as session:
         try:
             olap = OLAPService(session)
 
@@ -87,7 +87,7 @@ def get_daily_viewing_activity():
             ]
         }
     """
-    with get_db_session() as session:
+    with get_db_entrepot_session() as session:
         try:
             olap = OLAPService(session)
 

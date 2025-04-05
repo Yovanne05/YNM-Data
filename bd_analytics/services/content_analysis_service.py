@@ -1,6 +1,6 @@
 from sqlalchemy import func
 from databases.db import db
-from databases.database_session import get_db_session
+from databases.database_session import get_db_entrepot_session
 from ..services.olap_service import OLAPService
 
 
@@ -19,7 +19,7 @@ def get_content_performance(time_range=None, time_granularity='month'):
             - content_type: Type de contenu
             - view_count: Nombre de visionnages
     """
-    with get_db_session() as session:
+    with get_db_entrepot_session() as session:
         olap = OLAPService(session)
 
         time_hierarchy = {
@@ -83,7 +83,7 @@ def get_top_content(top_n=10, time_range=None, content_type=None):
     Returns:
         pd.DataFrame des top contenus
     """
-    with get_db_session() as session:
+    with get_db_entrepot_session() as session:
         df = get_content_performance(time_range=time_range)
 
         if content_type:

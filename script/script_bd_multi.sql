@@ -1,21 +1,25 @@
 CREATE SCHEMA IF NOT EXISTS Entrepot_Netflix;
 USE Entrepot_Netflix;
 
-CREATE TABLE Utilisateur (
-    idUtilisateur INT AUTO_INCREMENT PRIMARY KEY,
-    nom VARCHAR(100),
-    prenom VARCHAR(100),
-    age INT CHECK (age >= 0),
-    paysResidence VARCHAR(100),
-    email VARCHAR(255) UNIQUE NOT NULL,
-    numero VARCHAR(15) UNIQUE NOT NULL,
+CREATE TABLE Utilisateur
+(
+    idUtilisateur    INT AUTO_INCREMENT PRIMARY KEY,
+    nom              VARCHAR(100),
+    prenom           VARCHAR(100),
+    age              INT CHECK (age >= 0),
+    paysResidence    VARCHAR(100),
+    email            VARCHAR(255) UNIQUE NOT NULL,
+    numero           VARCHAR(15) UNIQUE  NOT NULL,
     statutAbonnement VARCHAR(20) DEFAULT 'Actif' CHECK (statutAbonnement IN ('Actif', 'Résilié'))
+)
 ;
 
-CREATE TABLE Abonnement (
-    idAbonnement INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE Abonnement
+(
+    idAbonnement   INT AUTO_INCREMENT PRIMARY KEY,
     typeAbonnement VARCHAR(50),
-    prix DECIMAL(6,2)
+    prix           DECIMAL(6, 2)
+)
 ;
 
 -- Table Temps
@@ -25,10 +29,13 @@ CREATE TABLE Temps (
     mois INT,
     annee INT,
     trimestre INT
+    jour_semaine INT,
+    est_weekend BOOLEAN,
 );
 
 CREATE TABLE Titre (
     idTitre INT AUTO_INCREMENT PRIMARY KEY,
+    idGenre,
     nom VARCHAR(255),
     annee INT,
     iddateDebutLicence INT,
@@ -37,7 +44,9 @@ CREATE TABLE Titre (
     typeTitre VARCHAR(10) CHECK (typeTitre IN ('film', 'série')),
     description TEXT,
     FOREIGN KEY (iddateDebutLicence) REFERENCES Temps(idDate) ON DELETE SET NULL,
-    FOREIGN KEY (iddateFinLicence) REFERENCES Temps(idDate) ON DELETE SET NULL
+    FOREIGN KEY (iddateFinLicence) REFERENCES Temps(idDate) ON DELETE SET NULL,
+    FOREIGN KEY (idGenre) REFERENCES Genre(idGenre) ON DELETE SET NULL;
+
 );
 
 -- Table Serie

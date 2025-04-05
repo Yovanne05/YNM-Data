@@ -1,5 +1,5 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { Chart, registerables } from 'chart.js';
+import { Component, Input, OnInit } from '@angular/core';
+import { Chart} from 'chart.js';
 
 @Component({
   selector: 'app-daily-activity-chart',
@@ -8,33 +8,26 @@ import { Chart, registerables } from 'chart.js';
   templateUrl: './daily-activity-chart.component.html',
   styleUrl: './daily-activity-chart.component.scss'
 })
-export class DailyActivityChartComponent implements OnChanges {
+export class DailyActivityChartComponent implements OnInit {
   @Input() dailyActivity: any[] = [];
-  private chart: Chart | null = null;
 
-  constructor() {
-    Chart.register(...registerables);
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['dailyActivity'] && this.dailyActivity) {
-      this.renderChart();
-    }
+  ngOnInit(): void {
+    this.renderChart();
   }
 
   renderChart(): void {
     const ctx = document.getElementById('dailyActivityChart') as HTMLCanvasElement;
     if (!ctx) return;
 
-    if (this.chart) {
-      this.chart.destroy();
-      this.chart = null;
+    const existingChart = Chart.getChart(ctx);
+    if (existingChart) {
+      existingChart.destroy();
     }
 
     const labels = this.dailyActivity.map(item => item.date);
     const data = this.dailyActivity.map(item => item.view_count);
 
-    this.chart = new Chart(ctx, {
+    new Chart(ctx, {
       type: 'line',
       data: {
         labels: labels,

@@ -72,6 +72,9 @@ export class ContentPerformanceChartComponent implements OnChanges {
                 return `${tooltipItem.label}: ${tooltipItem.raw} vues`;
               }
             }
+          },
+          legend: {
+            display: false
           }
         }
       }

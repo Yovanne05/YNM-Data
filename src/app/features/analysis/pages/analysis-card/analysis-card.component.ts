@@ -28,6 +28,9 @@ export class AnalysisCardComponent implements OnInit {
   userEngagement: any;
   dailyActivity: any[] = [];
 
+  currentSlide = 0;
+  slides = [0, 1, 2, 3, 4];
+
   constructor(private statsService: StatsService) {}
 
 
@@ -37,8 +40,6 @@ export class AnalysisCardComponent implements OnInit {
     this.loadViewingTrends();
     this.loadDailyActivity();
     this.loadUserEngagement();
-    
-    Chart.register(...registerables);
   }
 
   loadUserEngagement(): void {
@@ -90,5 +91,17 @@ export class AnalysisCardComponent implements OnInit {
       error: (err) => console.error('Error loading daily activity', err)
     });
 
+  }
+  
+  nextSlide(): void {
+    this.currentSlide = (this.currentSlide + 1) % this.slides.length;
+  }
+
+  prevSlide(): void {
+    this.currentSlide = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
+  }
+
+  goToSlide(index: number): void {
+    this.currentSlide = index;
   }
 }

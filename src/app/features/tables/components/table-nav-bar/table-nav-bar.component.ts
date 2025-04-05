@@ -2,7 +2,7 @@ import { Component, EventEmitter, inject, Output, OnInit, OnDestroy } from '@ang
 import { BehaviorSubject, Observable } from 'rxjs';
 import { TableStructure } from '../../../../models/transactionnal/table_response';
 import { TableCardComponent } from '../table-card-name/table-card-name.component';
-import { GenericTableService } from '../../../../services/generic.service';
+import { GenericTableService } from '../../../../services/transactional/generic.service';
 
 @Component({
   selector: 'app-table-nav-bar',

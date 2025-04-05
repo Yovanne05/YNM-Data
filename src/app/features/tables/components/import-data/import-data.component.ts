@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { CsvImportService } from '../../../../services/csv-import.service';
+import { CsvImportService } from '../../../../services/transactional/csv-import.service';
 
 @Component({
   selector: 'app-import-data',
@@ -12,7 +12,7 @@ import { CsvImportService } from '../../../../services/csv-import.service';
 export class ImportDataComponent {
   fichierCSV!: File;
   private readonly csvImportService = inject(CsvImportService);
-  
+
   dataForm = new FormGroup({
     fichierImport: new FormControl('', [Validators.required]),
   })

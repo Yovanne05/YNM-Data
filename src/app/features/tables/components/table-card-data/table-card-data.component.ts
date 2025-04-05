@@ -3,8 +3,8 @@ import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { TableFiltersComponent } from '../table-filters/table-filters.component';
 import { TableHeaderComponent } from '../table-header/table-header.component';
 import { TableRowComponent } from '../table-row/table-row.component';
-import { FilterRegistryService } from '../../../../services/filter.registry.service';
-import { GenericTableService } from '../../../../services/generic.service';
+import { FilterRegistryService } from '../../../../services/transactional/filter.registry.service';
+import { GenericTableService } from '../../../../services/transactional/generic.service';
 import { Subscription } from 'rxjs';
 
 @Component({

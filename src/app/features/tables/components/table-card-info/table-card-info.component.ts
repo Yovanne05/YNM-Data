@@ -3,7 +3,7 @@ import { Table } from '../../../../models/transactionnal/table';
 import { TableCardDataComponent } from '../table-card-data/table-card-data.component';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { TableStructure } from '../../../../models/transactionnal/table_response';
-import { GenericTableService } from '../../../../services/generic.service';
+import { GenericTableService } from '../../../../services/transactional/generic.service';
 
 @Component({
   selector: 'app-table-card-info',

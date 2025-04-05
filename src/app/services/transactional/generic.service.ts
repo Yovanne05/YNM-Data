@@ -2,14 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { API_CONFIG } from '../config/api.config';
-import { GenericTableInterface } from './interfaces/service.interface';
-import { TableStructure } from '../models/transactionnal/table_response';
+import { API_CONFIG } from '../../config/api.config';
+import { TableStructure } from '../../models/transactionnal/table_response';
 
 @Injectable({
   providedIn: 'root',
 })
-export class GenericTableService implements GenericTableInterface {
+export class GenericTableService {
   private apiUrl = API_CONFIG.API_URL;
 
   constructor(private http: HttpClient) {}

@@ -1,6 +1,6 @@
 import { Component, inject, Input } from '@angular/core';
 import { TableCardDataComponent } from '../table-card-data/table-card-data.component';
-import { CsvExtractService } from '../../../../services/csv-extract.service';
+import { CsvExtractService } from '../../../../services/transactional/csv-extract.service';
 
 @Component({
   selector: 'app-export-data',
@@ -29,5 +29,5 @@ export class ExportDataComponent {
       this.showErrorMessage = true;
     }
   }
-  
+
 }

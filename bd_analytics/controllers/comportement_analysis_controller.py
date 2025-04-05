@@ -2,16 +2,16 @@ from flask import Blueprint, jsonify, Response
 from typing import Dict, Any, Tuple
 from ..services.comportement_analysis_service import get_daily_viewing_activity, get_viewing_analytics
 
-behavior_analysis_blueprint = Blueprint('behavior_analysis', __name__, url_prefix='/behavior-analysis')
+behavior_analysis_controller = Blueprint('behavior_analysis', __name__, url_prefix='/behavior-analysis')
 
-@behavior_analysis_blueprint.route('/engagement/<int:user_id>', methods=['GET'])
+@behavior_analysis_controller.route('/engagement/<int:user_id>', methods=['GET'])
 def user_engagement(user_id: int) -> Tuple[Response, int]:
     try:
-        metrics = get_viewing_analytics(user_id=user_id)
+        viewving_analysis = get_viewing_analytics()
 
         response_data: Dict[str, Any] = {
             'success': True,
-            'data': metrics,
+            'data': viewving_analysis,
             'user_id': user_id
         }
         return jsonify(response_data), 200
@@ -24,14 +24,14 @@ def user_engagement(user_id: int) -> Tuple[Response, int]:
         return jsonify(error_response), 400
 
 
-@behavior_analysis_blueprint.route('/viewing-activity', methods=['GET'])
+@behavior_analysis_controller.route('/viewing-activity', methods=['GET'])
 def daily_viewing_activity() -> Tuple[Response, int]:
     try:
-        patterns = get_daily_viewing_activity()
+        activity = get_daily_viewing_activity()
 
         response_data: Dict[str, Any] = {
             'success': True,
-            'data': patterns
+            'data': activity
         }
         return jsonify(response_data), 200
 

@@ -1,46 +1,58 @@
 from sqlalchemy import func
-import pandas as pd
 from databases.db import db
 from databases.database_session import get_db_session
+from ..services.olap_service import OLAPService
+
 
 def get_viewing_analytics(user_id=None):
     """
-    Mesure l'activité de visionnage d'un utilisateur ou de l'ensemble des utilisateurs
+    Mesure l'activité de visionnage en utilisant OLAPService
 
     Args:
-        user_id (int, optional): ID utilisateur spécifique. None pour une analyse globale.
+        user_id (int, optional): ID utilisateur spécifique. None pour analyse globale.
 
     Returns:
         dict: {
-            'total_views': (int) nombre total de contenus visionnés,
+            'total_views': (int) nombre total de visionnages,
             'avg_duration_minutes': (float) durée moyenne en minutes
         }
     """
     with get_db_session() as session:
         try:
-            VisionnageFact = db.models.VisionnageFact
+            olap = OLAPService(session)
 
-            query = session.query(
-                func.count(VisionnageFact.idVisionnage).label('total_views'),
-                func.avg(VisionnageFact.dureeVisionnage).label('avg_duration')
-            )
+            dimensions = []
+            measures = ['idVisionnage', 'dureeVisionnage']
+            filters = {}
 
             if user_id:
-                query = query.filter(VisionnageFact.idUtilisateur == user_id)
+                filters = {'idUtilisateur': user_id}
 
-            result = query.one()
+            result = olap.scoping(
+                fact_table=db.models.VisionnageFact,
+                dimensions=dimensions,
+                measures=measures,
+                filters=filters,
+                aggregation_funcs={
+                    'idVisionnage': func.count,
+                    'dureeVisionnage': func.avg
+                }
+            )
 
-            return {
-                'total_views': result.total_views,
-                'avg_duration_minutes': round(result.avg_duration / 60, 2) if result.avg_duration else 0
-            }
+            if not result.empty:
+                return {
+                    'total_views': int(result.iloc[0]['aggregated_idVisionnage']),
+                    'avg_duration_minutes': round(result.iloc[0]['aggregated_dureeVisionnage'] / 60, 2)
+                }
+            return {'total_views': 0, 'avg_duration_minutes': 0}
 
         except Exception as e:
             raise Exception(f"Database error: {str(e)}")
 
+
 def get_daily_viewing_activity():
     """
-    Analyse les habitudes de visionnage par date en utilisant les champs disponibles (année, mois, jour).
+    Analyse des habitudes de visionnage par date avec OLAPService
 
     Returns:
         dict: {
@@ -52,22 +64,31 @@ def get_daily_viewing_activity():
     """
     with get_db_session() as session:
         try:
-            TempsDim = db.models.TempsDim
-            VisionnageFact = db.models.VisionnageFact
+            olap = OLAPService(session)
 
-            query_date = session.query(
-                func.concat(
-                    TempsDim.annee, '-',
-                    func.lpad(TempsDim.mois, 2, '0'), '-',
-                    func.lpad(TempsDim.jour, 2, '0')
-                ).label('date'),
-                func.count(VisionnageFact.idVisionnage).label('view_count')
-            ).join(VisionnageFact
-            ).group_by(TempsDim.annee, TempsDim.mois, TempsDim.jour)
+            result = olap.scoping(
+                fact_table=db.models.VisionnageFact,
+                dimensions=[
+                    db.models.TempsDim.annee,
+                    db.models.TempsDim.mois,
+                    db.models.TempsDim.jour
+                ],
+                measures=['idVisionnage'],
+                aggregation_funcs={'idVisionnage': func.count}
+            )
 
-            return {
-                'by_date': pd.read_sql(query_date.statement, session.bind).to_dict('records')
-            }
+            if not result.empty:
+                result['date'] = (
+                        result['annee'].astype(str) + '-' +
+                        result['mois'].astype(str).str.zfill(2) + '-' +
+                        result['jour'].astype(str).str.zfill(2)
+                )
+                return {
+                    'by_date': result[['date', 'aggregated_idVisionnage']]
+                    .rename(columns={'aggregated_idVisionnage': 'view_count'})
+                    .to_dict('records')
+                }
+            return {'by_date': []}
 
         except Exception as e:
             raise Exception(f"Database error: {str(e)}")

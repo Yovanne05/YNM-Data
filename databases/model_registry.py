@@ -1,6 +1,8 @@
+# databases/model_registry.py
 class ModelRegistry:
-    def __init__(self):
+    def __init__(self, db):
         self._models = {}
+        self.db = db
 
     def register(self, name, model):
         self._models[name] = model

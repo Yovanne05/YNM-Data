@@ -3,13 +3,12 @@ from datetime import datetime
 from typing import Tuple, Optional, Any, Dict
 from ..services.content_analysis_service import get_content_performance, get_top_content
 
-content_analysis_blueprint = Blueprint('content_analysis', __name__, url_prefix='/content-analysis')
+content_analysis_controller = Blueprint('content_analysis', __name__, url_prefix='/content-analysis')
 
 
-@content_analysis_blueprint.route('/performance', methods=['GET'])
+@content_analysis_controller.route('/performance', methods=['GET'])
 def content_performance() -> Tuple[Response, int]:
     try:
-        # Récupération et validation des paramètres
         date_debut: Optional[str] = request.args.get('date_debut')
         date_fin: Optional[str] = request.args.get('date_fin')
 
@@ -44,7 +43,7 @@ def content_performance() -> Tuple[Response, int]:
         return jsonify(error_data), 400
 
 
-@content_analysis_blueprint.route('/top-content', methods=['GET'])
+@content_analysis_controller.route('/top-content', methods=['GET'])
 def top_content() -> Tuple[Response, int]:
     try:
         top_n: int = int(request.args.get('top_n', default=10))

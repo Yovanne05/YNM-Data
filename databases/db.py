@@ -16,7 +16,7 @@ from bd_analytics.models.facts.evaluation_model import EvaluationFact
 from bd_analytics.models.facts.paiement_model import PaiementFact
 from bd_analytics.models.facts.visionnage_model import VisionnageFact
 
-db.models = ModelRegistry()
+db.models = ModelRegistry(db)
 
 db.models.register('AbonnementDim', AbonnementDim)
 db.models.register('GenreDim', GenreDim)

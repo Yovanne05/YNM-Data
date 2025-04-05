@@ -1,58 +1,57 @@
-from datetime import datetime
-import pandas as pd
 from sqlalchemy import func
 from databases.db import db
 from databases.database_session import get_db_session
+from ..services.olap_service import OLAPService
+
 
 def analyze_views_over_time(period='month'):
-    """
-    Analyse des visionnages dans le temps avec le nom des séries/films.
-
-    Args:
-        period (str): Niveau d'agrégation ('day', 'month' ou 'year'). Défaut: 'month'
-
-    Returns:
-        pd.DataFrame: Colonnes:
-            - period: Période temporelle
-            - title: Nom du contenu
-            - view_count: Nombre de visionnages
-
-    Raises:
-        Exception: Erreurs de base de données
-    """
     with get_db_session() as session:
         try:
-            if period == 'month':
-                time_col = func.concat(
-                    db.models.TempsDim.annee, '-',
-                    func.lpad(db.models.TempsDim.mois, 2, '0')
-                )
-            elif period == 'year':
-                time_col = func.cast(db.models.TempsDim.annee, db.String)
-            else:
-                time_col = func.concat(
-                    db.models.TempsDim.annee, '-',
-                    func.lpad(db.models.TempsDim.mois, 2, '0'), '-',
-                    func.lpad(db.models.TempsDim.jour, 2, '0')
-                )
+            olap = OLAPService(session)
 
-            query = session.query(
-                time_col.label('period'),
-                db.models.TitreDim.nom.label('title'),
-                func.count(db.models.VisionnageFact.idVisionnage).label('view_count')
-            ).join(
-                db.models.TempsDim,
-                db.models.VisionnageFact.idDate == db.models.TempsDim.idDate
-            ).join(
-                db.models.TitreDim,
-                db.models.VisionnageFact.idTitre == db.models.TitreDim.idTitre
-            ).group_by(
-                time_col, db.models.TitreDim.nom
-            ).order_by(
-                time_col, db.models.TitreDim.nom
+            dimensions = []
+            if period == 'year':
+                dimensions = [db.models.TempsDim.annee]
+            elif period == 'month':
+                dimensions = [db.models.TempsDim.annee, db.models.TempsDim.mois]
+            else:  # day
+                dimensions = [db.models.TempsDim.annee, db.models.TempsDim.mois, db.models.TempsDim.jour]
+
+            dimensions.append(db.models.TitreDim.nom)
+
+            result = olap.scoping(
+                fact_table=db.models.VisionnageFact,
+                dimensions=dimensions,
+                measures=['dureeVisionnage'],
+                aggregation_funcs={'dureeVisionnage': func.sum}
             )
 
-            return pd.read_sql(query.statement, session.bind)
+            result = result.rename(columns={
+                'annee': 'year',
+                'mois': 'month',
+                'jour': 'day',
+                'nom': 'title',
+                'aggregated_dureeVisionnage': 'total_duration'
+            })
+
+            result['view_count'] = 1
+
+            if period == 'day':
+                result['period'] = (result['year'].astype(str) + '-' +
+                                    result['month'].astype(str).str.zfill(2) + '-' +
+                                    result['day'].astype(str).str.zfill(2))
+            elif period == 'month':
+                result['period'] = (result['year'].astype(str) + '-' +
+                                    result['month'].astype(str).str.zfill(2))
+            else:
+                result['period'] = result['year'].astype(str)
+
+            final_result = result.groupby(['period', 'title']).agg({
+                'view_count': 'sum',
+                'total_duration': 'sum'
+            }).reset_index()
+
+            return final_result.sort_values(['period', 'title'])
 
         except Exception as e:
             raise Exception(f"Database error: {str(e)}")

@@ -16,7 +16,7 @@ export class TopContentChartComponent extends ChartBaseComponent {
 
   protected override chartId = 'topContentChart';
   protected override chartType: 'bar' = 'bar';
-  protected override chartTitle = 'Top 3 des contenus les plus regardés';
+  protected override chartTitle = 'Top 5 des contenus les plus regardés';
 
   protected override getChartConfig(): any {
     const labels = this.chartData.map(item => item.content_title);

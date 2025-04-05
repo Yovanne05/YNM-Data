@@ -7,6 +7,7 @@ import { UserEngagementChartComponent } from '../../components/user-engagement-c
 import { ContentAnalysisService } from '../../../../services/analysis/content.analysis.service';
 import { TemporalAnalysisService } from '../../../../services/analysis/temporal.analysis.service';
 import { BehaviorAnalysisService } from '../../../../services/analysis/behavior.analysis.service';
+import { EtlService } from '../../../../services/shared/etl.service';
 
 @Component({
   selector: 'app-stats-dashboard',
@@ -27,11 +28,16 @@ export class AnalysisCardComponent implements OnInit {
   viewingTrends: any[] = [];
   userEngagement: any;
   dailyActivity: any[] = [];
+  isEtlRunning = false;
+  etlMessage = '';
+  showEtlMessage = false;
+  isEtlError = false;
 
   constructor(
     private contentAnalysisService: ContentAnalysisService,
     private temporalAnalysisService: TemporalAnalysisService,
-    private behaviorAnalysisService: BehaviorAnalysisService
+    private behaviorAnalysisService: BehaviorAnalysisService,
+    private etlService: EtlService
   ) {}
 
   ngOnInit(): void {
@@ -40,6 +46,33 @@ export class AnalysisCardComponent implements OnInit {
     this.loadViewingTrends();
     this.loadDailyActivity();
     this.loadUserEngagement();
+  }
+
+  runETLProcess(): void {
+    this.isEtlRunning = true;
+    this.showEtlMessage = false;
+
+    this.etlService.runETL().subscribe({
+      next: (response) => {
+        this.showEtlNotification('ETL process completed successfully!', false);
+        this.isEtlRunning = false;
+        this.ngOnInit();
+      },
+      error: (err) => {
+        this.showEtlNotification(`ETL process failed: ${err.error?.error || 'Unknown error'}`, true);
+        this.isEtlRunning = false;
+      }
+    });
+  }
+
+  private showEtlNotification(message: string, isError: boolean): void {
+    this.etlMessage = message;
+    this.isEtlError = isError;
+    this.showEtlMessage = true;
+
+    setTimeout(() => {
+      this.showEtlMessage = false;
+    }, 5000);
   }
 
   loadUserEngagement(): void {

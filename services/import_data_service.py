@@ -24,7 +24,7 @@ from services.generic_service import GenericService
 
 MODELS = {
     "abonnement": Abonnement(),
-    "acteur": Acteur(),
+    "acteur": Acteur(), 
     "acting": Acting(),
     "evaluation": Evaluation(),
     "film": Film(),

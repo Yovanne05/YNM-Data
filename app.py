@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from config import Config
+from controllers.initialise_db_controller import initialise_db_controller
 from databases.db import db, init_app
 from sqlalchemy import inspect
 
@@ -31,6 +32,7 @@ blueprints = [
     film_controller,
     genre_controller,
     import_data_controller,
+    initialise_db_controller,
     langue_controller,
     languedisponible_controller,
     maliste_controller,

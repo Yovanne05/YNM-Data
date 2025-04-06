@@ -1,7 +1,7 @@
 @if (table) {
 <div class="flex space-x-4 p-4">
   <div
-    class="w-1/3 max-w-xs bg-white shadow-lg rounded-xl p-6 transition-transform transform"
+    class="w-1/3 max-w-xs bg-gray-100 shadow-lg rounded-xl p-6 transition-transform transform"
   >
     <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ table.name }}</h2>
     <ul class="mt-2 space-y-2">
@@ -16,7 +16,7 @@
   </div>
 
   <div
-    class="flex-1 bg-white shadow-lg rounded-xl p-6 h-[400px] overflow-auto transition-transform transform"
+    class="flex-1 bg-gray-100 shadow-lg rounded-xl p-6 h-[600px] overflow-auto transition-transform transform"
   >
   <app-table-card-data
   [tableName]="table.name"

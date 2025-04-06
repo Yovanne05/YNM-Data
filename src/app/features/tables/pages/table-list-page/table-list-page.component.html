@@ -5,6 +5,8 @@
     <app-table-card-info (sendTablesData)="initTablesData($event)" [tableName]="selectedTable" />
   </div>
 
-  <app-export-data [tablesData]="tablesData" [tableName]="selectedTable"></app-export-data>
-  <app-import-data [tableName]="selectedTable"></app-import-data>
+  <div class="button-container">
+    <app-export-data [tablesData]="tablesData" [tableName]="selectedTable"></app-export-data>
+    <app-import-data [tableName]="selectedTable"></app-import-data>
+  </div>
 </div>

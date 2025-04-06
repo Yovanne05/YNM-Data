@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { NotFoundComponent } from './shared/pages/not-found/not-found.component';
 import { TableListPageComponent } from './features/tables/pages/table-list-page/table-list-page.component';
 import { DashboardPageComponent } from './features/dashboard/pages/dashboard-page/dashboard-page.component';
+import { InitAddPageComponent } from './features/init-add/pages/init-add-page/init-add-page.component';
 
 export const routes: Routes = [
   {
@@ -19,8 +20,8 @@ export const routes: Routes = [
     component: TableListPageComponent
   },
   {
-    path: 'analysis',
-    component: AnalysisCardComponent
+    path: 'init-add',
+    component: InitAddPageComponent
   },
   {
     path: '**',

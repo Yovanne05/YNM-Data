@@ -15,5 +15,6 @@ export class HeaderComponent {
   { label: 'Tables', path: 'tables' },
   { label: 'Analyses', path: 'analysis' },
   { label: 'Logs', path: 'logs' },
+  { label: 'Initialisation', path:'init-add' },
 ]
 }

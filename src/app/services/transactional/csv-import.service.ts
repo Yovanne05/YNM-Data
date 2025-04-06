@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { API_CONFIG } from '../../config/api.config';
+import { Injectable, Input } from '@angular/core';
+import { API_CONFIG } from '../config/api.config';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -8,14 +8,13 @@ import { Observable } from 'rxjs';
 })
 export class CsvImportService {
   private apiUrl = API_CONFIG.API_URL;
-  aaa: string = "oui";
 
   constructor(private http: HttpClient) {}
 
-  sendCSVData(file: File): Observable<any> {
+  sendCSVData(file: File, tableName: string): Observable<any> {
     const formData = new FormData();
     formData.append('file', file);
-    //TODO : envoyer le nom de la table dans le composant pour pouvoir ajouter correctement les données
+    formData.append('tableName', tableName);
     return this.http.post<any>(this.apiUrl + '/import_data', formData);
   }
 }

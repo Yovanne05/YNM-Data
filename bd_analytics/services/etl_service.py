@@ -320,7 +320,6 @@ def process_evaluation_fact():
                 idGenre=eval.idGenre,
                 idDate=id_date,
                 note=eval.note,
-                avis=eval.avis
             )
             entrepot_session.merge(evaluation_fact)
 

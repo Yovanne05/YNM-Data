@@ -424,12 +424,7 @@ INSERT INTO MaListe (idProfil, idTitre) VALUES
 (22, 6), (22, 25), (22, 42),
 (23, 12), (23, 28), (23, 50),
 (24, 2), (24, 17), (24, 39),
-(25, 8), (25, 22), (25, 45),
-(26, 11), (26, 27), (26, 36),
-(27, 4), (27, 20), (27, 35),
-(28, 10), (28, 23), (28, 46),
-(29, 1), (29, 16), (29, 37),
-(30, 13), (30, 30), (30, 48);
+(25, 8), (25, 22), (25, 45);
 
 -- Insertions supplémentaires pour Evaluation (2-3 évaluations par profil)
 INSERT INTO Evaluation (idProfil, idTitre, note, avis) VALUES
@@ -461,9 +456,4 @@ INSERT INTO Evaluation (idProfil, idTitre, note, avis) VALUES
 (22, 6, 4, 'Chris Hemsworth est convaincant'),
 (23, 12, 3, 'Scènes daction répétitives'),
 (24, 17, 5, 'Western moderne réussi'),
-(25, 8, 4, 'Parfait pour les adolescents'),
-(26, 11, 2, 'Je nai pas accroché'),
-(27, 4, 5, 'Puissant et poétique'),
-(28, 10, 3, 'Ryan Reynolds joue toujours le même rôle'),
-(29, 16, 5, 'Nouveau classique de Noël'),
-(30, 20, 4, 'Spike Lee en grande forme');
+(25, 8, 4, 'Parfait pour les adolescents');

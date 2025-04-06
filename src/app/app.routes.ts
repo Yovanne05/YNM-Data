@@ -24,6 +24,10 @@ export const routes: Routes = [
     component: InitAddPageComponent
   },
   {
+    path: 'analysis',
+    component: AnalysisCardComponent
+  },
+  {
     path: '**',
     redirectTo: '404'
   },

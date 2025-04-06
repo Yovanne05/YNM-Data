@@ -1,25 +1,70 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from config import Config
-from controllers.genre_controller import genre_controller
-from controllers.import_data_controller import import_data_controller
-from controllers.paiement_controller import paiement_controller
-from controllers.temps_controller import temps_controller
-from controllers.titre_controller import titre_controller
-from controllers.abonnement_controller import abonnement_controller
-from controllers.utilisateur_controller import utilisateur_controller
-import db
+from databases.db import db, init_app
+from sqlalchemy import inspect
+from config import config
+
+from sqlalchemy import text
+from bd_transactional.controllers.abonnement_controller import abonnement_controller
+from bd_transactional.controllers.acteur_controller import acteur_controller
+from bd_transactional.controllers.acting_controller import acting_controller
+from bd_transactional.controllers.evaluation_controller import evaluation_controller
+from bd_transactional.controllers.film_controller import film_controller
+from bd_transactional.controllers.genre_controller import genre_controller
+from bd_transactional.controllers.import_data_controller import import_data_controller
+from bd_transactional.controllers.langue_controller import langue_controller
+from bd_transactional.controllers.languedispo_controller import languedisponible_controller
+from bd_transactional.controllers.maliste_controller import maliste_controller
+from bd_transactional.controllers.paiement_controller import paiement_controller
+from bd_transactional.controllers.profil_controller import profil_controller
+from bd_transactional.controllers.realisation_controller import realisation_controller
+from bd_transactional.controllers.serie_controller import serie_controller
+from bd_transactional.controllers.studio_controller import studio_controller
+from bd_transactional.controllers.titre_controller import titre_controller
+from bd_transactional.controllers.titregenre_controller import titregenre_controller
+from bd_transactional.controllers.utilisateur_controller import utilisateur_controller
+
+from bd_analytics.controllers.content_analysis_controller import content_analysis_controller
+from bd_analytics.controllers.comportement_analysis_controller import behavior_analysis_controller
+from bd_analytics.controllers.temporal_analysis_controller import temporal_analysis_controller
+from bd_analytics.controllers.etl_controller import etl_controller
+
+blueprints = [
+    etl_controller,
+    content_analysis_controller,
+    behavior_analysis_controller,
+    abonnement_controller,
+    temporal_analysis_controller,
+    acteur_controller,
+    acting_controller,
+    evaluation_controller,
+    film_controller,
+    genre_controller,
+    import_data_controller,
+    langue_controller,
+    languedisponible_controller,
+    maliste_controller,
+    paiement_controller,
+    profil_controller,
+    realisation_controller,
+    serie_controller,
+    studio_controller,
+    titre_controller,
+    titregenre_controller,
+    utilisateur_controller,
+]
+
 app = Flask(__name__)
+app.config.from_object(config)
+init_app(app)
+
 CORS(app, resources={r"/*": {"origins": "*"}})
 app.config.from_object(Config)
 
-app.register_blueprint(utilisateur_controller)
-app.register_blueprint(titre_controller)
-app.register_blueprint(genre_controller)
-app.register_blueprint(temps_controller)
-app.register_blueprint(paiement_controller)
-app.register_blueprint(abonnement_controller)
-app.register_blueprint(import_data_controller)
+for blueprint in blueprints:
+    app.register_blueprint(blueprint)
+
 
 @app.before_request
 def handle_options():
@@ -30,82 +75,43 @@ def handle_options():
         response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization")
         response.headers.add("Access-Control-Max-Age", "86400")
         return response, 200
-@app.route('/tables', methods=['GET'])
+
+
+@app.route('/tables')
 def get_tables():
-    conn = db.get_db_connection()
     try:
-        with conn.cursor() as cursor:
-            cursor.execute("SHOW TABLES")
-            tables = [table['Tables_in_' + Config.MYSQL_DB] for table in cursor.fetchall()]
+        __bind_key__ = 'transactional'
+        inspector = inspect(db.engine)
+        tables_data = {}
 
-        result = {}
-        for table in tables:
-            with conn.cursor() as cursor:
-                cursor.execute(f"DESCRIBE `{table}`")
-                columns = [column['Field'] for column in cursor.fetchall()]
-                result[table] = columns
+        for table_name in inspector.get_table_names():
+            columns = [column['name'] for column in inspector.get_columns(table_name)]
+            tables_data[table_name] = columns
 
-        return jsonify(result)
+        return jsonify(tables_data)
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-    finally:
-        cursor.close()
-
-@app.route('/table/<table_name>', methods=['GET'])
-def get_table_structure(table_name):
-    conn = db.get_db_connection()
+        app.logger.error(f"Error fetching tables: {str(e)}")
+        return jsonify({"error": "Unable to fetch database structure"}), 500
+@app.route('/test-db')
+def test_db():
     try:
-        with conn.cursor() as cursor:
-            cursor.execute(f"DESCRIBE `{table_name}`")
-            columns = [column['Field'] for column in cursor.fetchall()]
-
-        return jsonify({table_name: columns})
-
+        with app.app_context():
+            engine = db.get_engine()
+            conn = engine.connect()
+            conn.close()
+            return jsonify({"status": "success", "message": "Connexion à la BDD réussie !"})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"status": "error", "message": str(e)}), 500
 
-    finally:
-        cursor.close()
-
-@app.route('/table/<table_name>/data', methods=['GET'])
-def get_table_data(table_name):
-    conn = db.get_db_connection()
+@app.route('/check-db')
+def check_db():
     try:
-        filters = request.args.to_dict()
-
-        with conn.cursor() as cursor:
-            cursor.execute(f"DESCRIBE `{table_name}`")
-            columns = [column['Field'] for column in cursor.fetchall()]
-
-        query = f"SELECT * FROM `{table_name}`"
-        params = []
-
-        if filters:
-            conditions = []
-            for key, value in filters.items():
-                if value and key in columns:
-                    is_greater_than = filters.get(f"{key}_isGreaterThan") == "true"
-
-                    if is_greater_than:
-                        conditions.append(f"`{key}` > %s")
-                    else:
-                        conditions.append(f"`{key}` LIKE %s")
-                    params.append(f"%{value}%" if not is_greater_than else value)
-
-            if conditions:
-                query += " WHERE " + " AND ".join(conditions)
-
-        with conn.cursor() as cursor:
-            cursor.execute(query, tuple(params))
-            data = cursor.fetchall()
-
-        return jsonify(data)
-
+        # Utilisez text() pour les requêtes SQL brutes
+        engine = db.get_engine(app, bind='entrepot')
+        with engine.connect() as conn:
+            result = conn.execute(text("SELECT COUNT(*) FROM Temps"))
+            count = result.scalar()
+            return f"La table Temps contient {count} enregistrements"
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-    finally:
-        cursor.close()
-        conn.close()
+        return f"Erreur: {str(e)}", 500

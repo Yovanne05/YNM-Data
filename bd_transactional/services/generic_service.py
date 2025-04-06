@@ -31,6 +31,7 @@ class GenericService:
             db.session.commit()
             return obj
         except SQLAlchemyError as e:
+            print(str(e))
             db.session.rollback()
             raise Exception(f"Erreur lors de la création: {str(e)}")
 

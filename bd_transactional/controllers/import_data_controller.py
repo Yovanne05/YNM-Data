@@ -8,10 +8,9 @@ def import_data():
     try:
         if 'file' not in request.files:
             return jsonify({"error": "Aucun fichier envoyé"}), 400
-
         import_data_service.save_file(request)
-
-        #TODO: implémenter la méthode qui lis chaque ligne et les implante dans la BD
-        return jsonify({"import": "Données de la table A FAIRE ajoutées"}), 200
+        table_name = request.form.get('tableName')
+        import_data_service.import_data_to_db(table_name)
+        return jsonify({"import": "Données de la table " + table_name + " ajoutées"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

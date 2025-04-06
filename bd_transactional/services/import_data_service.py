@@ -1,70 +1,33 @@
 import csv
 from typing import List, TypeAlias
-
 from flask import Request
+from databases.db import db
 
-from models.abonnement_model import Abonnement
-from models.acteur_model import Acteur
-from models.acting_model import Acting
-from models.evaluation_model import Evaluation
-from models.film_model import Film
-from models.genre_model import Genre
-from models.langue_model import Langue
-from models.languedispo_model import LangueDisponible
-from models.maliste_model import MaListe
-from models.paiement_model import Paiement
-from models.profil_model import Profil
-from models.realisation_model import Realisation
-from models.serie_model import Serie
-from models.studio_model import Studio
-from models.titre_model import Titre
-from models.titregenre_model import TitreGenre
-from models.utilisateur_model import Utilisateur
-from services.generic_service import GenericService
-
-MODELS = {
-    "abonnement": Abonnement(),
-    "acteur": Acteur(), 
-    "acting": Acting(),
-    "evaluation": Evaluation(),
-    "film": Film(),
-    "genre": Genre(),
-    "langue": Langue(),
-    "langue_disponible": LangueDisponible(),
-    "maliste": MaListe(),
-    "paiement": Paiement(),
-    "profil": Profil(),
-    "realisation": Realisation(),
-    "serie": Serie(),
-    "studio": Studio(),
-    "titre": Titre(),
-    "titregenre": TitreGenre(),
-    "utilisateur": Utilisateur()
-}
+from bd_transactional.services.generic_service import GenericService
 
 SERVICES = {
-    "abonnement": GenericService(Abonnement),
-    "acteur": GenericService(Acteur),
-    "acting": GenericService(Acting),
-    "evaluation": GenericService(Evaluation),
-    "film": GenericService(Film),
-    "genre": GenericService(Genre),
-    "langue": GenericService(Langue),
-    "langue_disponible": GenericService(LangueDisponible),
-    "maliste": GenericService(MaListe),
-    "paiement": GenericService(Paiement),
-    "profil": GenericService(Profil),
-    "realisation": GenericService(Realisation),
-    "serie": GenericService(Serie),
-    "studio": GenericService(Studio),
-    "titre": GenericService(Titre),
-    "titregenre": GenericService(TitreGenre),
-    "utilisateur": GenericService(Utilisateur),
+    "abonnement": GenericService(db.models.Abonnement),
+    "acteur": GenericService(db.models.Acteur),
+    "acting": GenericService(db.models.Acting),
+    "evaluation": GenericService(db.models.Evaluation),
+    "film": GenericService(db.models.Film),
+    "genre": GenericService(db.models.Genre),
+    "langue": GenericService(db.models.Langue),
+    "langue_disponible": GenericService(db.models.LangueDisponible),
+    "maliste": GenericService(db.models.MaListe),
+    "paiement": GenericService(db.models.Paiement),
+    "profil": GenericService(db.models.Profil),
+    "realisation": GenericService(db.models.Realisation),
+    "serie": GenericService(db.models.Serie),
+    "studio": GenericService(db.models.Studio),
+    "titre": GenericService(db.models.Titre),
+    "titregenre": GenericService(db.models.TitreGenre),
+    "utilisateur": GenericService(db.models.Utilisateur),
 }
 
 FILE_PATH = "utils/import.csv"
 
-netflix_object: TypeAlias = Abonnement | Genre | Paiement | Serie | Titre | Utilisateur
+netflix_object: TypeAlias = db.models.Abonnement | db.models.Genre | db.models.Paiement | db.models.Serie | db.models.Titre | db.models.Utilisateur
 
 def save_file(request: Request) -> None:
     file = request.files['file']
@@ -87,9 +50,9 @@ def import_data_to_db(table_name: str) -> None:
 
 def get_instance(table_name: str) -> netflix_object :
     try:
-        if table_name not in MODELS.keys():
+        if table_name not in db.models:
             raise Exception(f"La table {table_name} n'existe pas")
-        model = type(MODELS.get(table_name.lower()))
+        model = type(db.models.get(table_name.lower()))
         return model()
     except Exception as e:
         raise Exception(f"Erreur lors de la récupération de la table d'import: {str(e)}")

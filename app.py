@@ -1,7 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from config import Config
-from controllers.initialise_db_controller import initialise_db_controller
 from databases.db import db, init_app
 from sqlalchemy import inspect
 from config import config
@@ -30,6 +29,7 @@ from bd_analytics.controllers.content_analysis_controller import content_analysi
 from bd_analytics.controllers.comportement_analysis_controller import behavior_analysis_controller
 from bd_analytics.controllers.temporal_analysis_controller import temporal_analysis_controller
 from bd_analytics.controllers.etl_controller import etl_controller
+from bd_transactional.controllers.initialise_db_controller import initialise_db_controller
 
 blueprints = [
     etl_controller,

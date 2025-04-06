@@ -1,7 +1,6 @@
 from bd_transactional.models.generic_model import GenericModel
 from databases.db import db
 
-
 class Acteur(GenericModel):
     __tablename__ = 'acteur'
 

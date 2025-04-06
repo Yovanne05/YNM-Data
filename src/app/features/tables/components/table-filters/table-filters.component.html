@@ -27,14 +27,6 @@
           <input type="date" [formControlName]="filter.key"
                  class="w-full border rounded-md p-1 text-sm">
         }
-        @case ('select') {
-          <select [formControlName]="filter.key" class="w-full border rounded-md p-1 text-sm">
-            <option value="">Tous</option>
-            @for (option of filter.options; track option) {
-              <option [value]="option">{{ option }}</option>
-            }
-          </select>
-        }
         @case ('boolean') {
           <div class="flex items-center">
             <input type="checkbox" [formControlName]="filter.key" class="mr-2">

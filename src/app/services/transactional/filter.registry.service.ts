@@ -32,11 +32,14 @@ export class FilterRegistryService {
       'varchar': 'text',
       'text': 'text',
       'int': 'number',
+      'integer': 'number',
       'decimal': 'number',
+      'float': 'number',
+      'double': 'number',
       'date': 'date',
       'datetime': 'date',
-      'tinyint': 'boolean',
-      'enum': 'select'
+      'timestamp': 'date',
+      'tinyint': 'boolean'
     };
 
     for (const [column, columnInfo] of Object.entries(schema)) {
@@ -47,12 +50,17 @@ export class FilterRegistryService {
       const baseType = type.split('(')[0].toLowerCase();
       const filterType = typeMapping[baseType] || 'text';
 
-      filters.push({
+      const filterDef: any = {
         key: column,
         label: this.formatLabel(column),
         type: filterType,
-        options: this.getOptionsForColumn(column, type)
-      });
+      };
+
+      if (filterType === 'number') {
+        filterDef.hasOperator = true;
+      }
+
+      filters.push(filterDef);
     }
 
     return filters;
@@ -62,17 +70,5 @@ export class FilterRegistryService {
     return column.replace(/_/g, ' ')
                 .replace(/([A-Z])/g, ' $1')
                 .replace(/^./, str => str.toUpperCase());
-  }
-
-  private getOptionsForColumn(column: string, type: string): string[] {
-    if (type.includes('enum')) {
-      return type.split('enum(')[1].split(')')[0].split(',').map(opt => opt.trim().replace(/'/g, ''));
-    }
-
-    const lowerColumn = column.toLowerCase();
-    if (lowerColumn.includes('statut')) return ['Actif', 'Inactif'];
-    if (lowerColumn.includes('type')) return ['Basic', 'Standard', 'Premium'];
-
-    return [];
   }
 }

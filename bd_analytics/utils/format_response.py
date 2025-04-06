@@ -10,16 +10,16 @@ def format_response(
         metadata: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
     """
-    Standard API response format
+    Format standard de réponse API
 
     Args:
-        success: Whether the request was successful
-        data: Main response data (dict, list, or DataFrame)
-        error: Error message if not successful
-        metadata: Additional metadata about the response
+        success: Indique si la requête a réussi (booléen)
+        data: Données principales de la réponse (dict, list ou DataFrame)
+        error: Message d'erreur en cas d'échec
+        metadata: Métadonnées supplémentaires sur la réponse
 
     Returns:
-        Standardized response dictionary
+        Dictionnaire de réponse standardisé
     """
     response = {
         'success': success,

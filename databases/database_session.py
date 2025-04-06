@@ -6,7 +6,7 @@ from .db import db
 @contextmanager
 def get_db_session(bind=None):
     """
-    Context manager pour obtenir une session SQLAlchemy.
+    Context manager pour obtenir une session SQLAlchemy
 
     Args:
         bind (str, optional): Nom du bind de base de données à utiliser.

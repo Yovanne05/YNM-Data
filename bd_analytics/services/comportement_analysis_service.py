@@ -12,7 +12,7 @@ def get_viewing_analytics():
         dict: {
             'total_views': (int) nombre total de visionnages,
             'avg_duration_minutes': (float) durée moyenne en minutes,
-            'users': [  # Nouveau: statistiques par utilisateur
+            'users': [
                 {
                     'user_id': int,
                     'total_views': int,
@@ -25,19 +25,17 @@ def get_viewing_analytics():
     with get_db_entrepot_session() as session:
         try:
             olap = OLAPService(session)
-
             global_stats = {
                 'total_views': 0,
                 'avg_duration_minutes': 0,
                 'users': []
             }
-            measures = ['idVisionnage', 'dureeVisionnage']
 
             # Stats globales (totaux)
             result = olap.scoping(
                 fact_table=db.models.VisionnageFact,
                 dimensions=[],
-                measures=measures,
+                measures=['idVisionnage', 'dureeVisionnage'],
                 aggregation_funcs={
                     'idVisionnage': func.count,
                     'dureeVisionnage': func.avg
@@ -48,11 +46,11 @@ def get_viewing_analytics():
                 global_stats['total_views'] = int(result.iloc[0]['aggregated_idVisionnage'])
                 global_stats['avg_duration_minutes'] = round(result.iloc[0]['aggregated_dureeVisionnage'] / 60, 2)
 
+                # Stats par utilisateur
                 user_stats = olap.scoping(
                     fact_table=db.models.VisionnageFact,
                     dimensions=[db.models.VisionnageFact.idUtilisateur],
-                    measures=measures,
-                    filters={},
+                    measures=['idVisionnage', 'dureeVisionnage'],
                     aggregation_funcs={
                         'idVisionnage': func.count,
                         'dureeVisionnage': func.avg
@@ -99,14 +97,15 @@ def get_daily_viewing_activity():
                     db.models.TempsDim.jour
                 ],
                 measures=['idVisionnage'],
-                aggregation_funcs={'idVisionnage': func.count}
+                aggregation_funcs={'idVisionnage': func.count},
+                joins=[db.models.TempsDim]
             )
 
             if not result.empty:
                 result['date'] = (
-                        result['annee'].astype(str) + '-' +
-                        result['mois'].astype(str).str.zfill(2) + '-' +
-                        result['jour'].astype(str).str.zfill(2)
+                    result['annee'].astype(str) + '-' +
+                    result['mois'].astype(str).str.zfill(2) + '-' +
+                    result['jour'].astype(str).str.zfill(2)
                 )
                 return {
                     'by_date': result[['date', 'aggregated_idVisionnage']]

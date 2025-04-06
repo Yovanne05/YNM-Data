@@ -1,3 +1,5 @@
+from sqlalchemy.orm import relationship
+
 from databases.db import db
 
 class VisionnageFact(db.Model):

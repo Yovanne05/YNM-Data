@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { InitDbService } from '../../../../services/init-db.service';
+import { InitDbService } from '../../../../services/transactional/init-db.service';
 
 @Component({
   selector: 'app-init-db',

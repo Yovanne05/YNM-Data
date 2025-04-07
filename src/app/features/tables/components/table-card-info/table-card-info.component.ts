@@ -44,6 +44,7 @@ export class TableCardInfoComponent implements OnInit, OnChanges {
           this.genericTableService.getTableData(this.tableName).subscribe({
             next: (tableData) => {
               this.table = { name, columns, data: tableData };
+                  this.emitTablesData(this.table?.data);
             },
             error: (err) => {
               console.error('Erreur lors du chargement des données:', err);
@@ -56,7 +57,7 @@ export class TableCardInfoComponent implements OnInit, OnChanges {
     });
   }
 
-  emitTablesData(data: Record<string, string>[] | null): void {
+  emitTablesData(data: Record<string, string>[] | undefined): void {
     this.sendTablesData.emit(data);
   }
 }

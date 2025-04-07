@@ -11,4 +11,8 @@
     }
 
     <button type="submit" [disabled]="dataForm.invalid" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 disabled:bg-gray-400">Importer les données</button>
+    @if (showErrorMessage) {
+        <p>Une erreur est survenue, vérifiez l'ordre des données dans le fichier et leur cohérence au niveau des types attendus.</p>
+        <p>(Certains attributs peuvent également être considérés comme uniques, et ne peuvent pas exister en double)</p>
+    }
 </form>

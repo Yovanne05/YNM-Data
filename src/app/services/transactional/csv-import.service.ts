@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { catchError, Observable, throwError } from 'rxjs';
 import { API_CONFIG } from '../../config/api.config';
 
 @Injectable({
@@ -15,6 +15,10 @@ export class CsvImportService {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('tableName', tableName);
-    return this.http.post<any>(this.apiUrl + '/import_data', formData);
+    return this.http.post<any>(this.apiUrl + '/import_data', formData).pipe(
+      catchError((error) => {
+        return throwError(() => error);
+      })
+    );
   }
 }

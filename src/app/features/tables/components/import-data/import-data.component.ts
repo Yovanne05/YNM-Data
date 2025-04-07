@@ -15,13 +15,20 @@ export class ImportDataComponent {
 
   @Input() tableName!: string;
 
+  showErrorMessage: boolean = false;
+
   dataForm = new FormGroup({
     fichierImport: new FormControl('', [Validators.required]),
   })
 
   onSubmit(): void {
+    this.showErrorMessage = false;
     if (this.dataForm.valid) {
-      this.csvImportService.sendCSVData(this.fichierCSV, this.tableName).subscribe();
+      this.csvImportService.sendCSVData(this.fichierCSV, this.tableName).subscribe({
+        error: (err) => {
+          this.showErrorMessage = true;
+        }
+      });
     }
   }
 

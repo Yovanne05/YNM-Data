@@ -5,3 +5,15 @@
 .hover\:text-blue-500:hover {
   color: #3b82f6;
 }
+.grid-cols-12 > div {
+  min-width: 120px; /* Largeur minimale pour chaque colonne */
+  max-width: 120px; /* Largeur maximale pour éviter l'étirement */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Ajustement pour le menu déroulant */
+.relative {
+  min-width: auto;
+  max-width: none;
+}

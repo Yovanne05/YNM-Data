@@ -49,6 +49,7 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     if (changes['data'] && this.data.length > 0) {
       this.filteredData = [...this.data];
       this.applySort();
+      this.activeDropdown = null; // Réinitialise le dropdown
     }
     if (changes['filters'] || changes['tableName']) {
       this.loadFilters();
@@ -59,14 +60,18 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     this.dataSubscription?.unsubscribe();
   }
 
+  // Nouvelle méthode pour identifier les colonnes ID
+  isIdColumn(column: string): boolean {
+    if (!column) return false;
+    const lowerColumn = column.toLowerCase();
+    return lowerColumn === 'id' || 
+           lowerColumn === `id${this.tableName.charAt(0).toUpperCase() + this.tableName.slice(1)}`.toLowerCase();
+  }
+
   toggleFilters(): void {
     this.showFilters = !this.showFilters;
   }
 
-  /**
-   * Gère le tri multi-colonnes (asc → desc → reset)
-   * @param key - La colonne à trier
-   */
   onSort(key: string): void {
     let newSortKeys = [...this.sortKeys];
     const existingIndex = newSortKeys.findIndex(s => s.key === key);
@@ -91,9 +96,6 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     this.sortChanged.emit([...this.sortKeys]);
   }
 
-  /**
-   * Applique les tris cumulatifs selon la priorité d'ajout
-   */
   private applySort(): void {
     if (!this.filteredData || this.sortKeys.length === 0) return;
 
@@ -106,13 +108,6 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     });
   }
 
-  /**
-   * Compare deux valeurs avec détection automatique du type
-   * @param a - Première valeur à comparer
-   * @param b - Deuxième valeur à comparer
-   * @param direction - Direction du tri ('asc' ou 'desc')
-   * @returns Résultat de comparaison (-1, 0, 1)
-   */
   private compareValues(a: any, b: any, direction: 'asc' | 'desc'): number {
     if (a == null || b == null) {
       if (a == null && b == null) return 0;
@@ -217,7 +212,9 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     this.editingItem = item;
     this.tempItemForm = new FormGroup({});
     Object.keys(item).forEach((key) => {
-      this.tempItemForm.addControl(key, new FormControl(item[key]));
+      if (!this.isIdColumn(key)) { // Ne pas inclure les champs ID dans le formulaire
+        this.tempItemForm.addControl(key, new FormControl(item[key]));
+      }
     });
   }
 
@@ -271,7 +268,6 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
   }
 
   saveNewItem(): void {
-    // Validation des champs requis
     const missingFields = this.requiredFields.filter(field => !this.newItem[field]);
 
     if (missingFields.length > 0) {
@@ -279,12 +275,11 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
       return;
     }
 
-    // Conversion des types si nécessaire
     this.convertDataTypes();
 
     this.genericTableService.createItem(this.tableName, this.newItem).subscribe({
       next: (response) => {
-        this.loadDataWithFilters(); // Recharge les données
+        this.loadDataWithFilters();
         this.isAddingMode = false;
         this.newItem = {};
       },
@@ -296,7 +291,6 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
   }
 
   private convertDataTypes(): void {
-    // Convertit les champs numériques
     const numericFields = ['id', 'age', 'prix', 'annee', 'duree', 'saison'];
     numericFields.forEach(field => {
       if (this.newItem[field] !== undefined) {
@@ -304,7 +298,6 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
       }
     });
 
-    // Convertit les champs date
     const dateFields = ['dateDebutLicence', 'dateFinLicence'];
     dateFields.forEach(field => {
       if (this.newItem[field]) {
@@ -317,22 +310,20 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     this.isAddingMode = true;
     this.newItem = {};
     this.errorMessage = null;
-    this.loadRequiredFields();
-    this.cancelEditing(); // Annule l'édition en cours si elle existe
+    this.cancelEditing();
   }
 
-  private loadRequiredFields(): void {
-    // Cette méthode devrait idéalement faire un appel API pour récupérer
-    // les champs requis depuis le backend. Pour l'exemple, nous utilisons
-    // une solution temporaire:
 
-    const requiredFieldsMap: {[key: string]: string[]} = {
-      'Utilisateur': ['nom', 'prenom', 'email', 'numero'],
-      'Abonnement': ['typeAbonnement', 'prix', 'idUtilisateur'],
-      'Titre': ['nom', 'annee', 'dateDebutLicence', 'dateFinLicence']
-    };
+  activeDropdown: any = null;
 
-    this.requiredFields = requiredFieldsMap[this.tableName] || [];
+toggleDropdown(event: MouseEvent, item: any): void {
+  event.stopPropagation();
+  this.activeDropdown = this.activeDropdown === item ? null : item;
+}
+
+onDocumentClick(event: MouseEvent): void {
+  if (!(event.target as Element).closest('.relative')) {
+    this.activeDropdown = null;
   }
-
+}
 }

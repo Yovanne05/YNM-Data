@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, SimpleChanges, inject, output, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, SimpleChanges, inject, output, OnDestroy, HostListener } from '@angular/core';
 import { FormGroup, FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { TableFiltersComponent } from '../table-filters/table-filters.component';
 import { TableHeaderComponent } from '../table-header/table-header.component';
@@ -32,6 +32,7 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
   editingItem: any = null;
   sortKeys: { key: string; direction: 'asc' | 'desc' }[] = [];
   filteredData: any[] = [];
+  activeDropdown: any = null;
 
   filterSubmit = output<void>();
   filterReset = output<void>();
@@ -49,7 +50,7 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     if (changes['data'] && this.data.length > 0) {
       this.filteredData = [...this.data];
       this.applySort();
-      this.activeDropdown = null; // Réinitialise le dropdown
+      this.activeDropdown = null;
     }
     if (changes['filters'] || changes['tableName']) {
       this.loadFilters();
@@ -60,7 +61,6 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     this.dataSubscription?.unsubscribe();
   }
 
-  // Nouvelle méthode pour identifier les colonnes ID
   isIdColumn(column: string): boolean {
     if (!column) return false;
     const lowerColumn = column.toLowerCase();
@@ -128,6 +128,19 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
 
     return direction === 'asc' ? String(a).localeCompare(String(b)) : String(b).localeCompare(String(a));
   }
+
+  toggleDropdown(event: MouseEvent, item: any): void {
+    event.stopPropagation();
+    this.activeDropdown = this.activeDropdown === item ? null : item;
+  }
+
+  @HostListener('document:click')
+  closeDropdown(): void {
+    this.activeDropdown = null;
+  }
+
+
+ 
 
   removeSort(key: string): void {
     this.sortKeys = this.sortKeys.filter((s) => s.key !== key);
@@ -313,13 +326,6 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     this.cancelEditing();
   }
 
-
-  activeDropdown: any = null;
-
-toggleDropdown(event: MouseEvent, item: any): void {
-  event.stopPropagation();
-  this.activeDropdown = this.activeDropdown === item ? null : item;
-}
 
 onDocumentClick(event: MouseEvent): void {
   if (!(event.target as Element).closest('.relative')) {

@@ -1,4 +1,5 @@
 <div class="relative p-2">
+
   @if (isAddingMode) {
     <div class="bg-gray-100 rounded-md p-4 mb-4 shadow-md">
       <h3 class="text-lg font-medium mb-3">Nouvel élément</h3>
@@ -94,83 +95,35 @@
   </div>
 
   <div class="p-2">
-    @if (filteredData) { 
-      @if (filteredData.length > 0) {
-        <div class="bg-gray-100 rounded-md p-2 mb-2 overflow-x-auto">
-          <!-- En-têtes -->
-          <div class="grid grid-cols-12 gap-2 p-2 border-b font-medium text-gray-500">
-            @for (column of getObjectKeys(filteredData[0]); track column; let i = $index) {
-              <div class="col-span-1 truncate">
-                {{column}}
-                <button (click)="onSort(column)" class="ml-1 text-gray-400 hover:text-gray-600">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                  </svg>
-                </button>
-              </div>
-            }
-            <div class="col-span-1"><!-- Espace actions --></div>
-          </div>
+    @if (filteredData) { @if (filteredData.length > 0) {
+    <div class="bg-gray-100 rounded-md p-2 mb-2">
+      <app-table-header
+        [columns]="getObjectKeys(filteredData[0])"
+        [sortKeys]="sortKeys"
+        (sort)="onSort($event)"
+      ></app-table-header>
 
-          <!-- Lignes de données -->
-          @for (item of filteredData; track $index) {
-            <div class="grid grid-cols-12 gap-2 p-2 border-b last:border-b-0 hover:bg-gray-50">
-              @if (editingItem === item) {
-                <!-- Mode édition -->
-                @for (column of getObjectKeys(item); track column; let i = $index) {
-                  <div class="col-span-1">
-                    @if (isIdColumn(column)) {
-                      <div class="p-2 bg-gray-200 rounded truncate">{{item[column]}}</div>
-                    } @else {
-                      <input type="text" 
-                             [formControlName]="column" 
-                             class="w-full border rounded p-1">
-                    }
-                  </div>
-                }
-                <div class="col-span-1 flex gap-2 items-center">
-                  <button (click)="saveChanges()" title="Enregistrer" class="text-green-600 hover:text-green-800">
-                    ✓
-                  </button>
-                  <button (click)="cancelEditing()" title="Annuler" class="text-gray-600 hover:text-gray-800">
-                    ✕
-                  </button>
-                </div>
-              } @else {
-                <!-- Mode affichage -->
-                @for (column of getObjectKeys(item); track column; let i = $index) {
-                  <div class="col-span-1 truncate">
-                    {{item[column]}}
-                  </div>
-                }
-                <div class="col-span-1 relative">
-                  <button (click)="toggleDropdown($event, item)" class="text-gray-500 hover:text-gray-700">
-                    ⋮
-                  </button>
-                  @if (activeDropdown === item) {
-                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
-                      <div class="py-1">
-                        <button (click)="startEditing(item); activeDropdown = null" 
-                                class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                          Modifier
-                        </button>
-                        <button (click)="onDelete(item); activeDropdown = null"
-                                class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
-                          Supprimer
-                        </button>
-                      </div>
-                    </div>
-                  }
-                </div>
-              }
-            </div>
-          }
-        </div>
-      } @else {
-        <!-- ... (message aucun résultat) ... -->
+      @for (item of filteredData; track $index) {
+      <app-table-row
+        [item]="item"
+        [columns]="getObjectKeys(item)"
+        [isEditing]="editingItem === item"
+        [editForm]="tempItemForm"
+        (edit)="startEditing(item)"
+        (delete)="onDelete(item)"
+        (save)="saveChanges()"
+        (cancel)="cancelEditing()"
+      ></app-table-row>
       }
+    </div>
     } @else {
-      <!-- ... (chargement en cours) ... -->
+    <div class="bg-gray-100 rounded-md p-2 mb-2 text-center text-gray-500">
+      Aucun résultat trouvé
+    </div>
+    } } @else {
+    <div class="bg-gray-100 rounded-md p-2 mb-2 text-center text-gray-500">
+      Chargement en cours...
+    </div>
     }
   </div>
 </div>

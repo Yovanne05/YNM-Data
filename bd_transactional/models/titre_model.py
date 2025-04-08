@@ -3,7 +3,7 @@ from databases.db import db
 
 
 class Titre(GenericModel):
-    __tablename__ = 'Titre'
+    __tablename__ = 'titre'
 
     idTitre = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.String(255), nullable=False)

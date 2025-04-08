@@ -35,18 +35,20 @@ class GenericController:
 
         @self.blueprint.route("/", methods=["POST"])
         def create():
-            """Crée un nouvel élément"""
             try:
                 data = request.get_json()
+                if not data:
+                    return jsonify({"error": "Aucune donnée fournie"}), 400
 
-                required_fields = {column.name for column in self.service.model_class.__table__.columns if
-                                   not column.nullable and not column.primary_key}
+                item = self.service.create_item(data)
 
-                if not required_fields.issubset(data.keys()):
-                    return jsonify({"error": "Champs requis manquants"}), 400
+                # Récupération dynamique de la clé primaire
+                primary_key = self.service.get_primary_key(item)
+                return jsonify({
+                    "id": getattr(item, primary_key),  # Accès dynamique à l'ID
+                    "message": "Création réussie"
+                }), 201
 
-                item = self.service.create(data)
-                return jsonify({"id": item.idGenre, **data}), 201
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
 

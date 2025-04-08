@@ -150,7 +150,7 @@ export class GenericTableService {
 
     if (!idValue) {
       throw new Error(
-        `Aucun ID détecté pour ${tableName.toLocaleLowerCase()}. ` +
+        `Aucun ID détecté pour ${tableName}. ` +
           `Colonnes disponibles: ${Object.keys(item).join(', ')}`
       );
     }

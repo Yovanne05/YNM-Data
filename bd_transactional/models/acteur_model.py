@@ -9,3 +9,4 @@ class Acteur(GenericModel):
     prenom = db.Column(db.String(100), nullable=False)
     dateNaissance = db.Column(db.Date, nullable=False)
     dateDeces = db.Column(db.Date)
+    acting = db.relationship('Acting', cascade='all,delete', backref='acteurs')

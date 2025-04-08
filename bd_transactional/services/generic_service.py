@@ -1,4 +1,5 @@
 from typing import Type, List, Any, Dict, Optional
+import sqlalchemy
 from sqlalchemy.exc import SQLAlchemyError
 from databases.db import db
 from sqlalchemy import inspect
@@ -49,14 +50,18 @@ class GenericService:
             raise Exception(f"Erreur lors de la mise à jour: {str(e)}")
 
     def delete(self, id: int) -> bool:
-        """Supprime un enregistrement"""
+        """Supprime un enregistrement avec cascade"""
         try:
+            # Charge l'objet avec toutes ses relations (ajustez selon vos besoins)
             obj = db.session.query(self.model_class).get(id)
-            if obj:
-                db.session.delete(obj)
-                db.session.commit()
-                return True
-            return False
+
+            if not obj:
+                return False
+
+            db.session.delete(obj)  # Laisser SQLAlchemy gérer la cascade
+            db.session.commit()
+            return True
+
         except SQLAlchemyError as e:
             db.session.rollback()
             raise Exception(f"Erreur lors de la suppression: {str(e)}")

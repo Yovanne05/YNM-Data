@@ -13,5 +13,10 @@ class Titre(GenericModel):
     categorieAge = db.Column(db.Enum('Tout public', '12+', '16+', '18+'), nullable=False)
     description = db.Column(db.Text)
 
-    film = db.relationship('Film', backref='titre', uselist=False)
-    serie = db.relationship('Serie', backref='titre', uselist=False)
+    film = db.relationship('Film', cascade='all,delete', backref='titres', uselist=False)
+    serie = db.relationship('Serie', cascade='all,delete', backref='titres', uselist=False)
+    titre_genre = db.relationship('TitreGenre', cascade='all,delete', backref='titres')
+    languedisponible = db.relationship('LangueDisponible', cascade='all,delete', backref='titres')
+    acting = db.relationship('Acting', cascade='all,delete', backref='titres')
+    maliste = db.relationship('MaListe', cascade='all,delete', backref='titres')
+    evaluation = db.relationship('Evaluation', cascade='all,delete', backref='titres')

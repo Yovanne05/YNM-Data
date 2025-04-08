@@ -13,3 +13,6 @@ class Utilisateur(GenericModel):
     email = db.Column(db.String(255), unique=True, nullable=False)
     numero = db.Column(db.String(15), unique=True, nullable=False)
     statutAbonnement = db.Column(db.Enum('Actif', 'Résilié'), default='Actif')
+    abonnement = db.relationship('Abonnement', cascade='all,delete' , backref='utilisateurs')
+    profil = db.relationship('Profil', cascade='all,delete', backref='utilisateurs')
+    

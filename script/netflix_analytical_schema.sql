@@ -28,14 +28,14 @@ CREATE TABLE Temps (
     jour INT,
     mois INT,
     annee INT,
-    trimestre INT
+    trimestre INT,
     jour_semaine INT,
     est_weekend BOOLEAN,
 );
 
 CREATE TABLE Titre (
     idTitre INT AUTO_INCREMENT PRIMARY KEY,
-    idGenre,
+    idGenre INT,
     nom VARCHAR(255),
     annee INT,
     iddateDebutLicence INT,

@@ -10,3 +10,5 @@ class Profil(GenericModel):
     idUtilisateur = db.Column(db.Integer, db.ForeignKey('utilisateur.idUtilisateur'), nullable=False)
 
     utilisateur = db.relationship('Utilisateur', backref='profils')
+    evaluation = db.relationship('Evaluation', cascade='all,delete', backref='profils')
+    maliste = db.relationship('MaListe', cascade='all,delete', backref='profils')

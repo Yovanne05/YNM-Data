@@ -3,22 +3,43 @@ from typing import Dict, Any
 
 
 class Config:
+    # DB_COMMON = {
+    #     'drivername': 'mysql+pymysql',
+    #     'host': 'localhost',
+    #     'username': 'root',
+    #     'password': '',
+    #     'query': {'charset': 'utf8mb4'}
+    # }
+    #
+    # DATABASES = {
+    #     'transactional': {
+    #         **DB_COMMON,
+    #         'database': 'netflixdb'
+    #     },
+    #     'entrepot': {
+    #         **DB_COMMON,
+    #         'database': 'entrepot_netflix'
+    #     }
+    # }
+
     DB_COMMON = {
         'drivername': 'mysql+pymysql',
-        'host': 'localhost',
-        'username': 'root',
-        'password': '',
+        'host': 'database-etudiants.iut.univ-paris8.fr',
         'query': {'charset': 'utf8mb4'}
     }
 
     DATABASES = {
         'transactional': {
             **DB_COMMON,
-            'database': 'netflixdb'
+            'username': 'dutinfopw201655',
+            'password': 'hevenequ',
+            'database': 'dutinfopw201655'
         },
         'entrepot': {
             **DB_COMMON,
-            'database': 'entrepot_netflix'
+            'username': 'dutinfopw201657',
+            'password': 'qupevuna',
+            'database': 'dutinfopw201657'
         }
     }
 
@@ -31,9 +52,9 @@ class Config:
     def get_db_url(self, db_type: str) -> str:
         """Génère l'URL de connexion sous forme de string"""
         config = self.get_db_config(db_type)
-        url = f"mysql+pymysql://{config['username']}@{config['host']}/{config['database']}"
+        url = f"mysql+pymysql://{config['username']}:{config['password']}@{config['host']}/{config['database']}"
         if 'port' in config:
-            url = f"mysql+pymysql://{config['username']}@{config['host']}:{config['port']}/{config['database']}"
+            url = f"mysql+pymysql://{config['username']}:{config['password']}@{config['host']}:{config['port']}/{config['database']}"
         return url
 
     @property

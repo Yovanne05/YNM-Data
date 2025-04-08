@@ -3,7 +3,7 @@ from databases.db import db
 
 
 class Langue(GenericModel):
-    __tablename__ = 'langue'
+    __tablename__ = 'Langue'
 
     idLangue = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.String(100), unique=True, nullable=False)

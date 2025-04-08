@@ -29,7 +29,7 @@ export class GenericTableService {
   }
 
   return this.http.get<Record<string, string>[]>(
-    `${this.apiUrl}/${tableName}`,
+    `${this.apiUrl}/${tableName.toLocaleLowerCase()}`,
     { params }
   ).pipe(
     catchError((err) => {
@@ -53,7 +53,7 @@ export class GenericTableService {
 
   getTableDataByTableName(table_name: string): Observable<TableStructure> {
     return this.http
-      .get<TableStructure>(`${this.apiUrl}/${table_name}/structure`)
+      .get<TableStructure>(`${this.apiUrl}/${table_name.toLocaleLowerCase()}/structure`)
       .pipe(
         catchError((err) => {
           console.error(
@@ -73,7 +73,7 @@ export class GenericTableService {
     };
 
     return this.http
-      .delete(`${this.apiUrl}/${tableName}/${id}`, {
+      .delete(`${this.apiUrl}/${tableName.toLocaleLowerCase()}/${id}`, {
         body: requestBody,
         headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
       })
@@ -93,7 +93,7 @@ export class GenericTableService {
       return throwError(() => new Error('Données invalides'));
     }
 
-    return this.http.post<{id: number}>(`${this.apiUrl}/${tableName}`, data).pipe(
+    return this.http.post<{id: number}>(`${this.apiUrl}/${tableName.toLocaleLowerCase()}`, data).pipe(
       catchError((error) => {
         console.error(`Erreur lors de la création dans ${tableName}`, error);
         let errorMessage = 'Erreur inconnue';
@@ -113,7 +113,7 @@ export class GenericTableService {
     const id = this.extractIdFromItem(tableName, item);
 
     return this.http
-      .put(`${this.apiUrl}/${tableName}/${id}`, updatedData, {
+      .put(`${this.apiUrl}/${tableName.toLocaleLowerCase()}/${id}`, updatedData, {
         headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
       })
       .pipe(
@@ -127,7 +127,7 @@ export class GenericTableService {
 
   getTableSchema(tableName: string): Observable<{[key: string]: string}> {
     return this.http.get<{[key: string]: string}>(
-      `${this.apiUrl}/${tableName}/schema`
+      `${this.apiUrl}/${tableName.toLocaleLowerCase()}/schema`
     ).pipe(
       catchError(err => {
         console.error('Error fetching schema', err);
@@ -150,7 +150,7 @@ export class GenericTableService {
 
     if (!idValue) {
       throw new Error(
-        `Aucun ID détecté pour ${tableName}. ` +
+        `Aucun ID détecté pour ${tableName.toLocaleLowerCase()}. ` +
           `Colonnes disponibles: ${Object.keys(item).join(', ')}`
       );
     }

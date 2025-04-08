@@ -1,129 +1,109 @@
 <div class="relative p-2">
-
-  @if (isAddingMode) {
-    <div class="bg-gray-100 rounded-md p-4 mb-4 shadow-md">
-      <h3 class="text-lg font-medium mb-3">Nouvel élément</h3>
-
-      @if (errorMessage) {
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {{ errorMessage }}
-        </div>
-      }
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        @if (filteredData && filteredData.length > 0) {
-          @for (key of getObjectKeys(filteredData[0]); track $index) {
-            <div>
-              <label class="block text-sm font-medium mb-1">
-                {{ key }}
-                @if (requiredFields.includes(key)) {
-                  <span class="text-red-500">*</span>
-                }
-              </label>
-
-              @if (key.includes('date')) {
-                <input type="date"
-                       [(ngModel)]="newItem[key]"
-                       class="w-full border rounded-md p-2 text-sm"
-                       [required]="requiredFields.includes(key)">
-              } @else if (key === 'typeAbonnement') {
-                <select [(ngModel)]="newItem[key]"
-                        class="w-full border rounded-md p-2 text-sm"
-                        [required]="requiredFields.includes(key)">
-                  <option value="">Sélectionner...</option>
-                  <option value="Basic">Basic</option>
-                  <option value="Standard">Standard</option>
-                  <option value="Premium">Premium</option>
-                </select>
-              } @else if (key === 'categorieAge') {
-                <select [(ngModel)]="newItem[key]"
-                        class="w-full border rounded-md p-2 text-sm"
-                        [required]="requiredFields.includes(key)">
-                  <option value="">Sélectionner...</option>
-                  <option value="Tout public">Tout public</option>
-                  <option value="12+">12+</option>
-                  <option value="16+">16+</option>
-                  <option value="18+">18+</option>
-                </select>
-              } @else {
-                <input type="{{ key === 'email' ? 'email' : 'text' }}"
-                       [(ngModel)]="newItem[key]"
-                       class="w-full border rounded-md p-2 text-sm"
-                       [required]="requiredFields.includes(key)">
-              }
-            </div>
-          }
-        }
-      </div>
-
-      <div class="flex justify-end gap-2">
-        <button (click)="cancelAdding()"
-                class="bg-gray-500 text-white px-4 py-2 rounded text-sm">
-          Annuler
-        </button>
-        <button (click)="saveNewItem()"
-                class="bg-green-500 text-white px-4 py-2 rounded text-sm">
-          Enregistrer
-        </button>
-      </div>
-    </div>
-  }
-
-  <button
-    (click)="startAdding()"
-    class="bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 transition-colors flex items-center gap-1 mb-4"
-  >
-    <span>+</span> Ajouter un élément
-  </button>
-
-  <div class="relative p-2">
+  <div class="flex justify-between items-center mb-2">
     <button
       (click)="toggleFilters()"
       class="bg-gray-100 text-gray-700 px-3 py-1 rounded-md text-sm hover:bg-gray-200 transition-colors"
     >
       Filtres
     </button>
+    
+    <button
+      (click)="startAdding()"
+      class="bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 transition-colors"
+    >
+      Ajouter
+    </button>
+  </div>
 
-    @if (showFilters) {
+  <!-- Modal d'ajout -->
+  @if (isAddingMode) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-lg p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
+        <h3 class="text-lg font-medium mb-4">Ajouter un nouvel élément</h3>
+        
+        <form [formGroup]="addForm" (ngSubmit)="onAddSubmit()">
+          @for (field of getAddFormFields(); track field) {
+            <div class="mb-4">
+              <label class="block text-gray-700 text-sm font-bold mb-2">{{field}}</label>
+              <input
+                type="text"
+                [formControlName]="field"
+                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                [required]="isRequiredField(field)"
+              >
+              @if (addForm.get(field)?.invalid && (addForm.get(field)?.dirty || addForm.get(field)?.touched)) {
+                <p class="text-red-500 text-xs italic">Ce champ est requis</p>
+              }
+            </div>
+          }
+          
+          @if (errorMessage) {
+            <div class="mb-4 text-red-500 text-sm">{{errorMessage}}</div>
+          }
+          
+          <div class="flex justify-end gap-2 pt-2">
+            <button
+              type="button"
+              (click)="cancelAdding()"
+              class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              [disabled]="!addForm.valid"
+              class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:bg-blue-300"
+            >
+              Ajouter
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- Le reste de votre template existant -->
+  @if (showFilters) {
     <app-table-filters
       [filters]="filters"
       [filterForm]="filterForm"
       (filterSubmit)="onSubmitFilters()"
       (filterReset)="onResetFilters()"
     ></app-table-filters>
-    }
-  </div>
+  }
 
   <div class="p-2">
-    @if (filteredData) { @if (filteredData.length > 0) {
-    <div class="bg-gray-100 rounded-md p-2 mb-2">
-      <app-table-header
-        [columns]="getObjectKeys(filteredData[0])"
-        [sortKeys]="sortKeys"
-        (sort)="onSort($event)"
-      ></app-table-header>
+    @if (filteredData) { 
+      @if (filteredData.length > 0) {
+        <div class="bg-gray-100 rounded-md p-2 mb-2">
+          <app-table-header
+            [columns]="getObjectKeys(filteredData[0])"
+            [sortKeys]="sortKeys"
+            (sort)="onSort($event)"
+          ></app-table-header>
 
-      @for (item of filteredData; track $index) {
-      <app-table-row
-        [item]="item"
-        [columns]="getObjectKeys(item)"
-        [isEditing]="editingItem === item"
-        [editForm]="tempItemForm"
-        (edit)="startEditing(item)"
-        (delete)="onDelete(item)"
-        (save)="saveChanges()"
-        (cancel)="cancelEditing()"
-      ></app-table-row>
-      }
-    </div>
+          @for (item of filteredData; track $index) {
+            <app-table-row
+              [item]="item"
+              [columns]="getObjectKeys(item)"
+              [isEditing]="editingItem === item"
+              [editForm]="tempItemForm"
+              (edit)="startEditing(item)"
+              (delete)="onDelete(item)"
+              (save)="saveChanges()"
+              (cancel)="cancelEditing()"
+            ></app-table-row>
+          }
+        </div>
+      } @else {
+        <div class="bg-gray-100 rounded-md p-2 mb-2 text-center text-gray-500">
+          Aucun résultat trouvé
+        </div>
+      } 
     } @else {
-    <div class="bg-gray-100 rounded-md p-2 mb-2 text-center text-gray-500">
-      Aucun résultat trouvé
-    </div>
-    } } @else {
-    <div class="bg-gray-100 rounded-md p-2 mb-2 text-center text-gray-500">
-      Chargement en cours...
-    </div>
+      <div class="bg-gray-100 rounded-md p-2 mb-2 text-center text-gray-500">
+        Chargement en cours...
+      </div>
     }
   </div>
 </div>

@@ -40,11 +40,10 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
   itemDeleted = output<any>();
   sortChanged = output<{ key: string; direction: 'asc' | 'desc' }[]>();
   sendTablesData = new EventEmitter<any[]>();
+  tableSchema: {[key: string]: string} = {};
 
-  isAddingMode = false;
-  newItem: {[key: string]: any} = {};
-  requiredFields: string[] = [];
   errorMessage: string | null = null;
+
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] && this.data.length > 0) {
@@ -274,62 +273,84 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     return index >= 0 ? index + 1 : null;
   }
 
-  cancelAdding(): void {
-    this.isAddingMode = false;
-    this.newItem = {};
-    this.errorMessage = null;
-  }
-
-  saveNewItem(): void {
-    const missingFields = this.requiredFields.filter(field => !this.newItem[field]);
-
-    if (missingFields.length > 0) {
-      this.errorMessage = `Champs requis manquants: ${missingFields.join(', ')}`;
-      return;
-    }
-
-    this.convertDataTypes();
-
-    this.genericTableService.createItem(this.tableName, this.newItem).subscribe({
-      next: (response) => {
-        this.loadDataWithFilters();
-        this.isAddingMode = false;
-        this.newItem = {};
-      },
-      error: (err) => {
-        this.errorMessage = err.message;
-        console.error('Erreur détaillée:', err);
-      }
-    });
-  }
-
-  private convertDataTypes(): void {
-    const numericFields = ['id', 'age', 'prix', 'annee', 'duree', 'saison'];
-    numericFields.forEach(field => {
-      if (this.newItem[field] !== undefined) {
-        this.newItem[field] = Number(this.newItem[field]);
-      }
-    });
-
-    const dateFields = ['dateDebutLicence', 'dateFinLicence'];
-    dateFields.forEach(field => {
-      if (this.newItem[field]) {
-        this.newItem[field] = new Date(this.newItem[field]).toISOString().split('T')[0];
-      }
-    });
-  }
-
-  startAdding(): void {
-    this.isAddingMode = true;
-    this.newItem = {};
-    this.errorMessage = null;
-    this.cancelEditing();
-  }
-
-
 onDocumentClick(event: MouseEvent): void {
   if (!(event.target as Element).closest('.relative')) {
     this.activeDropdown = null;
   }
 }
+
+addForm: FormGroup = new FormGroup({});
+isAddingMode = false;
+
+// Méthodes à ajouter
+startAdding(): void {
+  this.isAddingMode = true;
+  this.initAddForm();
+}
+
+private initAddForm(): void {
+  const formControls: { [key: string]: FormControl } = {};
+  
+  if (this.filteredData.length > 0) {
+    const sampleItem = this.filteredData[0];
+    
+    Object.keys(sampleItem).forEach(key => {
+      if (!this.isIdColumn(key)) { // On exclut les champs ID
+        formControls[key] = new FormControl('');
+      }
+    });
+  }
+  
+  this.addForm = new FormGroup(formControls);
+  this.errorMessage = null;
+}
+
+getAddFormFields(): string[] {
+  return this.addForm ? Object.keys(this.addForm.controls) : [];
+}
+
+isRequiredField(field: string): boolean {
+  // Cette méthode peut être adaptée si vous avez des infos sur les champs requis
+  return false; // Par défaut, aucun champ n'est requis côté front
+}
+
+isLoading = false;
+onAddSubmit(): void {
+  if (this.addForm.valid) {
+    this.isLoading = true; // Ajoutez un indicateur de chargement
+    this.errorMessage = null;
+    
+    this.genericTableService.createItem(this.tableName, this.addForm.value)
+      .subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          this.loadDataWithFilters();
+          this.cancelAdding();
+          // Notification de succès
+          
+        },
+        error: (err) => {
+          this.isLoading = false;
+          console.error('Détails complets de l\'erreur:', err);
+          this.errorMessage = this.getUserFriendlyError(err);
+        }
+      });
+  }
+}
+
+cancelAdding(): void {
+  this.isAddingMode = false;
+  this.addForm.reset();
+  this.errorMessage = null;
+}
+private getUserFriendlyError(err: any): string {
+  if (err.message.includes('Impossible de se connecter au serveur')) {
+    return 'Serveur indisponible. Veuillez vérifier votre connexion.';
+  }
+  if (err.message.includes('Erreur serveur')) {
+    return 'Le serveur a rencontré une erreur. Détails techniques: ' + err.message;
+  }
+  return err.message || 'Erreur lors de la création';
+}
+
 }

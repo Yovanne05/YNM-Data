@@ -7,3 +7,4 @@ class Langue(GenericModel):
 
     idLangue = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.String(100), unique=True, nullable=False)
+    languedisponible = db.relationship('LangueDisponible', cascade='all,delete', backref='langues')

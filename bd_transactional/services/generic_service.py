@@ -1,5 +1,9 @@
+import json
 from typing import Type, List, Any, Dict, Optional
-from sqlalchemy.exc import SQLAlchemyError
+import sqlalchemy
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from sqlalchemy.orm import class_mapper
+
 from databases.db import db
 from sqlalchemy import inspect
 
@@ -23,17 +27,60 @@ class GenericService:
         except SQLAlchemyError as e:
             raise Exception(f"Erreur lors de la récupération: {str(e)}")
 
-    def create(self, data: Dict[str, Any]) -> Any:
-        """Crée un nouvel enregistrement"""
+    def create_item(self, data):
+        """Version robuste avec validation améliorée"""
         try:
-            obj = self.model_class(**data)
-            db.session.add(obj)
+            # Validation des types
+            schema = {
+                'nom': {'type': 'string', 'maxlength': 100},
+                'date_debut': {'type': 'string', 'regex': r'^\d{4}-\d{2}-\d{2}$'},
+                # Ajoutez tous les champs nécessaires
+            }
+
+            errors = {}
+            for field, rules in schema.items():
+                if field in data:
+                    if not isinstance(data[field], str) and rules['type'] == 'string':
+                        errors[field] = "Doit être une chaîne de caractères"
+                    # Ajoutez d'autres règles de validation...
+
+            if errors:
+                raise ValueError(json.dumps({"errors": errors}))
+
+            # Reste de la logique...
+            item = self.model_class(**data)
+            db.session.add(item)
             db.session.commit()
-            return obj
-        except SQLAlchemyError as e:
-            print(str(e))
+            return item
+
+        except ValueError as ve:
             db.session.rollback()
-            raise Exception(f"Erreur lors de la création: {str(e)}")
+            try:
+                # Si l'erreur contient du JSON (validation structurée)
+                error_data = json.loads(str(ve))
+                raise ValueError(error_data)
+            except json.JSONDecodeError:
+                # Erreur texte simple
+                raise ve
+
+    def _validate_data(self, data):
+        """Validation des données métier"""
+        # 1. Vérifier les champs requis
+        required_fields = {
+            column.name for column in self.model_class.__table__.columns
+            if not column.nullable
+               and not column.primary_key
+               and column.default is None
+               and column.server_default is None
+        }
+
+        missing_fields = required_fields - set(data.keys())
+        if missing_fields:
+            raise ValueError(f"Champs requis manquants: {', '.join(missing_fields)}")
+
+        # 2. Validation spécifique au modèle
+        if hasattr(self.model_class, 'validate'):
+            self.model_class.validate(data)
 
     def update(self, id: int, data: Dict[str, Any]) -> Optional[Any]:
         """Met à jour un enregistrement"""
@@ -49,14 +96,18 @@ class GenericService:
             raise Exception(f"Erreur lors de la mise à jour: {str(e)}")
 
     def delete(self, id: int) -> bool:
-        """Supprime un enregistrement"""
+        """Supprime un enregistrement avec cascade"""
         try:
+            # Charge l'objet avec toutes ses relations (ajustez selon vos besoins)
             obj = db.session.query(self.model_class).get(id)
-            if obj:
-                db.session.delete(obj)
-                db.session.commit()
-                return True
-            return False
+
+            if not obj:
+                return False
+
+            db.session.delete(obj)  # Laisser SQLAlchemy gérer la cascade
+            db.session.commit()
+            return True
+
         except SQLAlchemyError as e:
             db.session.rollback()
             raise Exception(f"Erreur lors de la suppression: {str(e)}")
@@ -124,3 +175,55 @@ class GenericService:
             return query.all()
         except Exception as e:
             raise Exception(f"Erreur lors du filtrage: {str(e)}")
+
+    def get_primary_key(self, item):
+        """Récupère le nom de la colonne clé primaire"""
+        mapper = class_mapper(self.model_class)
+        primary_keys = mapper.primary_key
+        if not primary_keys:
+            raise ValueError("Aucune clé primaire définie pour ce modèle")
+        return primary_keys[0].name
+
+    def get_column_schema(self, column_name: str) -> Dict[str, Any]:
+        """Version corrigée avec gestion robuste des colonnes ENUM"""
+        try:
+            # Vérification de base
+            if not hasattr(self.model_class, '__table__'):
+                return {"error": "Model has no table representation"}
+
+            # Récupération sécurisée de la colonne
+            column = getattr(self.model_class, column_name, None)
+            if column is None:
+                return {"error": f"Column {column_name} not found"}
+
+            # Pour les colonnes SQLAlchemy standard
+            if hasattr(column, 'type'):
+                type_info = {
+                    "name": column_name,
+                    "type": str(column.type),
+                    "nullable": column.nullable
+                }
+
+                # Gestion spéciale des ENUM
+                if hasattr(column.type, 'enums'):
+                    type_info.update({
+                        "type": "ENUM",
+                        "values": column.type.enums
+                    })
+
+                return type_info
+
+            return {"error": "Column type could not be determined"}
+
+        except Exception as e:
+            return {"error": str(e)}
+
+    def get_enum_values(self, column_name: str) -> Optional[List[str]]:
+        """Récupère les valeurs possibles pour une colonne ENUM"""
+        try:
+            column = self.model_class.__table__.columns.get(column_name)
+            if column and hasattr(column.type, 'enums'):
+                return column.type.enums
+            return None
+        except Exception as e:
+            raise Exception(f"Erreur lors de la récupération des valeurs ENUM: {str(e)}")

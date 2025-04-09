@@ -1,3 +1,5 @@
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import inspect
 from databases.db import db
 from typing import Dict, Any
 import re
@@ -7,6 +9,8 @@ def camel_to_snake(name: str) -> str:
 
 class GenericModel(db.Model):
     __abstract__ = True  # Important pour les modèles de base
+
+
 
     @classmethod
     def from_db(cls, data: Dict[str, Any]) -> "GenericModel":

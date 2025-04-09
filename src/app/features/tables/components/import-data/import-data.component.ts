@@ -13,6 +13,9 @@ export class ImportDataComponent {
   fichierCSV!: File;
   private readonly csvImportService = inject(CsvImportService);
 
+  showImport = false;
+
+
   @Input() tableName!: string;
 
   showErrorMessage: boolean = false;

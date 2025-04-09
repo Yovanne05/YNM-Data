@@ -38,7 +38,7 @@ export class TableNavBarComponent implements OnInit {
     } else if (width < 768) {
       this.tablesPerPage = 6;
     } else {
-      this.tablesPerPage = 12;
+      this.tablesPerPage = 11;
     }
     this.totalPages = Math.ceil(this.tableNames.length / this.tablesPerPage);
     this.currentPage = 1;

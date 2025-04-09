@@ -25,10 +25,10 @@ import { ViewingTrend } from '../../../../models/analysis/temporal.stats.ts/view
     DailyActivityChartComponent,
     UserEngagementChartComponent
   ],
-  templateUrl: './analysis-card.component.html',
-  styleUrl: './analysis-card.component.scss'
+  templateUrl: './analysis-page.component.html',
+  styleUrl: './analysis-page.component.scss'
 })
-export class AnalysisCardComponent implements OnInit, OnDestroy {
+export class AnalysisPageComponent implements OnInit, OnDestroy {
   dailyActivity: DailyViewingActivity['by_date'] = [];
   userEngagement?: UserEngagement;
   contentPerformance: ContentPerformance[] = [];
@@ -81,7 +81,7 @@ export class AnalysisCardComponent implements OnInit, OnDestroy {
       this.behaviorAnalysisService.getDailyViewingActivity(),
       this.contentAnalysisService.getTopContent(5),
       this.contentAnalysisService.getContentPerformance(),
-      this.temporalAnalysisService.getViewingTrends('month')
+      this.temporalAnalysisService.getViewingTrends('day')
     ]).subscribe({
       next: ([
         userEngagementRes,

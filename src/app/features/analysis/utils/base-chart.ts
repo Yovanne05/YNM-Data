@@ -44,23 +44,57 @@ export abstract class ChartBaseComponent implements OnChanges {
         title: {
           display: true,
           text: this.chartTitle,
+          color: '#ffffff',
+          font: {
+            size: 16,
+            weight: 'bold'
+          }
         },
+        legend: {
+          labels: {
+            color: '#ffffff',
+            font: {
+              size: 14
+            }
+          }
+        }
       },
       scales: {
         y: {
           beginAtZero: true,
           title: {
             display: true,
-            text: 'Nombre de vues',
+            color: '#ffffff',
+            font: {
+              size: 14,
+              weight: 'bold'
+            }
           },
+          ticks: {
+            color: '#ffffff'
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          }
         },
         x: {
           title: {
             display: true,
             text: 'Date',
+            color: '#ffffff',
+            font: {
+              size: 14,
+              weight: 'bold'
+            }
           },
-        },
-      },
+          ticks: {
+            color: '#ffffff'
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          }
+        }
+      }
     };
   }
 }

@@ -22,7 +22,7 @@ export class ViewingTrendsChartComponent extends ChartBaseComponent {
     const periodMap = new Map<string, number>();
     this.chartData.forEach(item => {
       const total = periodMap.get(item.period) || 0;
-      periodMap.set(item.period, total + item.view_count);
+      periodMap.set(item.period, item.view_count);
     });
 
     const labels = Array.from(periodMap.keys());

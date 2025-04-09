@@ -1,8 +1,8 @@
-import { AnalysisCardComponent } from './features/analysis/pages/analysis-card/analysis-card.component';
+import { AnalysisPageComponent } from './features/analysis/pages/analysis-page/analysis-page.component';
 import { Routes } from '@angular/router';
 import { NotFoundComponent } from './shared/pages/not-found/not-found.component';
 import { TableListPageComponent } from './features/tables/pages/table-list-page/table-list-page.component';
-import { DashboardPageComponent } from './features/dashboard/pages/dashboard-page/dashboard-page.component';
+import { HomePageComponent } from './features/dashboard/pages/home-page/home-page.component';
 import { InitAddPageComponent } from './features/init-add/pages/init-add-page/init-add-page.component';
 
 export const routes: Routes = [
@@ -13,7 +13,7 @@ export const routes: Routes = [
   },
   {
     path: 'home',
-    component: DashboardPageComponent
+    component: HomePageComponent
   },
   {
     path: 'tables',
@@ -25,7 +25,7 @@ export const routes: Routes = [
   },
   {
     path: 'analysis',
-    component: AnalysisCardComponent
+    component: AnalysisPageComponent
   },
   {
     path: '**',

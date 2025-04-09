@@ -14,33 +14,33 @@ export class GenericTableService {
   constructor(private http: HttpClient) {}
 
   getTableData(
-  tableName: string,
-  filters?: { [key: string]: { operator: string, value: string } }
-): Observable<Record<string, string>[]> {
-  let params = new HttpParams();
+    tableName: string,
+    filters?: { [key: string]: { operator: string, value: string } }
+  ): Observable<Record<string, string>[]> {
+    let params = new HttpParams();
 
-  if (filters) {
-    Object.keys(filters).forEach(key => {
-      const filter = filters[key];
-      if (filter.value) {
-        params = params.set(`${key}__${filter.operator}`, filter.value);
-      }
-    });
+    if (filters) {
+      Object.keys(filters).forEach(key => {
+        const filter = filters[key];
+        if (filter.value) {
+          params = params.set(`${key}__${filter.operator}`, filter.value);
+        }
+      });
+    }
+
+    return this.http.get<Record<string, string>[]>(
+      `${this.apiUrl}/${tableName}`,
+      { params }
+    ).pipe(
+      catchError((err) => {
+        console.error(
+          `Erreur lors de la récupération des données de la table ${tableName}`,
+          err
+        );
+        throw new Error(`Une erreur est survenue: ${err}`);
+      })
+    );
   }
-
-  return this.http.get<Record<string, string>[]>(
-    `${this.apiUrl}/${tableName.toLocaleLowerCase()}`,
-    { params }
-  ).pipe(
-    catchError((err) => {
-      console.error(
-        `Erreur lors de la récupération des données de la table ${tableName}`,
-        err
-      );
-      throw new Error(`Une erreur est survenue: ${err}`);
-    })
-  );
-}
 
   getTables(): Observable<TableStructure> {
     return this.http.get<TableStructure>(`${this.apiUrl}/tables`).pipe(
@@ -53,7 +53,7 @@ export class GenericTableService {
 
   getTableDataByTableName(table_name: string): Observable<TableStructure> {
     return this.http
-      .get<TableStructure>(`${this.apiUrl}/${table_name.toLocaleLowerCase()}/structure`)
+      .get<TableStructure>(`${this.apiUrl}/${table_name}/structure`)
       .pipe(
         catchError((err) => {
           console.error(
@@ -73,7 +73,7 @@ export class GenericTableService {
     };
 
     return this.http
-      .delete(`${this.apiUrl}/${tableName.toLocaleLowerCase()}/${id}`, {
+      .delete(`${this.apiUrl}/${tableName}/${id}`, {
         body: requestBody,
         headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
       })
@@ -89,15 +89,7 @@ export class GenericTableService {
   }
 
   createItem(tableName: string, data: any): Observable<{id: number}> {
-    if (!data || typeof data !== 'object') {
-      return throwError(() => new Error('Données invalides'));
-    }
-
-    return this.http.post<{id: number}>(`${this.apiUrl}/${tableName.toLocaleLowerCase()}`, data).pipe(
-      catchError((error) => {
-        console.error(`Erreur lors de la création dans ${tableName}`, error);
-        let errorMessage = 'Erreur inconnue';
-
+    console.log(data)
     return this.http.post<{id: number}>(`${this.apiUrl}/${tableName}`, data).pipe(
       catchError((error: HttpErrorResponse) => {
         console.error('Full error:', {
@@ -125,7 +117,7 @@ export class GenericTableService {
     const id = this.extractIdFromItem(tableName, item);
 
     return this.http
-      .put(`${this.apiUrl}/${tableName.toLocaleLowerCase()}/${id}`, updatedData, {
+      .put(`${this.apiUrl}/${tableName}/${id}`, updatedData, {
         headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
       })
       .pipe(
@@ -139,7 +131,7 @@ export class GenericTableService {
 
   getTableSchema(tableName: string): Observable<{[key: string]: string}> {
     return this.http.get<{[key: string]: string}>(
-      `${this.apiUrl}/${tableName.toLocaleLowerCase()}/schema`
+      `${this.apiUrl}/${tableName}/schema`
     ).pipe(
       catchError(err => {
         console.error('Error fetching schema', err);
@@ -163,12 +155,28 @@ export class GenericTableService {
     if (!idValue) {
       throw new Error(
         `Aucun ID détecté pour ${tableName}. ` +
-          `Colonnes disponibles: ${Object.keys(item).join(', ')}`
+        `Colonnes disponibles: ${Object.keys(item).join(', ')}`
       );
     }
 
     const numericId = Number(idValue)
     return numericId;
+  }
+
+
+
+  getColumnSchema(tableName: string, columnName: string): Observable<any> {
+    return this.http.get<any>(
+      `${this.apiUrl}/${tableName}/schema/${columnName}`
+    ).pipe(
+      catchError(err => {
+        console.error(`Error fetching schema for ${columnName}:`, err);
+        return of({
+          type: 'text',
+          values: []
+        });
+      })
+    );
   }
 
 }

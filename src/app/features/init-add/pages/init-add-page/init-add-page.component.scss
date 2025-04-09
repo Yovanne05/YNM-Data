@@ -1,6 +1,8 @@
-.container-init{
+.container-init {
   display: flex;
-  height: 100%;
-  justify-items: center;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  height: 100%;
 }

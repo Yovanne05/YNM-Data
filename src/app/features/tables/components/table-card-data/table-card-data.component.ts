@@ -24,32 +24,39 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
   @Input() data: Record<string, string>[] = [];
   @Input() filters: any[] = [];
 
+  // Forms
   editForm = new FormGroup({});
   filterForm: FormGroup = new FormGroup({});
   tempItemForm: FormGroup = new FormGroup({});
+  addForm: FormGroup = new FormGroup({});
 
+  // State variables
   showFilters = false;
   editingItem: any = null;
   sortKeys: { key: string; direction: 'asc' | 'desc' }[] = [];
   filteredData: Record<string, string>[] = [];
+  activeDropdown: any = null;
+  isAddingMode = false;
+  isLoading = false;
+  errorMessage: string | null = null;
+  newItem: {[key: string]: any} = {};
+  requiredFields: string[] = [];
+  tableSchema: {[key: string]: string} = {};
+  fieldTypes: {[key: string]: {type: string, values?: string[]}} = {};
 
+  // Pagination
   dataPerPage: number = 8;
   paginationData: Record<string, string>[] = [];
   actualPage: number = 0;
   pageNumber!: number;
-  filteredData: any[] = [];
-  activeDropdown: any = null;
 
+  // Outputs
   filterSubmit = output<void>();
   filterReset = output<void>();
   itemEdited = output<any>();
   itemDeleted = output<any>();
   sortChanged = output<{ key: string; direction: 'asc' | 'desc' }[]>();
   sendTablesData = new EventEmitter<any[]>();
-  tableSchema: {[key: string]: string} = {};
-
-  errorMessage: string | null = null;
-
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] && this.data.length > 0) {
@@ -67,17 +74,56 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     this.dataSubscription?.unsubscribe();
   }
 
+  // Helper methods
   isIdColumn(column: string): boolean {
     if (!column) return false;
     const lowerColumn = column.toLowerCase();
     return lowerColumn === 'id' ||
-           lowerColumn === `id${this.tableName.charAt(0).toUpperCase() + this.tableName.slice(1)}`.toLowerCase();
+      lowerColumn === `id${this.tableName.charAt(0).toUpperCase() + this.tableName.slice(1)}`.toLowerCase();
   }
 
+  getObjectKeys(obj: any): string[] {
+    return obj ? Object.keys(obj) : [];
+  }
+
+  getSortDirection(key: string): 'asc' | 'desc' | null {
+    const sort = this.sortKeys.find((s) => s.key === key);
+    return sort ? sort.direction : null;
+  }
+
+  getSortOrder(key: string): number | null {
+    const index = this.sortKeys.findIndex((s) => s.key === key);
+    return index >= 0 ? index + 1 : null;
+  }
+
+  getInputType(field: string): string {
+    return this.fieldTypes[field]?.type || 'text';
+  }
+
+  getAddFormFields(): string[] {
+    return this.addForm ? Object.keys(this.addForm.controls) : [];
+  }
+
+  isRequiredField(field: string): boolean {
+    return this.requiredFields.includes(field);
+  }
+
+  // UI interaction methods
   toggleFilters(): void {
     this.showFilters = !this.showFilters;
   }
 
+  toggleDropdown(event: MouseEvent, item: any): void {
+    event.stopPropagation();
+    this.activeDropdown = this.activeDropdown === item ? null : item;
+  }
+
+  @HostListener('document:click')
+  closeDropdown(): void {
+    this.activeDropdown = null;
+  }
+
+  // Sorting methods
   onSort(key: string): void {
     let newSortKeys = [...this.sortKeys];
     const existingIndex = newSortKeys.findIndex(s => s.key === key);
@@ -136,19 +182,6 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     return direction === 'asc' ? String(a).localeCompare(String(b)) : String(b).localeCompare(String(a));
   }
 
-  toggleDropdown(event: MouseEvent, item: any): void {
-    event.stopPropagation();
-    this.activeDropdown = this.activeDropdown === item ? null : item;
-  }
-
-  @HostListener('document:click')
-  closeDropdown(): void {
-    this.activeDropdown = null;
-  }
-
-
-
-
   removeSort(key: string): void {
     this.sortKeys = this.sortKeys.filter((s) => s.key !== key);
     this.applySort();
@@ -162,6 +195,7 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     this.setPaginationData();
   }
 
+  // Filter methods
   private loadFilters(): void {
     this.filterRegistry.getFiltersForTable(this.tableName).subscribe({
       next: (filters) => {
@@ -230,6 +264,7 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     this.filterReset.emit();
   }
 
+  // CRUD operations
   startEditing(item: any): void {
     this.editingItem = item;
     this.tempItemForm = new FormGroup({});
@@ -269,106 +304,122 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     }
   }
 
-  getObjectKeys(obj: any): string[] {
-    return obj ? Object.keys(obj) : [];
+  // Add item functionality
+  startAdding(): void {
+    this.isAddingMode = true;
+    this.newItem = {}; // Réinitialiser l'objet newItem
+    this.initAddForm();
+    this.errorMessage = null;
+    this.cancelEditing();
   }
 
-  getSortDirection(key: string): 'asc' | 'desc' | null {
-    const sort = this.sortKeys.find((s) => s.key === key);
-    return sort ? sort.direction : null;
+  private async initAddForm(): Promise<void> {
+    this.addForm = new FormGroup({});
+    this.fieldTypes = {};
+
+    if (this.filteredData.length > 0) {
+      const sampleItem = this.filteredData[0];
+      await this.loadColumnSchemas(sampleItem);
+
+      Object.keys(sampleItem).forEach(key => {
+        if (!this.isIdColumn(key)) {
+          // Initialiser avec une valeur vide et non null
+          this.addForm.addControl(key, new FormControl(''));
+          // Lier la valeur à newItem
+          this.addForm.get(key)?.valueChanges.subscribe(value => {
+            this.newItem[key] = value;
+          });
+        }
+      });
+    }
   }
 
-  getSortOrder(key: string): number | null {
-    const index = this.sortKeys.findIndex((s) => s.key === key);
-    return index >= 0 ? index + 1 : null;
+  private async loadColumnSchemas(sampleItem: any): Promise<void> {
+    const fields = Object.keys(sampleItem).filter(key => !this.isIdColumn(key));
+
+    for (const field of fields) {
+      try {
+        const schema = await this.genericTableService.getColumnSchema(
+          this.tableName,
+          field
+        ).toPromise();
+
+        this.fieldTypes[field] = schema;
+      } catch (e) {
+        console.error(`Failed to load schema for ${field}:`, e);
+        this.fieldTypes[field] = { type: 'text' };
+      }
+    }
   }
 
-onDocumentClick(event: MouseEvent): void {
-  if (!(event.target as Element).closest('.relative')) {
-    this.activeDropdown = null;
+  onAddSubmit(): void {
+    if (this.addForm.valid) {
+      this.isLoading = true;
+      this.errorMessage = null;
+
+      // Convertir les types si nécessaire
+      this.convertFormDataTypes();
+
+      this.genericTableService.createItem(this.tableName, this.newItem)
+        .subscribe({
+          next: (response) => {
+            this.isLoading = false;
+            this.loadDataWithFilters();
+            this.cancelAdding();
+          },
+          error: (err) => {
+            this.isLoading = false;
+            console.error('Détails complets de l\'erreur:', err);
+            this.errorMessage = this.getUserFriendlyError(err);
+          }
+        });
+    }
   }
-}
 
-addForm: FormGroup = new FormGroup({});
-isAddingMode = false;
+  private convertFormDataTypes(): void {
+    const formValue = this.addForm.value;
 
-// Méthodes à ajouter
-startAdding(): void {
-  this.isAddingMode = true;
-  this.initAddForm();
-}
+    // Convert numeric fields
+    const numericFields = ['id', 'age', 'prix', 'annee', 'duree', 'saison'];
+    numericFields.forEach(field => {
+      if (formValue[field] !== undefined) {
+        this.addForm.get(field)?.setValue(Number(formValue[field]));
+      }
+    });
 
-private initAddForm(): void {
-  const formControls: { [key: string]: FormControl } = {};
-
-  if (this.filteredData.length > 0) {
-    const sampleItem = this.filteredData[0];
-
-    Object.keys(sampleItem).forEach(key => {
-      if (!this.isIdColumn(key)) { // On exclut les champs ID
-        formControls[key] = new FormControl('');
+    // Convert date fields
+    const dateFields = ['dateDebutLicence', 'dateFinLicence'];
+    dateFields.forEach(field => {
+      if (formValue[field]) {
+        const dateValue = new Date(formValue[field]).toISOString().split('T')[0];
+        this.addForm.get(field)?.setValue(dateValue);
       }
     });
   }
 
-  this.addForm = new FormGroup(formControls);
-  this.errorMessage = null;
-}
-
-getAddFormFields(): string[] {
-  return this.addForm ? Object.keys(this.addForm.controls) : [];
-}
-
-isRequiredField(field: string): boolean {
-  // Cette méthode peut être adaptée si vous avez des infos sur les champs requis
-  return false; // Par défaut, aucun champ n'est requis côté front
-}
-
-isLoading = false;
-onAddSubmit(): void {
-  if (this.addForm.valid) {
-    this.isLoading = true; // Ajoutez un indicateur de chargement
+  cancelAdding(): void {
+    this.isAddingMode = false;
+    this.addForm.reset();
     this.errorMessage = null;
-
-    this.genericTableService.createItem(this.tableName, this.addForm.value)
-      .subscribe({
-        next: (response) => {
-          this.isLoading = false;
-          this.loadDataWithFilters();
-          this.cancelAdding();
-          // Notification de succès
-
-        },
-        error: (err) => {
-          this.isLoading = false;
-          console.error('Détails complets de l\'erreur:', err);
-          this.errorMessage = this.getUserFriendlyError(err);
-        }
-      });
   }
-}
 
-cancelAdding(): void {
-  this.isAddingMode = false;
-  this.addForm.reset();
-  this.errorMessage = null;
-}
-private getUserFriendlyError(err: any): string {
-  if (err.message.includes('Impossible de se connecter au serveur')) {
-    return 'Serveur indisponible. Veuillez vérifier votre connexion.';
+  private getUserFriendlyError(err: any): string {
+    if (err.message.includes('Impossible de se connecter au serveur')) {
+      return 'Serveur indisponible. Veuillez vérifier votre connexion.';
+    }
+    if (err.message.includes('Erreur serveur')) {
+      return 'Le serveur a rencontré une erreur. Détails techniques: ' + err.message;
+    }
+    return err.message || 'Erreur lors de la création';
   }
-  if (err.message.includes('Erreur serveur')) {
-    return 'Le serveur a rencontré une erreur. Détails techniques: ' + err.message;
-  }
-  return err.message || 'Erreur lors de la création';
-}
 
-
-  //Méthodes pour la pagination
+  // Pagination methods
   setPaginationData(): void {
-    this.paginationData = this.filteredData.slice(this.actualPage*this.dataPerPage, (this.actualPage+1)*this.dataPerPage);
-    this.pageNumber = Math.ceil(this.filteredData.length/this.dataPerPage);
-    console.log(this.pageNumber);
+    this.paginationData = this.filteredData.slice(
+      this.actualPage * this.dataPerPage,
+      (this.actualPage + 1) * this.dataPerPage
+    );
+    this.pageNumber = Math.ceil(this.filteredData.length / this.dataPerPage);
   }
 
   nextPage(): void {
@@ -384,5 +435,4 @@ private getUserFriendlyError(err: any): string {
       this.setPaginationData();
     }
   }
-
 }

@@ -3,7 +3,7 @@ from databases.db import db
 
 
 class Utilisateur(GenericModel):
-    __tablename__ = 'utilisateur'
+    __tablename__ = 'Utilisateur'
 
     idUtilisateur = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.String(100), nullable=False)

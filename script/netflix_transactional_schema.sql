@@ -16,22 +16,6 @@ CREATE TABLE Utilisateur (
     statutAbonnement ENUM('Actif', 'Résilié') DEFAULT 'Actif'
 );
 
-DELIMITER //
-
-CREATE TRIGGER verif_utilisateur_age
-BEFORE INSERT ON Utilisateur
-FOR EACH ROW
-BEGIN
-  IF NEW.age IS NOT NULL AND NEW.age < 0 THEN
-    SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'Lâge doit être positif ou nul.';
-  END IF;
-END;
-//
-
-DELIMITER ;
-
-
 -- Table Abonnement
 CREATE TABLE Abonnement (
     idAbonnement INT AUTO_INCREMENT PRIMARY KEY,
@@ -40,22 +24,6 @@ CREATE TABLE Abonnement (
     prix DECIMAL(6,2) NOT NULL CHECK (prix > 0 AND prix <= 20.00),
     FOREIGN KEY (idUtilisateur) REFERENCES Utilisateur(idUtilisateur) ON DELETE CASCADE
 );
-
-
-DELIMITER //
-
-CREATE TRIGGER verif_abonnement_prix
-BEFORE INSERT ON Abonnement
-FOR EACH ROW
-BEGIN
-  IF NEW.prix <= 0 OR NEW.prix > 20.00 THEN
-    SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'Le prix de labonnement doit être compris entre 0.01 et 20.00 €.';
-  END IF;
-END;
-//
-
-DELIMITER ;
 
 -- Table Paiement
 CREATE TABLE Paiement (
@@ -87,76 +55,6 @@ CREATE TABLE Titre (
     description TEXT
 );
 
-DELIMITER //
-
-CREATE TRIGGER verif_titre_annee
-BEFORE INSERT ON Titre
-FOR EACH ROW
-BEGIN
-  IF NEW.annee < 1900 OR NEW.annee > YEAR(CURDATE()) + 5 THEN
-    SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'L’année doit être comprise entre 1900 et 5 ans après l’année actuelle.';
-  END IF;
-END;
-//
-
-CREATE TRIGGER verif_titre_annee_update
-BEFORE UPDATE ON Titre
-FOR EACH ROW
-BEGIN
-  IF NEW.annee < 1900 OR NEW.annee > YEAR(CURDATE()) + 5 THEN
-    SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'L’année doit être comprise entre 1900 et 5 ans après l’année actuelle.';
-  END IF;
-END;
-//
-
-DELIMITER ;
-
-DELIMITER //
-
-CREATE TRIGGER verif_titre_insert
-BEFORE INSERT ON Titre
-FOR EACH ROW
-BEGIN
-  IF NEW.dateFinLicence <= NEW.dateDebutLicence THEN
-    SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'La date de fin de licence doit être après la date de début.';
-  END IF;
-
-  IF NEW.annee > YEAR(NEW.dateDebutLicence) THEN
-    SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'Lannée doit être inférieure ou égale à lannée de début de licence.';
-  END IF;
-END;
-//
-
-DELIMITER ;
-
-
-DELIMITER //
-
-CREATE TRIGGER verif_titre_update
-BEFORE UPDATE ON Titre
-FOR EACH ROW
-BEGIN
-  IF NEW.dateFinLicence <= NEW.dateDebutLicence THEN
-    SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'La date de fin de licence doit être après la date de début.';
-  END IF;
-
-  IF NEW.annee > YEAR(NEW.dateDebutLicence) THEN
-    SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'Lannée doit être inférieure ou égale à lannée de début de licence.';
-  END IF;
-END;
-//
-
-DELIMITER ;
-
-
-
-
 -- Table Film
 CREATE TABLE Film (
     idFilm INT AUTO_INCREMENT PRIMARY KEY,
@@ -164,23 +62,6 @@ CREATE TABLE Film (
     duree INT CHECK (duree > 0),
     FOREIGN KEY (idTitre) REFERENCES Titre(idTitre) ON DELETE CASCADE
 );
-
-DELIMITER //
-
-CREATE TRIGGER verif_film_duree
-BEFORE INSERT ON Film
-FOR EACH ROW
-BEGIN
-  IF NEW.duree <= 0 THEN
-    SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'La durée du film doit être strictement positive.';
-  END IF;
-END;
-//
-
-DELIMITER ;
-
-
 -- Table Serie
 CREATE TABLE Serie (
     idSerie INT AUTO_INCREMENT PRIMARY KEY,
@@ -188,22 +69,6 @@ CREATE TABLE Serie (
     saison INT CHECK (saison > 0),
     FOREIGN KEY (idTitre) REFERENCES Titre(idTitre) ON DELETE CASCADE
 );
-
-DELIMITER //
-
-CREATE TRIGGER verif_serie_saison
-BEFORE INSERT ON Serie
-FOR EACH ROW
-BEGIN
-  IF NEW.saison <= 0 THEN
-    SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'Le nombre de saisons doit être strictement positif.';
-  END IF;
-END;
-//
-
-DELIMITER ;
-
 
 -- Table Genre
 CREATE TABLE Genre (
@@ -280,22 +145,6 @@ CREATE TABLE Evaluation (
     FOREIGN KEY (idProfil) REFERENCES Profil(idProfil) ON DELETE CASCADE,
     FOREIGN KEY (idTitre) REFERENCES Titre(idTitre) ON DELETE CASCADE
 );
-
-
-DELIMITER //
-
-CREATE TRIGGER verif_evaluation_note
-BEFORE INSERT ON Evaluation
-FOR EACH ROW
-BEGIN
-  IF NEW.note < 1 OR NEW.note > 5 THEN
-    SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'La note doit être comprise entre 1 et 5.';
-  END IF;
-END;
-//
-
-DELIMITER ;
 
 -- Table MaListe
 CREATE TABLE MaListe (

@@ -3,7 +3,7 @@ from databases.db import db
 
 
 class Studio(GenericModel):
-    __tablename__ = 'studio'
+    __tablename__ = 'Studio'
 
     idStudio = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.String(255), unique=True, nullable=False)

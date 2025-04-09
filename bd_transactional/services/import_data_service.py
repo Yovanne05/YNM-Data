@@ -1,6 +1,8 @@
 import csv
 from typing import List, TypeAlias
 from flask import Request
+from sqlalchemy import inspect
+
 from databases.db import db
 
 from bd_transactional.services.generic_service import GenericService
@@ -50,7 +52,9 @@ def import_data_to_db(table_name: str) -> None:
 
 def get_instance(table_name: str) -> netflix_object :
     try:
-        if table_name not in db.models:
+        print("oui ?")
+        print(inspect(db).get_table_names())
+        if table_name not in db.tables.keys():
             raise Exception(f"La table {table_name} n'existe pas")
         model = type(db.models.get(table_name.lower()))
         return model()
@@ -62,17 +66,18 @@ def read_data(table_name: str) -> list[dict[str, str]]:
     try:
         separateur = get_separateur(FILE_PATH)
         headers = get_headers(FILE_PATH, separateur)
+        insp = inspect(db.engine)
+        column_names = [col["name"] for col in insp.get_columns(table_name)]
         if headers:
-            if sorted(headers) != sorted(get_instance(table_name).as_dict().keys()):
+            if sorted(headers) != sorted(column_names):
                 raise Exception("Les en-tête du fichier ne correspondent pas aux attributs de la table")
-        #TODO: faire en sorte de pouvoir éviter la colonne id
         with open(FILE_PATH, mode="r", encoding="utf-8") as file:
             reader = csv.reader(file)
             all_lines = []
             if headers:
                 next(reader)
             for row in reader:
-                line_dict = dict(zip(sorted(get_instance(table_name).as_dict().keys()), row))
+                line_dict = dict(zip(sorted(column_names), row))
                 pop_id(table_name, line_dict)
                 all_lines.append(line_dict)
         return all_lines

@@ -21,7 +21,7 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
   private dataSubscription?: Subscription;
 
   @Input() tableName!: string;
-  @Input() data: any[] = [];
+  @Input() data: Record<string, string>[] = [];
   @Input() filters: any[] = [];
 
   editForm = new FormGroup({});
@@ -31,7 +31,12 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
   showFilters = false;
   editingItem: any = null;
   sortKeys: { key: string; direction: 'asc' | 'desc' }[] = [];
-  filteredData: any[] = [];
+  filteredData: Record<string, string>[] = [];
+
+  dataPerPage: number = 8;
+  paginationData: Record<string, string>[] = [];
+  actualPage: number = 0;
+  pageNumber!: number;
 
   filterSubmit = output<void>();
   filterReset = output<void>();
@@ -49,6 +54,7 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     if (changes['data'] && this.data.length > 0) {
       this.filteredData = [...this.data];
       this.applySort();
+      this.setPaginationData();
     }
     if (changes['filters'] || changes['tableName']) {
       this.loadFilters();
@@ -104,6 +110,7 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
       }
       return 0;
     });
+    this.setPaginationData();
   }
 
   /**
@@ -144,6 +151,7 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     this.sortKeys = [];
     this.filteredData = [...this.data];
     this.sortChanged.emit([]);
+    this.setPaginationData();
   }
 
   private loadFilters(): void {
@@ -178,6 +186,7 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
           this.filteredData = [...data];
           this.applySort();
           this.sendTablesData.emit([...this.filteredData]);
+          this.setPaginationData();
         },
         error: (err) => console.error('Error loading filtered data:', err),
       });
@@ -333,6 +342,28 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     };
 
     this.requiredFields = requiredFieldsMap[this.tableName] || [];
+  }
+
+
+  //Méthodes pour la pagination
+  setPaginationData(): void {
+    this.paginationData = this.filteredData.slice(this.actualPage*this.dataPerPage, (this.actualPage+1)*this.dataPerPage);
+    this.pageNumber = Math.ceil(this.filteredData.length/this.dataPerPage);
+    console.log(this.pageNumber);
+  }
+
+  nextPage(): void {
+    if(this.actualPage + 1 < this.pageNumber) {
+      this.actualPage++;
+      this.setPaginationData();
+    }
+  }
+
+  prevPage(): void {
+    if(this.actualPage - 1 >= 0) {
+      this.actualPage--;
+      this.setPaginationData();
+    }
   }
 
 }

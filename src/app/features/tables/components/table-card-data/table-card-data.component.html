@@ -103,7 +103,7 @@
         (sort)="onSort($event)"
       ></app-table-header>
 
-      @for (item of filteredData; track $index) {
+      @for (item of paginationData; track $index) {
       <app-table-row
         [item]="item"
         [columns]="getObjectKeys(item)"
@@ -125,5 +125,23 @@
       Chargement en cours...
     </div>
     }
+
+    <!-- Boutons de pagination -->
+    <div class="flex justify-center gap-2 mt-4">
+      <button 
+        (click)="prevPage()" 
+        class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md text-sm transition-colors disabled:opacity-50"
+        [disabled]="actualPage == 0"
+      >
+        < Précédent
+      </button>
+      <button 
+        (click)="nextPage()" 
+        class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md text-sm transition-colors disabled:opacity-50"
+        [disabled]="(actualPage + 1) * dataPerPage >= filteredData.length"
+      >
+        Suivant >
+      </button>
+    </div>
   </div>
 </div>

@@ -29,6 +29,7 @@ class GenericService:
 
     def create_item(self, data):
         """Version robuste avec validation améliorée"""
+        print(data)
         try:
             # Validation des types
             schema = {

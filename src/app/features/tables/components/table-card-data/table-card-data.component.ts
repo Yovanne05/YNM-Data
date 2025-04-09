@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, SimpleChanges, inject, output, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, SimpleChanges, inject, output, OnDestroy, HostListener } from '@angular/core';
 import { FormGroup, FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { TableFiltersComponent } from '../table-filters/table-filters.component';
 import { TableHeaderComponent } from '../table-header/table-header.component';
@@ -37,6 +37,8 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
   paginationData: Record<string, string>[] = [];
   actualPage: number = 0;
   pageNumber!: number;
+  filteredData: any[] = [];
+  activeDropdown: any = null;
 
   filterSubmit = output<void>();
   filterReset = output<void>();
@@ -44,16 +46,16 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
   itemDeleted = output<any>();
   sortChanged = output<{ key: string; direction: 'asc' | 'desc' }[]>();
   sendTablesData = new EventEmitter<any[]>();
+  tableSchema: {[key: string]: string} = {};
 
-  isAddingMode = false;
-  newItem: {[key: string]: any} = {};
-  requiredFields: string[] = [];
   errorMessage: string | null = null;
+
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] && this.data.length > 0) {
       this.filteredData = [...this.data];
       this.applySort();
+      this.activeDropdown = null;
       this.setPaginationData();
     }
     if (changes['filters'] || changes['tableName']) {
@@ -65,14 +67,17 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     this.dataSubscription?.unsubscribe();
   }
 
+  isIdColumn(column: string): boolean {
+    if (!column) return false;
+    const lowerColumn = column.toLowerCase();
+    return lowerColumn === 'id' ||
+           lowerColumn === `id${this.tableName.charAt(0).toUpperCase() + this.tableName.slice(1)}`.toLowerCase();
+  }
+
   toggleFilters(): void {
     this.showFilters = !this.showFilters;
   }
 
-  /**
-   * Gère le tri multi-colonnes (asc → desc → reset)
-   * @param key - La colonne à trier
-   */
   onSort(key: string): void {
     let newSortKeys = [...this.sortKeys];
     const existingIndex = newSortKeys.findIndex(s => s.key === key);
@@ -97,9 +102,6 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     this.sortChanged.emit([...this.sortKeys]);
   }
 
-  /**
-   * Applique les tris cumulatifs selon la priorité d'ajout
-   */
   private applySort(): void {
     if (!this.filteredData || this.sortKeys.length === 0) return;
 
@@ -113,13 +115,6 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     this.setPaginationData();
   }
 
-  /**
-   * Compare deux valeurs avec détection automatique du type
-   * @param a - Première valeur à comparer
-   * @param b - Deuxième valeur à comparer
-   * @param direction - Direction du tri ('asc' ou 'desc')
-   * @returns Résultat de comparaison (-1, 0, 1)
-   */
   private compareValues(a: any, b: any, direction: 'asc' | 'desc'): number {
     if (a == null || b == null) {
       if (a == null && b == null) return 0;
@@ -140,6 +135,19 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
 
     return direction === 'asc' ? String(a).localeCompare(String(b)) : String(b).localeCompare(String(a));
   }
+
+  toggleDropdown(event: MouseEvent, item: any): void {
+    event.stopPropagation();
+    this.activeDropdown = this.activeDropdown === item ? null : item;
+  }
+
+  @HostListener('document:click')
+  closeDropdown(): void {
+    this.activeDropdown = null;
+  }
+
+
+
 
   removeSort(key: string): void {
     this.sortKeys = this.sortKeys.filter((s) => s.key !== key);
@@ -226,7 +234,9 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     this.editingItem = item;
     this.tempItemForm = new FormGroup({});
     Object.keys(item).forEach((key) => {
-      this.tempItemForm.addControl(key, new FormControl(item[key]));
+      if (!this.isIdColumn(key)) { // Ne pas inclure les champs ID dans le formulaire
+        this.tempItemForm.addControl(key, new FormControl(item[key]));
+      }
     });
   }
 
@@ -273,76 +283,85 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     return index >= 0 ? index + 1 : null;
   }
 
-  cancelAdding(): void {
-    this.isAddingMode = false;
-    this.newItem = {};
+onDocumentClick(event: MouseEvent): void {
+  if (!(event.target as Element).closest('.relative')) {
+    this.activeDropdown = null;
+  }
+}
+
+addForm: FormGroup = new FormGroup({});
+isAddingMode = false;
+
+// Méthodes à ajouter
+startAdding(): void {
+  this.isAddingMode = true;
+  this.initAddForm();
+}
+
+private initAddForm(): void {
+  const formControls: { [key: string]: FormControl } = {};
+
+  if (this.filteredData.length > 0) {
+    const sampleItem = this.filteredData[0];
+
+    Object.keys(sampleItem).forEach(key => {
+      if (!this.isIdColumn(key)) { // On exclut les champs ID
+        formControls[key] = new FormControl('');
+      }
+    });
+  }
+
+  this.addForm = new FormGroup(formControls);
+  this.errorMessage = null;
+}
+
+getAddFormFields(): string[] {
+  return this.addForm ? Object.keys(this.addForm.controls) : [];
+}
+
+isRequiredField(field: string): boolean {
+  // Cette méthode peut être adaptée si vous avez des infos sur les champs requis
+  return false; // Par défaut, aucun champ n'est requis côté front
+}
+
+isLoading = false;
+onAddSubmit(): void {
+  if (this.addForm.valid) {
+    this.isLoading = true; // Ajoutez un indicateur de chargement
     this.errorMessage = null;
+
+    this.genericTableService.createItem(this.tableName, this.addForm.value)
+      .subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          this.loadDataWithFilters();
+          this.cancelAdding();
+          // Notification de succès
+
+        },
+        error: (err) => {
+          this.isLoading = false;
+          console.error('Détails complets de l\'erreur:', err);
+          this.errorMessage = this.getUserFriendlyError(err);
+        }
+      });
   }
+}
 
-  saveNewItem(): void {
-    // Validation des champs requis
-    const missingFields = this.requiredFields.filter(field => !this.newItem[field]);
-
-    if (missingFields.length > 0) {
-      this.errorMessage = `Champs requis manquants: ${missingFields.join(', ')}`;
-      return;
-    }
-
-    // Conversion des types si nécessaire
-    this.convertDataTypes();
-
-    this.genericTableService.createItem(this.tableName, this.newItem).subscribe({
-      next: (response) => {
-        this.loadDataWithFilters(); // Recharge les données
-        this.isAddingMode = false;
-        this.newItem = {};
-      },
-      error: (err) => {
-        this.errorMessage = err.message;
-        console.error('Erreur détaillée:', err);
-      }
-    });
+cancelAdding(): void {
+  this.isAddingMode = false;
+  this.addForm.reset();
+  this.errorMessage = null;
+}
+private getUserFriendlyError(err: any): string {
+  if (err.message.includes('Impossible de se connecter au serveur')) {
+    return 'Serveur indisponible. Veuillez vérifier votre connexion.';
   }
-
-  private convertDataTypes(): void {
-    // Convertit les champs numériques
-    const numericFields = ['id', 'age', 'prix', 'annee', 'duree', 'saison'];
-    numericFields.forEach(field => {
-      if (this.newItem[field] !== undefined) {
-        this.newItem[field] = Number(this.newItem[field]);
-      }
-    });
-
-    // Convertit les champs date
-    const dateFields = ['dateDebutLicence', 'dateFinLicence'];
-    dateFields.forEach(field => {
-      if (this.newItem[field]) {
-        this.newItem[field] = new Date(this.newItem[field]).toISOString().split('T')[0];
-      }
-    });
+  if (err.message.includes('Erreur serveur')) {
+    return 'Le serveur a rencontré une erreur. Détails techniques: ' + err.message;
   }
-
-  startAdding(): void {
-    this.isAddingMode = true;
-    this.newItem = {};
-    this.errorMessage = null;
-    this.loadRequiredFields();
-    this.cancelEditing(); // Annule l'édition en cours si elle existe
-  }
-
-  private loadRequiredFields(): void {
-    // Cette méthode devrait idéalement faire un appel API pour récupérer
-    // les champs requis depuis le backend. Pour l'exemple, nous utilisons
-    // une solution temporaire:
-
-    const requiredFieldsMap: {[key: string]: string[]} = {
-      'Utilisateur': ['nom', 'prenom', 'email', 'numero'],
-      'Abonnement': ['typeAbonnement', 'prix', 'idUtilisateur'],
-      'Titre': ['nom', 'annee', 'dateDebutLicence', 'dateFinLicence']
-    };
-
-    this.requiredFields = requiredFieldsMap[this.tableName] || [];
-  }
+  return err.message || 'Erreur lors de la création';
+}
 
 
   //Méthodes pour la pagination

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams,HttpErrorResponse } from '@angular/common/http';
 import { Observable,throwError, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { API_CONFIG } from '../../config/api.config';
@@ -98,13 +98,25 @@ export class GenericTableService {
         console.error(`Erreur lors de la création dans ${tableName}`, error);
         let errorMessage = 'Erreur inconnue';
 
+    return this.http.post<{id: number}>(`${this.apiUrl}/${tableName}`, data).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('Full error:', {
+          url: error.url,
+          status: error.status,
+          serverMessage: error.error?.error || error.error,
+          validationErrors: error.error?.missing_fields || error.error?.errors
+        });
+
+        let userMessage = 'Erreur lors de la création';
         if (error.status === 400) {
-          errorMessage = error.error?.error || 'Champs requis manquants';
-        } else if (error.status === 500) {
-          errorMessage = 'Erreur serveur - veuillez réessayer plus tard';
+          if (error.error?.missing_fields) {
+            userMessage = `Champs manquants: ${error.error.missing_fields.join(', ')}`;
+          } else if (error.error?.error) {
+            userMessage = error.error.error;
+          }
         }
 
-        return throwError(() => new Error(errorMessage));
+        return throwError(() => new Error(userMessage));
       })
     );
   }

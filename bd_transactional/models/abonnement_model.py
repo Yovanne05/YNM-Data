@@ -10,4 +10,3 @@ class Abonnement(GenericModel):
     prix = db.Column(db.Numeric(6, 2), nullable=False)
 
     utilisateur = db.relationship('Utilisateur', cascade='all,delete', backref='abonnements')
-    paiement = db.relationship('Paiement', cascade='all,delete', backref='abonnements')

@@ -3,45 +3,45 @@ from typing import Dict, Any
 
 
 class Config:
-    # DB_COMMON = {
-    #     'drivername': 'mysql+pymysql',
-    #     'host': 'localhost',
-    #     'username': 'root',
-    #     'password': '',
-    #     'query': {'charset': 'utf8mb4'}
-    # }
-    #
-    # DATABASES = {
-    #     'transactional': {
-    #         **DB_COMMON,
-    #         'database': 'netflixdb'
-    #     },
-    #     'entrepot': {
-    #         **DB_COMMON,
-    #         'database': 'entrepot_netflix'
-    #     }
-    # }
-
     DB_COMMON = {
         'drivername': 'mysql+pymysql',
-        'host': 'database-etudiants.iut.univ-paris8.fr',
+        'host': 'localhost',
+        'username': 'root',
+        'password': '',
         'query': {'charset': 'utf8mb4'}
     }
 
     DATABASES = {
         'transactional': {
             **DB_COMMON,
-            'username': 'dutinfopw201655',
-            'password': 'hevenequ',
-            'database': 'dutinfopw201655'
+            'database': 'netflixdb'
         },
         'entrepot': {
             **DB_COMMON,
-            'username': 'dutinfopw201657',
-            'password': 'qupevuna',
-            'database': 'dutinfopw201657'
+            'database': 'entrepot_netflix'
         }
     }
+
+    # DB_COMMON = {
+    #     'drivername': 'mysql+pymysql',
+    #     'host': 'database-etudiants.iut.univ-paris8.fr',
+    #     'query': {'charset': 'utf8mb4'}
+    # }
+    #
+    # DATABASES = {
+    #     'transactional': {
+    #         **DB_COMMON,
+    #         'username': 'dutinfopw201655',
+    #         'password': 'hevenequ',
+    #         'database': 'dutinfopw201655'
+    #     },
+    #     'entrepot': {
+    #         **DB_COMMON,
+    #         'username': 'dutinfopw201657',
+    #         'password': 'qupevuna',
+    #         'database': 'dutinfopw201657'
+    #     }
+    # }
 
     def get_db_config(self, db_type: str) -> Dict[str, Any]:
         """Récupère la configuration pour un type de base spécifique"""

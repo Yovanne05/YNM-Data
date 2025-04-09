@@ -8,7 +8,3 @@ class Profil(GenericModel):
     nom = db.Column(db.String(100), nullable=False)
     typeProfil = db.Column(db.Enum('Adulte', 'Enfant'), default='Adulte', nullable=False)
     idUtilisateur = db.Column(db.Integer, db.ForeignKey('utilisateur.idUtilisateur'), nullable=False)
-
-    utilisateur = db.relationship('Utilisateur', backref='profils')
-    evaluation = db.relationship('Evaluation', cascade='all,delete', backref='profils')
-    maliste = db.relationship('MaListe', cascade='all,delete', backref='profils')

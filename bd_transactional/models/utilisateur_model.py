@@ -3,7 +3,7 @@ from databases.db import db
 
 
 class Utilisateur(GenericModel):
-    __tablename__ = 'Utilisateur'
+    __tablename__ = 'utilisateur'
 
     idUtilisateur = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.String(100), nullable=False)
@@ -13,6 +13,4 @@ class Utilisateur(GenericModel):
     email = db.Column(db.String(255), unique=True, nullable=False)
     numero = db.Column(db.String(15), unique=True, nullable=False)
     statutAbonnement = db.Column(db.Enum('Actif', 'Résilié'), default='Actif')
-    abonnement = db.relationship('Abonnement', cascade='all,delete' , backref='utilisateurs')
-    profil = db.relationship('Profil', cascade='all,delete', backref='utilisateurs')
-    
+    profils = db.relationship('Profil', backref='utilisateur', cascade='all,delete')

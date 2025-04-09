@@ -94,3 +94,13 @@ class GenericController:
                 return jsonify(structure), 200
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
+
+        @self.blueprint.route("/schema/<column_name>", methods=["GET"])
+        def get_column_schema(column_name: str):
+            try:
+                schema = self.service.get_column_schema(column_name)
+                if "error" in schema:
+                    return jsonify(schema), 400
+                return jsonify(schema)
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500

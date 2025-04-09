@@ -183,3 +183,47 @@ class GenericService:
         if not primary_keys:
             raise ValueError("Aucune clé primaire définie pour ce modèle")
         return primary_keys[0].name
+
+    def get_column_schema(self, column_name: str) -> Dict[str, Any]:
+        """Version corrigée avec gestion robuste des colonnes ENUM"""
+        try:
+            # Vérification de base
+            if not hasattr(self.model_class, '__table__'):
+                return {"error": "Model has no table representation"}
+
+            # Récupération sécurisée de la colonne
+            column = getattr(self.model_class, column_name, None)
+            if column is None:
+                return {"error": f"Column {column_name} not found"}
+
+            # Pour les colonnes SQLAlchemy standard
+            if hasattr(column, 'type'):
+                type_info = {
+                    "name": column_name,
+                    "type": str(column.type),
+                    "nullable": column.nullable
+                }
+
+                # Gestion spéciale des ENUM
+                if hasattr(column.type, 'enums'):
+                    type_info.update({
+                        "type": "ENUM",
+                        "values": column.type.enums
+                    })
+
+                return type_info
+
+            return {"error": "Column type could not be determined"}
+
+        except Exception as e:
+            return {"error": str(e)}
+
+    def get_enum_values(self, column_name: str) -> Optional[List[str]]:
+        """Récupère les valeurs possibles pour une colonne ENUM"""
+        try:
+            column = self.model_class.__table__.columns.get(column_name)
+            if column and hasattr(column.type, 'enums'):
+                return column.type.enums
+            return None
+        except Exception as e:
+            raise Exception(f"Erreur lors de la récupération des valeurs ENUM: {str(e)}")

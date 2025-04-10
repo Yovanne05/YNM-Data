@@ -4,7 +4,7 @@ import { NotFoundComponent } from './shared/pages/not-found/not-found.component'
 import { TableListPageComponent } from './features/tables/pages/table-list-page/table-list-page.component';
 import { HomePageComponent } from './features/dashboard/pages/home-page/home-page.component';
 import { InitAddPageComponent } from './features/init-add/pages/init-add-page/init-add-page.component';
-
+import { LogComponent } from './features/logs/logs.component';
 export const routes: Routes = [
   {
     path: '',
@@ -26,6 +26,9 @@ export const routes: Routes = [
   {
     path: 'analysis',
     component: AnalysisPageComponent
+  },{
+    path: 'logs',
+    component : LogComponent
   },
   {
     path: '**',

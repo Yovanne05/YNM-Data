@@ -7,7 +7,7 @@ def reset_db():
     db.create_all()
 
 def add_sample_data():
-    with open("script/netflix_transactional_insert.sql", "r") as file:
+    with open("script/netflix_transactional_insert.sql", "r", encoding="utf-8") as file:
         fichier_insert = file.read()
 
     with db.engine.connect() as connexion:

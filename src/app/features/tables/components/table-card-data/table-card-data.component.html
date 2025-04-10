@@ -21,6 +21,7 @@
     </button>
   </div>
 
+  <!-- Modal d'ajout -->
   @if (isAddingMode) {
     <div class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md border border-gray-700">
@@ -29,6 +30,7 @@
           <h3 class="text-xl font-bold text-white">Ajouter un nouvel élément</h3>
         </div>
 
+        <!-- Conteneur scrollable -->
         <div class="max-h-[60vh] overflow-y-auto pr-2 -mr-2 mb-4">
           <form [formGroup]="addForm" (ngSubmit)="onAddSubmit()">
             <div class="grid grid-cols-1 gap-4">
@@ -80,6 +82,7 @@
           </form>
         </div>
 
+        <!-- Pied de modal fixe -->
         <div class="pt-4 border-t border-gray-700">
           @if (errorMessage) {
             <div class="mb-3 p-2 bg-red-900/50 text-red-300 text-sm rounded flex items-start gap-2">
@@ -112,6 +115,7 @@
     </div>
   }
 
+  <!-- Filtres -->
   @if (showFilters) {
     <app-table-filters
       [filters]="filters"
@@ -121,6 +125,7 @@
     ></app-table-filters>
   }
 
+  <!-- Tableau -->
   <div class="p-2">
     @if (filteredData) {
       @if (filteredData.length > 0) {
@@ -147,6 +152,7 @@
           </div>
         </div>
 
+        <!-- Pagination -->
         <div class="flex justify-center gap-2 mt-4">
           <button
             (click)="prevPage()"

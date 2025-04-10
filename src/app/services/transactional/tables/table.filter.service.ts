@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class TableFilterService {
   filterForm: FormGroup = new FormGroup({});
 

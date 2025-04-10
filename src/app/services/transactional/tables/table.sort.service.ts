@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
+
 export class TableSortService {
-  sortKeys: { key: string; direction: 'asc' | 'desc' }[] = [];
+  private _sortKeys: { key: string; direction: 'asc' | 'desc' }[] = [];
 
   onSort(key: string): void {
-    let newSortKeys = [...this.sortKeys];
+    let newSortKeys = [...this._sortKeys];
     const existingIndex = newSortKeys.findIndex(s => s.key === key);
 
     if (existingIndex >= 0) {
@@ -23,6 +26,12 @@ export class TableSortService {
       newSortKeys = newSortKeys.slice(-3);
     }
 
-    this.sortKeys = newSortKeys;
+    this._sortKeys = newSortKeys;
+    console.log(this.sortKeys);
+  }
+
+
+  get sortKeys(): { key: string; direction: "asc" | "desc" }[] {
+    return this._sortKeys;
   }
 }

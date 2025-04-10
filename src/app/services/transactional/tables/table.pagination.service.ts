@@ -1,6 +1,8 @@
 import { Injectable } from "@angular/core";
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class TablePaginationService {
   currentPage: number = 1;
   itemsPerPage: number = 15;

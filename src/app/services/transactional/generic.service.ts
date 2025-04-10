@@ -186,22 +186,20 @@ export class GenericTableService {
 
   getTableDataNoPagination(
     tableName: string,
-    filters?: { [key: string]: { operator: string, value: string } }
+    params: Record<string, string> // Format: { "colonne__operateur": "valeur", "sort_colonne": "asc|desc" }
   ): Observable<Record<string, string>[]> {
-    let params = new HttpParams();
+    let httpParams = new HttpParams();
 
-    if (filters) {
-      Object.keys(filters).forEach(key => {
-        const filter = filters[key];
-        if (filter.value) {
-          params = params.set(`${key}__${filter.operator}`, filter.value);
-        }
-      });
-    }
+    // Ajouter tous les paramètres (filtres et tris)
+    Object.keys(params).forEach(key => {
+      if (params[key]) {
+        httpParams = httpParams.set(key, params[key]);
+      }
+    });
 
     return this.http.get<Record<string, string>[]>(
       `${this.apiUrl}/${tableName}/no_pagination`,
-      { params }
+      { params: httpParams }
     ).pipe(
       catchError((err) => {
         console.error(

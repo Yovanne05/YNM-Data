@@ -27,7 +27,6 @@ import {TablePaginationService} from "../../../../services/transactional/tables/
   ],
   templateUrl: './table-card-data.component.html',
   styleUrls: ['./table-card-data.component.scss'],
-  providers: [GenericTableService, TableSortService, TableFilterService, TablePaginationService]
 })
 export class TableCardDataComponent implements OnChanges, OnDestroy {
   private filterRegistry = inject(FilterRegistryService);
@@ -161,7 +160,7 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
         error: (err) => console.error('Error loading filtered data:', err),
       });
 
-      
+
   }
 
   onSubmitFilters(): void {

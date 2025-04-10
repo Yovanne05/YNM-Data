@@ -42,10 +42,9 @@ class GenericController:
 
                 item = self.service.create_item(data)
 
-                # Récupération dynamique de la clé primaire
                 primary_key = self.service.get_primary_key(item)
                 return jsonify({
-                    "id": getattr(item, primary_key),  # Accès dynamique à l'ID
+                    "id": getattr(item, primary_key),
                     "message": "Création réussie"
                 }), 201
 

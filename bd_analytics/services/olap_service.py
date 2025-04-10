@@ -42,7 +42,6 @@ class OLAPService:
                 else:
                     query = query.join(join_item)
         else:
-            # Jointure automatique basée sur les relations
             for dim in dimensions:
                 if hasattr(dim, 'class_') and dim.class_ != fact_table:
                     for rel in fact_table.__mapper__.relationships:

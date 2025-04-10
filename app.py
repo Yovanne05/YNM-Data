@@ -109,7 +109,6 @@ def test_db():
 @app.route('/check-db')
 def check_db():
     try:
-        # Utilisez text() pour les requêtes SQL brutes
         engine = db.get_engine(app, bind='entrepot')
         with engine.connect() as conn:
             result = conn.execute(text("SELECT COUNT(*) FROM Temps"))

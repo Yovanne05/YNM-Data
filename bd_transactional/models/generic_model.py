@@ -8,9 +8,7 @@ def camel_to_snake(name: str) -> str:
     return re.sub(r'([a-z])([A-Z])', r'\1_\2', name).lower()
 
 class GenericModel(db.Model):
-    __abstract__ = True  # Important pour les modèles de base
-
-
+    __abstract__ = True
 
     @classmethod
     def from_db(cls, data: Dict[str, Any]) -> "GenericModel":

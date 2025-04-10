@@ -1,4 +1,3 @@
-# databases/model_registry.py
 class ModelRegistry:
     def __init__(self, db):
         self._models = {}

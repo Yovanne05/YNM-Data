@@ -39,14 +39,15 @@ def etl_status() -> Tuple[Response, int]:
     """
     Vérifier le statut du dernier ETL
     """
+    #TODO : A implémenter
     try:
 
         return jsonify(format_response(
             success=True,
             data={
-                'last_execution': '2023-11-15T14:30:00',  # À remplacer
+                'last_execution': '2023-11-15T14:30:00',
                 'status': 'completed',
-                'records_processed': 1250  # À remplacer
+                'records_processed': 1250
             }
         )), 200
 

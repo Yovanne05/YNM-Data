@@ -30,8 +30,9 @@ from bd_analytics.controllers.comportement_analysis_controller import behavior_a
 from bd_analytics.controllers.temporal_analysis_controller import temporal_analysis_controller
 from bd_analytics.controllers.etl_controller import etl_controller
 from bd_transactional.controllers.initialise_db_controller import initialise_db_controller
-
+from bd_transactional.controllers.log_controller import log_controller
 blueprints = [
+    log_controller,
     etl_controller,
     content_analysis_controller,
     behavior_analysis_controller,
@@ -64,8 +65,13 @@ init_app(app)
 CORS(app, resources={r"/*": {"origins": "*"}})
 app.config.from_object(Config)
 
+
+
+
 for blueprint in blueprints:
     app.register_blueprint(blueprint)
+
+
 
 
 @app.before_request

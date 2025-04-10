@@ -59,42 +59,51 @@ class GenericController:
             try:
                 data = request.get_json()
                 if not data:
+                    self.service.add_log("CREATE", "FAILED", "Aucune donnée fournie")
                     return jsonify({"error": "Aucune donnée fournie"}), 400
 
                 item = self.service.create_item(data)
-
                 primary_key = self.service.get_primary_key(item)
+
+                self.service.add_log("CREATE", "SUCCESS", f"ID: {getattr(item, primary_key)}")
                 return jsonify({
                     "id": getattr(item, primary_key),
                     "message": "Création réussie"
                 }), 201
 
             except Exception as e:
+                self.service.add_log("CREATE", "FAILED", str(e))
                 return jsonify({"error": str(e)}), 500
 
         @self.blueprint.route("/<int:id>", methods=["PUT"])
         def update(id: int):
-            """Met à jour un élément existant"""
             try:
                 item = self.service.get_by_id(id)
                 if not item:
+                    self.service.add_log("UPDATE", "FAILED", f"ID {id} non trouvé")
                     return jsonify({"error": "Ressource inexistante"}), 404
 
                 data = request.get_json()
                 self.service.update(id, data)
+
+                self.service.add_log("UPDATE", "SUCCESS", f"ID: {id}")
                 return jsonify(data), 200
             except Exception as e:
+                self.service.add_log("UPDATE", "FAILED", f"ID: {id}")
                 return jsonify({"error": str(e)}), 500
 
         @self.blueprint.route("/<int:id>", methods=["DELETE"])
         def delete(id: int):
-            """Supprime un élément existant"""
             try:
                 success = self.service.delete(id)
                 if not success:
+                    self.service.add_log("DELETE", "FAILED", f"ID {id} non trouvé")
                     return jsonify({"error": "Ressource inexistante"}), 404
+
+                self.service.add_log("DELETE", "SUCCESS", f"ID: {id}")
                 return jsonify({"message": "Suppression effectuée"}), 200
             except Exception as e:
+                self.service.add_log("DELETE", "FAILED", f"ID: {id}")
                 return jsonify({"error": str(e)}), 500
 
         @self.blueprint.route("/schema", methods=["GET"])

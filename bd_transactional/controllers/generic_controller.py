@@ -8,17 +8,27 @@ class GenericController:
 
         @self.blueprint.route("/", methods=["GET"])
         def get_all():
-            """Récupère tous les éléments ou les éléments filtrés avec pagination"""
+            """Récupère tous les éléments ou les éléments filtrés avec pagination et tri"""
             try:
                 page = request.args.get('page', default=1, type=int)
                 per_page = request.args.get('per_page', default=5, type=int)
                 filters = request.args.to_dict()
 
+                sort_params = []
+                for key in list(filters.keys()):
+                    if key.startswith('sort_'):
+                        sort_params.append((key[5:], filters.pop(key)))
+
                 filters.pop('page', None)
                 filters.pop('per_page', None)
 
-                if filters:
-                    items, total = self.service.get_with_filters(filters, page=page, per_page=per_page)
+                if filters or sort_params:
+                    items, total = self.service.get_with_filters_and_sort(
+                        filters,
+                        sort_params,
+                        page=page,
+                        per_page=per_page
+                    )
                 else:
                     items, total = self.service.get_paginated(page=page, per_page=per_page)
 

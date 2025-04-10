@@ -127,16 +127,29 @@ class GenericController:
 
         @self.blueprint.route("/no_pagination", methods=["GET"])
         def get_all_no_pagination():
-            """Récupère tous les éléments sans pagination"""
+            """Récupère tous les éléments sans pagination avec filtres et tri"""
             try:
-                filters = request.args.to_dict()
-                if filters:
-                    items = self.service.get_with_filters(filters)
+                params = request.args.to_dict()
+
+                filters = {}
+                sort_params = []
+                for key, value in params.items():
+                    if key.startswith("sort_"):
+                        column = key.replace("sort_", "")
+                        sort_params.append((column, value))
+                    elif "__" in key:
+                        filters[key] = value
+                    else:
+                        filters[f"{key}__eq"] = value
+                print(filters, sort_params)
+                if filters or sort_params:
+                    items = self.service.get_with_filters_and_sort_no_pagination(filters, sort_params)
                 else:
                     items = self.service.get_all()
 
                 if items and hasattr(items[0], 'as_dict'):
                     return jsonify([item.as_dict() for item in items]), 200
                 return jsonify(items), 200
+
             except Exception as e:
                 return jsonify({"error": str(e)}), 500

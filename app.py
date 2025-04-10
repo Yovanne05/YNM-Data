@@ -77,8 +77,6 @@ def handle_options():
         response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization")
         response.headers.add("Access-Control-Max-Age", "86400")
         return response, 200
-
-
 @app.route('/tables')
 def get_tables():
     try:
@@ -95,24 +93,3 @@ def get_tables():
     except Exception as e:
         app.logger.error(f"Error fetching tables: {str(e)}")
         return jsonify({"error": "Unable to fetch database structure"}), 500
-@app.route('/test-db')
-def test_db():
-    try:
-        with app.app_context():
-            engine = db.get_engine()
-            conn = engine.connect()
-            conn.close()
-            return jsonify({"status": "success", "message": "Connexion à la BDD réussie !"})
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
-
-@app.route('/check-db')
-def check_db():
-    try:
-        engine = db.get_engine(app, bind='entrepot')
-        with engine.connect() as conn:
-            result = conn.execute(text("SELECT COUNT(*) FROM Temps"))
-            count = result.scalar()
-            return f"La table Temps contient {count} enregistrements"
-    except Exception as e:
-        return f"Erreur: {str(e)}", 500

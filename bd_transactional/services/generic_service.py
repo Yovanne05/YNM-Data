@@ -258,6 +258,19 @@ class GenericService:
         except SQLAlchemyError as e:
             raise self._handle_db_error("requêtage", e)
 
+    def get_with_filters_and_sort_no_pagination(self, filters: dict, sort_params: list) -> List[Any]:
+        """Récupère les données avec filtres et tri sans pagination (pour export)"""
+        query = self._apply_filters(
+            query=db.session.query(self.model_class),
+            filters=filters
+        )
+        query = self._apply_sorting(query, sort_params)
+
+        try:
+            return query.all()
+        except SQLAlchemyError as e:
+            raise self._handle_db_error("requêtage sans pagination", e)
+
     def _handle_db_error(self, operation: str, error: Exception) -> Exception:
         """Gère les erreurs de base de données."""
         return Exception(f"Erreur lors de la {operation}: {str(error)}")

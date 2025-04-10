@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams,HttpErrorResponse } from '@angular/common/http';
 import { Observable,throwError, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError,switchMap } from 'rxjs/operators';
 import { API_CONFIG } from '../../config/api.config';
 import { TableStructure } from '../../models/transactionnal/table_response';
+
 
 @Injectable({
   providedIn: 'root',
@@ -73,28 +74,44 @@ export class GenericTableService {
       );
   }
 
+
   deleteItem(tableName: string, item: any): Observable<any> {
-    const id = this.extractIdFromItem(tableName, item);
+    return this.http.get<{is_composite: boolean, columns: string[]}>(
+      `${this.apiUrl}/${tableName}/primary-keys`
+    ).pipe(
+      switchMap(pkInfo => {
+            if (!pkInfo) throw new Error('Impossible de récupérer les informations de clé primaire');
+            
+            if (pkInfo.is_composite) {
+                const compositeKey: Record<string, any> = {};
+                
+                // Construction typée de la clé composite
+                pkInfo.columns.forEach((col: string) => {
+                    if (item[col] === undefined || item[col] === null) {
+                        throw new Error(`Item manque la colonne clé primaire: ${col}`);
+                    }
+                    compositeKey[col] = item[col];
+                });
 
-    return this.http.delete(`${this.apiUrl}/${tableName}/${id}`, {
-      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
-    }).pipe(
-      catchError((err) => {
-        console.error(`Erreur suppression ${tableName} id ${id}`, err);
-        let errorMessage = 'Erreur inconnue';
-
-        if (err.error instanceof ErrorEvent) {
-          errorMessage = `Erreur: ${err.error.message}`;
-        } else if (err.error?.message) {
-          errorMessage = err.error.message;
-        } else {
-          errorMessage = `Erreur ${err.status}: ${err.statusText}`;
-        }
-
-        return throwError(() => new Error(errorMessage));
-      })
+                return this.http.delete(`${this.apiUrl}/${tableName}`, {
+                    body: compositeKey,
+                    headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+                });
+            } else {
+                const idColumn = pkInfo.columns[0];
+                const id = item[idColumn] || item['id'];
+                if (id === undefined || id === null) {
+                    throw new Error('ID manquant pour la suppression');
+                }
+                return this.http.delete(`${this.apiUrl}/${tableName}/${id}`);
+            }
+        }),
+        catchError(error => {
+            console.error('Erreur lors de la suppression:', error);
+            return throwError(error);
+        })
     );
-  }
+}
 
   createItem(tableName: string, data: any): Observable<{id: number}> {
     return this.http.post<{id: number}>(`${this.apiUrl}/${tableName}/`, data).pipe(

@@ -25,13 +25,11 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
   @Input() data: Record<string, string>[] = [];
   @Input() filters: any[] = [];
 
-  // Forms
   editForm = new FormGroup({});
   filterForm: FormGroup = new FormGroup({});
   tempItemForm: FormGroup = new FormGroup({});
   addForm: FormGroup = new FormGroup({});
 
-  // State variables
   showFilters = false;
   editingItem: any = null;
   sortKeys: { key: string; direction: 'asc' | 'desc' }[] = [];
@@ -45,13 +43,11 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
   tableSchema: {[key: string]: string} = {};
   fieldTypes: {[key: string]: {type: string, values?: string[]}} = {};
 
-  // Pagination
   dataPerPage: number = 8;
   paginationData: Record<string, string>[] = [];
   actualPage: number = 0;
   pageNumber!: number;
 
-  // Outputs
   filterSubmit = output<void>();
   filterReset = output<void>();
   itemEdited = output<any>();
@@ -75,7 +71,6 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     this.dataSubscription?.unsubscribe();
   }
 
-  // Helper methods
   isIdColumn(column: string): boolean {
     if (!column) return false;
     const lowerColumn = column.toLowerCase();
@@ -109,7 +104,6 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     return this.requiredFields.includes(field);
   }
 
-  // UI interaction methods
   toggleFilters(): void {
     this.showFilters = !this.showFilters;
   }
@@ -124,7 +118,6 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     this.activeDropdown = null;
   }
 
-  // Sorting methods
   onSort(key: string): void {
     let newSortKeys = [...this.sortKeys];
     const existingIndex = newSortKeys.findIndex(s => s.key === key);
@@ -196,7 +189,6 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     this.setPaginationData();
   }
 
-  // Filter methods
   private loadFilters(): void {
     this.filterRegistry.getFiltersForTable(this.tableName).subscribe({
       next: (filters) => {
@@ -265,12 +257,11 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     this.filterReset.emit();
   }
 
-  // CRUD operations
   startEditing(item: any): void {
     this.editingItem = item;
     this.tempItemForm = new FormGroup({});
     Object.keys(item).forEach((key) => {
-      if (!this.isIdColumn(key)) { // Ne pas inclure les champs ID dans le formulaire
+      if (!this.isIdColumn(key)) {
         this.tempItemForm.addControl(key, new FormControl(item[key]));
       }
     });
@@ -305,10 +296,9 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     }
   }
 
-  // Add item functionality
   startAdding(): void {
     this.isAddingMode = true;
-    this.newItem = {}; // Réinitialiser l'objet newItem
+    this.newItem = {};
     this.initAddForm();
     this.errorMessage = null;
     this.cancelEditing();
@@ -324,9 +314,7 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
 
       Object.keys(sampleItem).forEach(key => {
         if (!this.isIdColumn(key)) {
-          // Initialiser avec une valeur vide et non null
           this.addForm.addControl(key, new FormControl(''));
-          // Lier la valeur à newItem
           this.addForm.get(key)?.valueChanges.subscribe(value => {
             this.newItem[key] = value;
           });
@@ -358,7 +346,6 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
       this.isLoading = true;
       this.errorMessage = null;
 
-      // Convertir les types si nécessaire
       this.convertFormDataTypes();
 
       this.genericTableService.createItem(this.tableName, this.newItem)
@@ -380,7 +367,6 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
   private convertFormDataTypes(): void {
     const formValue = this.addForm.value;
 
-    // Convert numeric fields
     const numericFields = ['id', 'age', 'prix', 'annee', 'duree', 'saison'];
     numericFields.forEach(field => {
       if (formValue[field] !== undefined) {
@@ -388,7 +374,6 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
       }
     });
 
-    // Convert date fields
     const dateFields = ['dateDebutLicence', 'dateFinLicence'];
     dateFields.forEach(field => {
       if (formValue[field]) {
@@ -414,7 +399,6 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     return err.message || 'Erreur lors de la création';
   }
 
-  // Pagination methods
   setPaginationData(): void {
     this.paginationData = this.filteredData.slice(
       this.actualPage * this.dataPerPage,

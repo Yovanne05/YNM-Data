@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { InitDbComponent } from '../../components/init-db/init-db.component';
-import { AddSampleComponent } from "../../add-sample/add-sample.component";
+import { AddSampleComponent } from "../../components/add-sample/add-sample.component";
 
 @Component({
   selector: 'app-init-add-page',

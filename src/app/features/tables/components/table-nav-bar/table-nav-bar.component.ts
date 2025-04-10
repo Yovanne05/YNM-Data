@@ -3,11 +3,12 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { TableStructure } from '../../../../models/transactionnal/table_response';
 import { TableCardComponent } from '../table-card-name/table-card-name.component';
 import { GenericTableService } from '../../../../services/transactional/generic.service';
+import {MatIcon} from "@angular/material/icon";
 
 @Component({
   selector: 'app-table-nav-bar',
   standalone: true,
-  imports: [TableCardComponent],
+  imports: [TableCardComponent, MatIcon],
   templateUrl: './table-nav-bar.component.html',
   styleUrls: ['./table-nav-bar.component.scss']
 })

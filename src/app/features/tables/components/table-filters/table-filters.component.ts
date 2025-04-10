@@ -1,10 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {MatIcon} from "@angular/material/icon";
 
 @Component({
   selector: 'app-table-filters',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, MatIcon],
   templateUrl: './table-filters.component.html',
   styleUrls: ['./table-filters.component.scss']
 })

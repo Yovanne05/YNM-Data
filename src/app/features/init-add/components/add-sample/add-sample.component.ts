@@ -1,10 +1,13 @@
 import { Component, inject } from '@angular/core';
-import { InitDbService } from '../../../services/transactional/init-db.service';
+import { InitDbService } from '../../../../services/transactional/init-db.service';
+import {MatIcon} from "@angular/material/icon";
 
 @Component({
   selector: 'app-add-sample',
   standalone: true,
-  imports: [],
+  imports: [
+    MatIcon
+  ],
   templateUrl: './add-sample.component.html',
   styleUrl: './add-sample.component.scss'
 })

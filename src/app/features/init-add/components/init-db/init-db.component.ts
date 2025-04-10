@@ -1,10 +1,13 @@
 import { Component, inject } from '@angular/core';
 import { InitDbService } from '../../../../services/transactional/init-db.service';
+import {MatIcon} from "@angular/material/icon";
 
 @Component({
   selector: 'app-init-db',
   standalone: true,
-  imports: [],
+  imports: [
+    MatIcon
+  ],
   templateUrl: './init-db.component.html',
   styleUrl: './init-db.component.scss'
 })

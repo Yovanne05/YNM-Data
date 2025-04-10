@@ -93,17 +93,48 @@ class GenericController:
                 return jsonify({"error": str(e)}), 500
 
         @self.blueprint.route("/<int:id>", methods=["DELETE"])
-        def delete(id: int):
+        def delete_single(id: int):
+            """Endpoint pour suppression standard (clé simple)"""
             try:
                 success = self.service.delete(id)
                 if not success:
-                    self.service.add_log("DELETE", "FAILED", f"ID {id} non trouvé")
+                    self.service.add_log("DELETE", "FAILED", f"ID: {id}")
                     return jsonify({"error": "Ressource inexistante"}), 404
-
                 self.service.add_log("DELETE", "SUCCESS", f"ID: {id}")
                 return jsonify({"message": "Suppression effectuée"}), 200
             except Exception as e:
                 self.service.add_log("DELETE", "FAILED", f"ID: {id}")
+                return jsonify({"error": str(e)}), 500
+
+        @self.blueprint.route("/", methods=["DELETE"])
+        def delete_composite():
+            """Endpoint pour suppression avec clé composite"""
+            try:
+                ids = request.get_json()
+                if not ids:
+                    self.service.add_log("DELETE", "FAILED", f"ID: {ids}")
+                    return jsonify({"error": "IDs manquants"}), 400
+                self.service.add_log("DELETE", "SUCCESS", f"ID: {ids}")
+                success = self.service.delete(ids)
+                if not success:
+                    self.service.add_log("DELETE", "FAILED", f"ID: {ids}")
+                    return jsonify({"error": "Ressource inexistante"}), 404
+
+                return jsonify({"message": "Suppression effectuée"}), 200
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
+
+        @self.blueprint.route("/primary-keys", methods=["GET"])
+        def get_primary_keys_info():
+            """Endpoint pour connaître la structure des clés primaires"""
+            try:
+                schema = self.service.get_table_schema()
+                pk_info = {
+                    'is_composite': len([col for col in schema if schema[col]['primary_key']]) > 1,
+                    'columns': [col for col in schema if schema[col]['primary_key']]
+                }
+                return jsonify(pk_info)
+            except Exception as e:
                 return jsonify({"error": str(e)}), 500
 
         @self.blueprint.route("/schema", methods=["GET"])

@@ -73,19 +73,40 @@ class GenericService:
             db.session.rollback()
             raise self._handle_db_error("mise à jour", e)
 
-    def delete(self, id: int) -> bool:
-        """Supprime un enregistrement."""
+    def delete(self, identifier: Any) -> bool:
+        """Supprime un enregistrement en gérant automatiquement les clés simples et composites"""
         try:
-            obj = self.get_by_id(id)
+            # Récupère le schéma pour connaître la structure de la PK
+            schema = self.get_table_schema()
+            pk_columns = [col for col in schema if schema[col]['primary_key']]
+
+            # Gestion des clés composites
+            if len(pk_columns) > 1:
+                if not isinstance(identifier, dict):
+                    raise ValueError("Pour une clé composite, l'identifiant doit être un dictionnaire")
+
+                # Vérifie que toutes les colonnes PK sont présentes
+                missing = set(pk_columns) - set(identifier.keys())
+                if missing:
+                    raise ValueError(f"Clés primaires manquantes: {', '.join(missing)}")
+
+                # Crée le tuple dans l'ordre des colonnes PK
+                pk_values = tuple(identifier[col] for col in pk_columns)
+                obj = db.session.query(self.model_class).get(pk_values)
+            else:
+                # Gestion classique pour clé simple
+                obj = db.session.query(self.model_class).get(identifier)
+
             if not obj:
                 return False
 
             db.session.delete(obj)
             db.session.commit()
             return True
+
         except SQLAlchemyError as e:
             db.session.rollback()
-            raise self._handle_db_error("suppression", e)
+            raise Exception(f"Erreur lors de la suppression: {str(e)}")
 
     def get_paginated(self, page: int = 1, per_page: int = 5) -> Tuple[List[Any], int]:
         """Récupère les enregistrements paginés."""
@@ -114,18 +135,23 @@ class GenericService:
         return self._execute_query(query, page, per_page)
 
     def get_table_schema(self) -> Dict[str, Dict[str, Any]]:
-        """Retourne le schéma complet de la table."""
+        """Retourne le schéma complet de la table avec les clés primaires correctes."""
         try:
             inspector = inspect(db.engine)
-            return {
-                col['name']: {
-                    'type': str(col['type']),
-                    'nullable': col['nullable'],
-                    'primary_key': col.get('primary_key', False),
-                    'default': col.get('default')
+            columns = inspector.get_columns(self.table_name)
+            primary_keys = {col.name for col in self.model_class.__table__.primary_key}
+
+            schema = {}
+            for col_info in columns:
+                col_name = col_info['name']
+                schema[col_name] = {
+                    'type': str(col_info['type']),
+                    'nullable': col_info['nullable'],
+                    'primary_key': col_name in primary_keys,  # Correction ici
+                    'default': col_info.get('default'),
+                    'autoincrement': col_info.get('autoincrement', False)
                 }
-                for col in inspector.get_columns(self.table_name)
-            }
+            return schema
         except Exception as e:
             raise Exception(f"Erreur récupération schéma: {str(e)}")
 

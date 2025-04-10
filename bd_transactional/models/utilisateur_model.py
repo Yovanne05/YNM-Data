@@ -14,3 +14,4 @@ class Utilisateur(GenericModel):
     numero = db.Column(db.String(15), unique=True, nullable=False)
     statutAbonnement = db.Column(db.Enum('Actif', 'Résilié'), default='Actif')
     profils = db.relationship('Profil', backref='utilisateur', cascade='all,delete')
+    abonnement = db.relationship('Abonnement', backref='utilisateurs', cascade='all,delete')

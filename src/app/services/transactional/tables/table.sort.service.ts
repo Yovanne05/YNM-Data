@@ -39,7 +39,7 @@ export class TableSortService {
   }
 
   applySort(data: any[]): any[] {
-    if (!data || this.sortKeys.length === 0) return data;
+    if (!data || this.sortKeys.length === 0) return [...data];
 
     return [...data].sort((a, b) => {
       for (const sort of this.sortKeys) {

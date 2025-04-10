@@ -15,9 +15,13 @@ export class GenericTableService {
 
   getTableData(
     tableName: string,
-    filters?: { [key: string]: { operator: string, value: string } }
-  ): Observable<Record<string, string>[]> {
-    let params = new HttpParams();
+    filters?: { [key: string]: { operator: string, value: string } },
+    page: number = 1,
+    perPage: number = 10
+  ): Observable<{items: Record<string, string>[], total: number, page: number, pages: number}> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('per_page', perPage.toString());
 
     if (filters) {
       Object.keys(filters).forEach(key => {
@@ -28,15 +32,12 @@ export class GenericTableService {
       });
     }
 
-    return this.http.get<Record<string, string>[]>(
+    return this.http.get<{items: any[], total: number, page: number, pages: number}>(
       `${this.apiUrl}/${tableName}/`,
       { params }
     ).pipe(
       catchError((err) => {
-        console.error(
-          `Erreur lors de la récupération des données de la table ${tableName}`,
-          err
-        );
+        console.error(`Erreur lors de la récupération des données`, err);
         throw new Error(`Une erreur est survenue: ${err}`);
       })
     );

@@ -34,7 +34,7 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
   private dataService = inject(GenericTableService);
   private sortService = inject(TableSortService);
   private filterService = inject(TableFilterService);
-  private paginationService = inject(TablePaginationService);
+  protected paginationService = inject(TablePaginationService);
   private dataSubscription?: Subscription;
 
   @Input() tableName!: string;
@@ -69,13 +69,6 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     return this.paginationService.paginationData;
   }
 
-  get pageNumber() {
-    return this.paginationService.pageNumber;
-  }
-
-  get actualPage() {
-    return this.paginationService.actualPage;
-  }
 
   get sortKeys() {
     return this.sortService.sortKeys;
@@ -87,6 +80,7 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] && this.data.length > 0) {
+      this.paginationService.currentPage = 1;
       this.paginationService.setData([...this.data]);
       this.applySort();
       this.activeDropdown = null;
@@ -136,7 +130,8 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
   }
 
   private applySort(): void {
-    this.paginationService.setData(this.sortService.applySort([...this.filteredData]));
+    const sortedData = this.sortService.applySort([...this.data]);
+    this.paginationService.setData(sortedData);
   }
 
   private loadFilters(): void {
@@ -154,12 +149,20 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     const activeFilters = this.filterService.getActiveFilters();
 
     this.dataSubscription = this.dataService
-      .getTableData(this.tableName, activeFilters)
+      .getTableData(
+        this.tableName,
+        activeFilters,
+        this.paginationService.currentPage,
+        this.paginationService.itemsPerPage
+      )
       .subscribe({
-        next: (data) => {
-          this.paginationService.setData([...data]);
-          this.applySort();
-          this.sendTablesData.emit([...this.filteredData]);
+        next: (response) => {
+          this.paginationService.setData(
+            response.items,
+            response.total,
+            response.pages
+          );
+          this.sendTablesData.emit(response.items);
         },
         error: (err) => console.error('Error loading filtered data:', err),
       });
@@ -280,7 +283,6 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
 
   private convertFormDataTypes(): void {
     const formValue = this.addForm.value;
-
     const numericFields = ['id', 'age', 'prix', 'annee', 'duree', 'saison'];
     numericFields.forEach(field => {
       if (formValue[field] !== undefined) {
@@ -305,9 +307,11 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
 
   nextPage(): void {
     this.paginationService.nextPage();
+    this.loadDataWithFilters();
   }
 
   prevPage(): void {
     this.paginationService.prevPage();
+    this.loadDataWithFilters();
   }
 }

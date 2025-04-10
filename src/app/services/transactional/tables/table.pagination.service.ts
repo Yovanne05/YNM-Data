@@ -1,37 +1,30 @@
-import { Injectable } from '@angular/core';
+import { Injectable } from "@angular/core";
 
 @Injectable()
 export class TablePaginationService {
-  dataPerPage: number = 8;
+  currentPage: number = 1;
+  itemsPerPage: number = 15;
+  totalItems: number = 0;
+  totalPages: number = 1;
   filteredData: any[] = [];
   paginationData: any[] = [];
-  actualPage: number = 0;
-  pageNumber: number = 0;
 
-  setData(data: any[]): void {
-    this.filteredData = data;
-    this.setPaginationData();
-  }
-
-  setPaginationData(): void {
-    this.paginationData = this.filteredData.slice(
-      this.actualPage * this.dataPerPage,
-      (this.actualPage + 1) * this.dataPerPage
-    );
-    this.pageNumber = Math.ceil(this.filteredData.length / this.dataPerPage);
+  setData(data: any[], total?: number, pages?: number): void {
+    this.filteredData = data || [];
+    this.paginationData = [...this.filteredData];
+    this.totalItems = total ?? data?.length ?? 0;
+    this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
   }
 
   nextPage(): void {
-    if(this.actualPage + 1 < this.pageNumber) {
-      this.actualPage++;
-      this.setPaginationData();
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
     }
   }
 
   prevPage(): void {
-    if(this.actualPage - 1 >= 0) {
-      this.actualPage--;
-      this.setPaginationData();
+    if (this.currentPage > 1) {
+      this.currentPage--;
     }
   }
 }

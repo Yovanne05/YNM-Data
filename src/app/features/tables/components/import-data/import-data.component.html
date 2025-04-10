@@ -73,6 +73,9 @@
           Importer
         </button>
       </form>
+      @if (showErrorMessage) {
+        <p class="text-base text-red-500 mb-1">Une erreur est survenue, vérifiez l'ordre des données dans le fichier et leur cohérence au niveau des types attendus</p>
+      }
     </div>
   </div>
 }

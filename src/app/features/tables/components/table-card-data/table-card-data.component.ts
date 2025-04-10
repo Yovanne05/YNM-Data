@@ -69,7 +69,6 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     return this.paginationService.paginationData;
   }
 
-
   get sortKeys() {
     return this.sortService.sortKeys;
   }
@@ -161,6 +160,8 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
         },
         error: (err) => console.error('Error loading filtered data:', err),
       });
+
+      
   }
 
   onSubmitFilters(): void {

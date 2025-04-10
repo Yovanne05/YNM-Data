@@ -19,4 +19,7 @@
     <mat-icon>add_circle</mat-icon>
     Ajouter des données prédéfinies
   </button>
+  @if (showErrorMessage) {
+    <p class="text-base text-red-500 mb-1">Une erreur est survenue, n'hésitez pas à réinitialiser la base de données si le problème persiste</p>
+  }
 </div>

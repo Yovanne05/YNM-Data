@@ -13,8 +13,16 @@ import {MatIcon} from "@angular/material/icon";
 })
 export class AddSampleComponent {
   private readonly initDbService = inject(InitDbService);
+  showErrorMessage: boolean = false;
 
   add_sample_data(): void {
-    this.initDbService.add_sample_data().subscribe();
+    this.initDbService.add_sample_data().subscribe({
+      next: () => {
+        this.showErrorMessage = false;
+      },
+      error: (err) => {
+        this.showErrorMessage = true;
+      }
+    });
   }
 }

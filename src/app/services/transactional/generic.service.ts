@@ -81,11 +81,10 @@ export class GenericTableService {
     ).pipe(
       switchMap(pkInfo => {
             if (!pkInfo) throw new Error('Impossible de récupérer les informations de clé primaire');
-            
+
             if (pkInfo.is_composite) {
                 const compositeKey: Record<string, any> = {};
-                
-                // Construction typée de la clé composite
+
                 pkInfo.columns.forEach((col: string) => {
                     if (item[col] === undefined || item[col] === null) {
                         throw new Error(`Item manque la colonne clé primaire: ${col}`);

@@ -1,0 +1,4 @@
+from bd_transactional.services.generic_service import GenericService
+from bd_transactional.models.titregenre_model import TitreGenre
+
+titregenre_service = GenericService(TitreGenre)

@@ -1,0 +1,4 @@
+from bd_transactional.controllers.generic_controller import GenericController
+from bd_transactional.services.realisation_service import realisation_service
+
+realisation_controller = GenericController(realisation_service, "realisation").blueprint

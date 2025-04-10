@@ -1,0 +1,4 @@
+from bd_transactional.controllers.generic_controller import GenericController
+from bd_transactional.services.abonnement_service import abonnement_service
+
+abonnement_controller = GenericController(abonnement_service, "abonnement").blueprint

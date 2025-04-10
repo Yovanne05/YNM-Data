@@ -59,42 +59,51 @@ class GenericController:
             try:
                 data = request.get_json()
                 if not data:
+                    self.service.add_log("CREATE", "FAILED", "Aucune donnée fournie")
                     return jsonify({"error": "Aucune donnée fournie"}), 400
 
                 item = self.service.create_item(data)
-
                 primary_key = self.service.get_primary_key(item)
+
+                self.service.add_log("CREATE", "SUCCESS", f"ID: {getattr(item, primary_key)}")
                 return jsonify({
                     "id": getattr(item, primary_key),
                     "message": "Création réussie"
                 }), 201
 
             except Exception as e:
+                self.service.add_log("CREATE", "FAILED", str(e))
                 return jsonify({"error": str(e)}), 500
 
         @self.blueprint.route("/<int:id>", methods=["PUT"])
         def update(id: int):
-            """Met à jour un élément existant"""
             try:
                 item = self.service.get_by_id(id)
                 if not item:
+                    self.service.add_log("UPDATE", "FAILED", f"ID {id} non trouvé")
                     return jsonify({"error": "Ressource inexistante"}), 404
 
                 data = request.get_json()
                 self.service.update(id, data)
+
+                self.service.add_log("UPDATE", "SUCCESS", f"ID: {id}")
                 return jsonify(data), 200
             except Exception as e:
+                self.service.add_log("UPDATE", "FAILED", f"ID: {id}")
                 return jsonify({"error": str(e)}), 500
 
         @self.blueprint.route("/<int:id>", methods=["DELETE"])
         def delete(id: int):
-            """Supprime un élément existant"""
             try:
                 success = self.service.delete(id)
                 if not success:
+                    self.service.add_log("DELETE", "FAILED", f"ID {id} non trouvé")
                     return jsonify({"error": "Ressource inexistante"}), 404
+
+                self.service.add_log("DELETE", "SUCCESS", f"ID: {id}")
                 return jsonify({"message": "Suppression effectuée"}), 200
             except Exception as e:
+                self.service.add_log("DELETE", "FAILED", f"ID: {id}")
                 return jsonify({"error": str(e)}), 500
 
         @self.blueprint.route("/schema", methods=["GET"])
@@ -122,5 +131,34 @@ class GenericController:
                 if "error" in schema:
                     return jsonify(schema), 400
                 return jsonify(schema)
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
+
+        @self.blueprint.route("/no_pagination", methods=["GET"])
+        def get_all_no_pagination():
+            """Récupère tous les éléments sans pagination avec filtres et tri"""
+            try:
+                params = request.args.to_dict()
+
+                filters = {}
+                sort_params = []
+                for key, value in params.items():
+                    if key.startswith("sort_"):
+                        column = key.replace("sort_", "")
+                        sort_params.append((column, value))
+                    elif "__" in key:
+                        filters[key] = value
+                    else:
+                        filters[f"{key}__eq"] = value
+                print(filters, sort_params)
+                if filters or sort_params:
+                    items = self.service.get_with_filters_and_sort_no_pagination(filters, sort_params)
+                else:
+                    items = self.service.get_all()
+
+                if items and hasattr(items[0], 'as_dict'):
+                    return jsonify([item.as_dict() for item in items]), 200
+                return jsonify(items), 200
+
             except Exception as e:
                 return jsonify({"error": str(e)}), 500

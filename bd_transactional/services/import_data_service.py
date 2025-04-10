@@ -45,7 +45,7 @@ def import_data_to_db(table_name: str) -> None:
         data = read_data(table_name)
         if table_name in SERVICES:
             for d in data:
-                SERVICES[table_name].create(d)
+                SERVICES[table_name].create_item(d)
     except Exception as e:
         raise Exception(f"Erreur lors de l'importation dans la base de données : {str(e)}")
 

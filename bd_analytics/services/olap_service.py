@@ -19,7 +19,7 @@ class OLAPService:
             aggregation_funcs: Dictionnaire de fonctions d'agrégation {measure: func}
             joins: Liste explicite de tables à joindre avec clauses ON optionnelles
         Returns:
-            DataFrame pandas avec les résultats
+            DataFrame
         """
         if aggregation_funcs is None:
             aggregation_funcs = {m: func.sum for m in measures}

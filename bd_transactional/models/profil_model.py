@@ -8,3 +8,6 @@ class Profil(GenericModel):
     nom = db.Column(db.String(100), nullable=False)
     typeProfil = db.Column(db.Enum('Adulte', 'Enfant'), default='Adulte', nullable=False)
     idUtilisateur = db.Column(db.Integer, db.ForeignKey('utilisateur.idUtilisateur'), nullable=False)
+
+    evaluations = db.relationship('Evaluation', backref='profil', cascade='all,delete')
+    listes = db.relationship('MaListe', backref='profil', cascade='all,delete')

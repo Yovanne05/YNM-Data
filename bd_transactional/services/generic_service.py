@@ -5,6 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import class_mapper
 from sqlalchemy import inspect, asc, desc
 
+from bd_transactional.services.log_service import add_logs
 from databases.db import db
 
 
@@ -26,8 +27,8 @@ class GenericService:
         """Initialise le service avec la classe du modèle."""
         self.model_class = model_class
         self.table_name = model_class.__tablename__
+        self.logs: List[str] = []
 
-    # Méthodes CRUD de base
     def get_all(self) -> List[Any]:
         """Récupère tous les enregistrements."""
         try:
@@ -113,7 +114,6 @@ class GenericService:
         query = self._apply_sorting(query, sort_params)
         return self._execute_query(query, page, per_page)
 
-    # Méthodes de schéma et métadonnées
     def get_table_schema(self) -> Dict[str, Dict[str, Any]]:
         """Retourne le schéma complet de la table."""
         try:
@@ -183,7 +183,6 @@ class GenericService:
             raise ValueError("Aucune clé primaire définie pour ce modèle")
         return mapper.primary_key[0].name
 
-    # Méthodes privées
     def _validate_data(self, data: Dict[str, Any]) -> None:
         """Valide les données selon les contraintes de la table."""
         required_fields = {
@@ -258,6 +257,19 @@ class GenericService:
         except SQLAlchemyError as e:
             raise self._handle_db_error("requêtage", e)
 
+    def get_with_filters_and_sort_no_pagination(self, filters: dict, sort_params: list) -> List[Any]:
+        """Récupère les données avec filtres et tri sans pagination (pour export)"""
+        query = self._apply_filters(
+            query=db.session.query(self.model_class),
+            filters=filters
+        )
+        query = self._apply_sorting(query, sort_params)
+
+        try:
+            return query.all()
+        except SQLAlchemyError as e:
+            raise self._handle_db_error("requêtage sans pagination", e)
+
     def _handle_db_error(self, operation: str, error: Exception) -> Exception:
         """Gère les erreurs de base de données."""
         return Exception(f"Erreur lors de la {operation}: {str(error)}")
@@ -269,3 +281,27 @@ class GenericService:
             return ValueError(json.dumps(error_data))
         except json.JSONDecodeError:
             return ValueError(json.dumps({"errors": {"general": str(error)}}))
+            raise Exception(f"Erreur lors de la récupération des valeurs ENUM: {str(e)}")
+
+    def add_log(self, action: str, status: str, details: str = ""):
+        """Ajoute une entrée de log en français"""
+        messages = {
+            'CREATE': {
+                'SUCCESS': f"Ajout réussi dans la table {self.table_name}",
+                'FAILED': f"Échec d'ajout dans la table {self.table_name}"
+            },
+            'UPDATE': {
+                'SUCCESS': f"Mise à jour réussie dans la table {self.table_name}",
+                'FAILED': f"Échec de mise à jour dans la table {self.table_name}"
+            },
+            'DELETE': {
+                'SUCCESS': f"Suppression réussie dans la table {self.table_name}",
+                'FAILED': f"Échec de suppression dans la table {self.table_name}"
+            }
+        }
+
+        message = messages.get(action, {}).get(status, "Action inconnue")
+        if details:
+            message += f" - Détails: {details}"
+        add_logs(message)
+

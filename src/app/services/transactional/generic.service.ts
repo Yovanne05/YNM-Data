@@ -29,7 +29,7 @@ export class GenericTableService {
     }
 
     return this.http.get<Record<string, string>[]>(
-      `${this.apiUrl}/${tableName}`,
+      `${this.apiUrl}/${tableName}/`,
       { params }
     ).pipe(
       catchError((err) => {
@@ -89,8 +89,7 @@ export class GenericTableService {
   }
 
   createItem(tableName: string, data: any): Observable<{id: number}> {
-    console.log(data)
-    return this.http.post<{id: number}>(`${this.apiUrl}/${tableName}`, data).pipe(
+    return this.http.post<{id: number}>(`${this.apiUrl}/${tableName}/`, data).pipe(
       catchError((error: HttpErrorResponse) => {
         console.error('Full error:', {
           url: error.url,

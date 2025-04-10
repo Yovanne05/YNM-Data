@@ -9,9 +9,9 @@ import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { MatIcon } from "@angular/material/icon";
 import {isIdColumn, getUserFriendlyError} from "../../utils/table-utils";
-import {TableSortService} from "../../../../services/transactional/tables/TableSortService";
-import {TableFilterService} from "../../../../services/transactional/tables/TableFilterService";
-import {TablePaginationService} from "../../../../services/transactional/tables/TablePaginationService";
+import {TableSortService} from "../../../../services/transactional/tables/table.sort.service";
+import {TableFilterService} from "../../../../services/transactional/tables/table.filter.service";
+import {TablePaginationService} from "../../../../services/transactional/tables/table.pagination.service";
 
 @Component({
   selector: 'app-table-card-data',
@@ -41,7 +41,6 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
   @Input() data: Record<string, string>[] = [];
   @Input() filters: Record<string, string>[] = [];
 
-  editForm = new FormGroup({});
   tempItemForm: FormGroup = new FormGroup({});
   addForm: FormGroup = new FormGroup({});
 

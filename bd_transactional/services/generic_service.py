@@ -3,7 +3,7 @@ import re
 from typing import Type, List, Any, Dict, Optional
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import class_mapper
-
+from bd_transactional.services.log_service import add_logs
 from databases.db import db
 from sqlalchemy import inspect
 
@@ -12,6 +12,7 @@ class GenericService:
     def __init__(self, model_class: Type):
         self.model_class = model_class
         self.table_name = model_class.__tablename__
+        self.logs: List[str] = []
 
     def get_all(self) -> List[Any]:
         """Récupère tous les enregistrements"""
@@ -225,3 +226,26 @@ class GenericService:
             return None
         except Exception as e:
             raise Exception(f"Erreur lors de la récupération des valeurs ENUM: {str(e)}")
+
+    def add_log(self, action: str, status: str, details: str = ""):
+        """Ajoute une entrée de log en français"""
+        messages = {
+            'CREATE': {
+                'SUCCESS': f"Ajout réussi dans la table {self.table_name}",
+                'FAILED': f"Échec d'ajout dans la table {self.table_name}"
+            },
+            'UPDATE': {
+                'SUCCESS': f"Mise à jour réussie dans la table {self.table_name}",
+                'FAILED': f"Échec de mise à jour dans la table {self.table_name}"
+            },
+            'DELETE': {
+                'SUCCESS': f"Suppression réussie dans la table {self.table_name}",
+                'FAILED': f"Échec de suppression dans la table {self.table_name}"
+            }
+        }
+
+        message = messages.get(action, {}).get(status, "Action inconnue")
+        if details:
+            message += f" - Détails: {details}"
+        add_logs(message)
+

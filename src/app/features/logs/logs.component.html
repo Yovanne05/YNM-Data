@@ -1,0 +1,25 @@
+<div class="log-container">
+    <div class="log-header">
+        <h2>Journal des logs</h2>
+        <button (click)="clearLogs()" class="clear-btn">Effacer les logs</button>
+    </div>
+    
+    <div class="log-content">
+        @if (logs.length > 0) {
+            <div class="messages-container">
+                @for (log of logs; track $index) {
+                    <div class="message-container">
+                        <div class="message-time">{{ formatTimestamp(log.timestamp) }}</div>
+                        <div class="message-bubble" [class.service-message]="isServiceMessage(log.message)">
+                            {{ log.message }}
+                        </div>
+                    </div>
+                }
+            </div>
+        } @else {
+            <div class="empty-state">
+                <p>Aucun log disponible</p>
+            </div>
+        }
+    </div>
+</div>

@@ -1,11 +1,12 @@
 import { Component, inject, Input } from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CsvImportService } from '../../../../services/transactional/csv-import.service';
+import {MatIcon} from "@angular/material/icon";
 
 @Component({
   selector: 'app-import-data',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, MatIcon],
   templateUrl: './import-data.component.html',
   styleUrl: './import-data.component.scss'
 })

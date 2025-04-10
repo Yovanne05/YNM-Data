@@ -1,22 +1,22 @@
-<div class="grid grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-2 text-sm border-b last:border-none py-1">
+<div class="grid grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-4 items-center text-sm border-b border-gray-700 last:border-none py-2 px-3 bg-gray-800 hover:bg-gray-750 transition-colors">
   @for (column of columns; track $index) {
-    <span>
+    <span class="text-gray-200 truncate">
       @if (isEditing) {
         <input type="text" [formControl]="getFormControl(column)"
-               class="border p-1 w-full text-sm">
+               class="w-full bg-gray-700 border border-gray-600 rounded p-1.5 text-sm text-white focus:ring-1 focus:ring-red-500 focus:border-transparent">
       } @else {
         {{ getValue(column) }}
       }
     </span>
   }
-  <div class="relative flex gap-2">
+  <div class="relative flex gap-2 justify-end">
     @if (isEditing) {
       <button (click)="save.emit()"
-              class="bg-green-500 text-white px-2 py-1 rounded text-sm hover:bg-green-600">
+              class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm transition-colors">
         Valider
       </button>
       <button (click)="cancel.emit()"
-              class="bg-gray-500 text-white px-2 py-1 rounded text-sm hover:bg-gray-600">
+              class="bg-gray-600 hover:bg-gray-500 text-gray-200 px-3 py-1.5 rounded text-sm transition-colors">
         Annuler
       </button>
     } @else {

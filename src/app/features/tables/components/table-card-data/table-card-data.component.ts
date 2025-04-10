@@ -7,11 +7,12 @@ import { FilterRegistryService } from '../../../../services/transactional/filter
 import { GenericTableService } from '../../../../services/transactional/generic.service';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import {MatIcon} from "@angular/material/icon";
 
 @Component({
   selector: 'app-table-card-data',
   standalone: true,
-  imports: [ReactiveFormsModule, TableFiltersComponent, TableHeaderComponent, TableRowComponent, CommonModule, FormsModule],
+  imports: [ReactiveFormsModule, TableFiltersComponent, TableHeaderComponent, TableRowComponent, CommonModule, FormsModule, MatIcon],
   templateUrl: './table-card-data.component.html',
   styleUrls: ['./table-card-data.component.scss']
 })

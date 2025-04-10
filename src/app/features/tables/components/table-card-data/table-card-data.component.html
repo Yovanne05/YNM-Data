@@ -4,9 +4,9 @@
       (click)="toggleFilters()"
       class="bg-gray-800 hover:bg-gray-700 text-gray-200 px-4 py-2 rounded-md text-sm transition-colors flex items-center gap-2"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-      </svg>
+      <mat-icon class="material-icons-outlined" style="font-size: 16px; width: 16px; height: 16px;">
+        filter_list
+      </mat-icon>
       Filtres
     </button>
 
@@ -14,9 +14,9 @@
       (click)="startAdding()"
       class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm transition-colors flex items-center gap-2"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-      </svg>
+      <mat-icon class="material-icons-outlined" style="font-size: 16px; width: 16px; height: 16px;">
+        add
+      </mat-icon>
       Ajouter
     </button>
   </div>
@@ -25,7 +25,10 @@
   @if (isAddingMode) {
     <div class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md border border-gray-700">
-        <h3 class="text-xl font-bold mb-4 text-white">Ajouter un nouvel élément</h3>
+        <div class="flex items-center gap-2 mb-4">
+          <mat-icon class="material-icons-outlined text-red-500">add_circle</mat-icon>
+          <h3 class="text-xl font-bold text-white">Ajouter un nouvel élément</h3>
+        </div>
 
         <!-- Conteneur scrollable -->
         <div class="max-h-[60vh] overflow-y-auto pr-2 -mr-2 mb-4">
@@ -33,29 +36,39 @@
             <div class="grid grid-cols-1 gap-4">
               @for (field of getAddFormFields(); track field) {
                 <div class="mb-2">
-                  <label class="block text-gray-300 text-sm font-medium mb-1">
+                  <label class="block text-gray-300 text-sm font-medium mb-1 flex items-center gap-1">
                     {{ field }}
                     @if (isRequiredField(field)) {
-                      <span class="text-red-500">*</span>
+                      <mat-icon class="material-icons-outlined text-red-500" style="font-size: 14px;">star</mat-icon>
                     }
                   </label>
 
                   @if (fieldTypes[field]?.type === 'ENUM' && fieldTypes[field]?.values) {
-                    <select
-                      [formControlName]="field"
-                      class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-sm text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                    >
-                      <option value="">-- Sélectionnez --</option>
-                      @for (value of fieldTypes[field].values; track value) {
-                        <option [value]="value">{{value}}</option>
-                      }
-                    </select>
+                    <div class="relative">
+                      <mat-icon class="material-icons-outlined absolute right-2 top-2 text-gray-400" style="font-size: 18px;">
+                        unfold_more
+                      </mat-icon>
+                      <select
+                        [formControlName]="field"
+                        class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-sm text-white focus:ring-2 focus:ring-red-500 focus:border-transparent pr-8 appearance-none"
+                      >
+                        <option value="">-- Sélectionnez --</option>
+                        @for (value of fieldTypes[field].values; track value) {
+                          <option [value]="value">{{value}}</option>
+                        }
+                      </select>
+                    </div>
                   } @else if (field.includes('date')) {
-                    <input
-                      type="date"
-                      [formControlName]="field"
-                      class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-sm text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                    >
+                    <div class="relative">
+                      <mat-icon class="material-icons-outlined absolute right-2 top-2 text-gray-400" style="font-size: 18px;">
+                        calendar_today
+                      </mat-icon>
+                      <input
+                        type="date"
+                        [formControlName]="field"
+                        class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-sm text-white focus:ring-2 focus:ring-red-500 focus:border-transparent pr-8"
+                      >
+                    </div>
                   } @else {
                     <input
                       [type]="getInputType(field)"
@@ -72,8 +85,9 @@
         <!-- Pied de modal fixe -->
         <div class="pt-4 border-t border-gray-700">
           @if (errorMessage) {
-            <div class="mb-3 p-2 bg-red-900/50 text-red-300 text-sm rounded">
-              {{errorMessage}}
+            <div class="mb-3 p-2 bg-red-900/50 text-red-300 text-sm rounded flex items-start gap-2">
+              <mat-icon class="material-icons-outlined" style="font-size: 18px;">error</mat-icon>
+              <span>{{errorMessage}}</span>
             </div>
           }
 
@@ -81,16 +95,18 @@
             <button
               type="button"
               (click)="cancelAdding()"
-              class="bg-gray-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded text-sm transition-colors"
+              class="bg-gray-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded text-sm transition-colors flex items-center gap-1"
             >
+              <mat-icon class="material-icons-outlined" style="font-size: 16px;">cancel</mat-icon>
               Annuler
             </button>
             <button
               type="submit"
               [disabled]="!addForm.valid"
-              class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm transition-colors disabled:bg-gray-600 disabled:text-gray-400"
+              class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm transition-colors disabled:bg-gray-600 disabled:text-gray-400 flex items-center gap-1"
               (click)="onAddSubmit()"
             >
+              <mat-icon class="material-icons-outlined" style="font-size: 16px;">check_circle</mat-icon>
               Ajouter
             </button>
           </div>
@@ -101,12 +117,12 @@
 
   <!-- Filtres -->
   @if (showFilters) {
-      <app-table-filters
-        [filters]="filters"
-        [filterForm]="filterForm"
-        (filterSubmit)="onSubmitFilters()"
-        (filterReset)="onResetFilters()"
-      ></app-table-filters>
+    <app-table-filters
+      [filters]="filters"
+      [filterForm]="filterForm"
+      (filterSubmit)="onSubmitFilters()"
+      (filterReset)="onResetFilters()"
+    ></app-table-filters>
   }
 
   <!-- Tableau -->
@@ -140,33 +156,35 @@
         <div class="flex justify-center gap-2 mt-4">
           <button
             (click)="prevPage()"
-            class="bg-gray-800 hover:bg-gray-700 text-gray-200 px-4 py-2 rounded text-sm transition-colors border border-gray-700 disabled:opacity-50"
+            class="bg-gray-800 hover:bg-gray-700 text-gray-200 px-4 py-2 rounded text-sm transition-colors border border-gray-700 disabled:opacity-50 flex items-center gap-1"
             [disabled]="actualPage === 0"
           >
-            ← Précédent
+            <mat-icon class="material-icons-outlined" style="font-size: 16px;">chevron_left</mat-icon>
+            Précédent
           </button>
           <button
             (click)="nextPage()"
-            class="bg-gray-800 hover:bg-gray-700 text-gray-200 px-4 py-2 rounded text-sm transition-colors border border-gray-700 disabled:opacity-50"
+            class="bg-gray-800 hover:bg-gray-700 text-gray-200 px-4 py-2 rounded text-sm transition-colors border border-gray-700 disabled:opacity-50 flex items-center gap-1"
             [disabled]="actualPage + 1 >= pageNumber"
           >
-            Suivant →
+            Suivant
+            <mat-icon class="material-icons-outlined" style="font-size: 16px;">chevron_right</mat-icon>
           </button>
         </div>
       } @else {
         <div class="bg-gray-800 rounded-lg p-8 text-center text-gray-400 border border-gray-700">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Aucun résultat trouvé
+          <mat-icon class="material-icons-outlined text-gray-600 mb-2" style="font-size: 48px; width: 48px; height: 48px;">
+            sentiment_dissatisfied
+          </mat-icon>
+          <p>Aucun résultat trouvé</p>
         </div>
       }
     } @else {
       <div class="bg-gray-800 rounded-lg p-8 text-center text-gray-400 border border-gray-700">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-600 mb-2 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
-        </svg>
-        Chargement des données...
+        <mat-icon class="material-icons-outlined text-gray-600 mb-2 animate-pulse" style="font-size: 48px; width: 48px; height: 48px;">
+          hourglass_empty
+        </mat-icon>
+        <p>Chargement des données...</p>
       </div>
     }
   </div>

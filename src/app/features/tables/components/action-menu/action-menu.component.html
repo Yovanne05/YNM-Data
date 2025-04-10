@@ -1,16 +1,33 @@
-<button (click)="toggleMenu()"
-        class="text-gray-700 px-3 py-1 rounded-md text-sm hover:bg-gray-200 transition-colors">
-  ⋮
-</button>
-@if (isOpen) {
-  <div class="absolute right-0 mt-7 bg-white border border-gray-200 rounded-md shadow-md w-32 z-10">
-    <button (click)="edit.emit(); isOpen = false"
-            class="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-gray-700">
-      Modifier
-    </button>
-    <button (click)="delete.emit(); isOpen = false"
-            class="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-gray-700">
-      Supprimer
-    </button>
-  </div>
-}
+<div class="relative">
+  <button (click)="toggleMenu()"
+          class="text-gray-300 hover:text-white p-1 rounded-md hover:bg-gray-700 transition-colors">
+    <mat-icon class="material-icons-outlined" style="font-size: 15px; width: 15px; height: 15px;">
+      more_vert
+    </mat-icon>
+  </button>
+
+  @if (isOpen) {
+    <div class="absolute right-0 mt-1 bg-gray-800 border border-gray-700 rounded-md shadow-lg w-40 z-10 overflow-hidden"
+         [class.bottom-full]="isNearBottom()"
+         [class.top-full]="!isNearBottom()">
+      <button (click)="edit.emit(); isOpen = false"
+              class="block w-full text-left px-4 py-2 hover:bg-gray-700 text-sm text-gray-200 transition-colors">
+        <div class="flex items-center gap-2">
+          <mat-icon class="material-icons-outlined" style="font-size: 16px; width: 16px; height: 16px;">
+            edit
+          </mat-icon>
+          Modifier
+        </div>
+      </button>
+      <button (click)="delete.emit(); isOpen = false"
+              class="block w-full text-left px-4 py-2 hover:bg-gray-700 text-sm text-red-400 transition-colors">
+        <div class="flex items-center gap-2">
+          <mat-icon class="material-icons-outlined" style="font-size: 16px; width: 16px; height: 16px;">
+            delete
+          </mat-icon>
+          Supprimer
+        </div>
+      </button>
+    </div>
+  }
+</div>

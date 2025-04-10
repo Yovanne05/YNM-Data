@@ -1,11 +1,12 @@
 import { Component, inject, Input } from '@angular/core';
 import { TableCardDataComponent } from '../table-card-data/table-card-data.component';
 import { CsvExtractService } from '../../../../services/transactional/csv-extract.service';
+import {MatIconModule} from "@angular/material/icon";
 
 @Component({
   selector: 'app-export-data',
   standalone: true,
-  imports: [TableCardDataComponent],
+  imports: [TableCardDataComponent, MatIconModule],
   templateUrl: './export-data.component.html',
   styleUrl: './export-data.component.scss'
 })

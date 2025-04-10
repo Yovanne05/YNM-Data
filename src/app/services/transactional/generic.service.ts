@@ -16,8 +16,9 @@ export class GenericTableService {
   getTableData(
     tableName: string,
     filters?: { [key: string]: { operator: string, value: string } },
+    sortKeys?: { key: string; direction: 'asc' | 'desc' }[],
     page: number = 1,
-    perPage: number = 10
+    perPage: number = 15
   ): Observable<{items: Record<string, string>[], total: number, page: number, pages: number}> {
     let params = new HttpParams()
       .set('page', page.toString())
@@ -29,6 +30,12 @@ export class GenericTableService {
         if (filter.value) {
           params = params.set(`${key}__${filter.operator}`, filter.value);
         }
+      });
+    }
+
+    if (sortKeys && sortKeys.length > 0) {
+      sortKeys.forEach(sort => {
+        params = params.set(`sort_${sort.key}`, sort.direction);
       });
     }
 
@@ -162,8 +169,6 @@ export class GenericTableService {
     const numericId = Number(idValue)
     return numericId;
   }
-
-
 
   getColumnSchema(tableName: string, columnName: string): Observable<any> {
     return this.http.get<any>(

@@ -82,7 +82,6 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
     if (changes['data'] && this.data.length > 0) {
       this.paginationService.currentPage = 1;
       this.paginationService.setData([...this.data]);
-      this.applySort();
       this.activeDropdown = null;
     }
     if (changes['filters'] || changes['tableName']) {
@@ -125,13 +124,8 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
 
   onSort(key: string): void {
     this.sortService.onSort(key);
-    this.applySort();
     this.sortChanged.emit([...this.sortKeys]);
-  }
-
-  private applySort(): void {
-    const sortedData = this.sortService.applySort([...this.data]);
-    this.paginationService.setData(sortedData);
+    this.loadDataWithFilters();
   }
 
   private loadFilters(): void {
@@ -152,6 +146,7 @@ export class TableCardDataComponent implements OnChanges, OnDestroy {
       .getTableData(
         this.tableName,
         activeFilters,
+        this.sortService.sortKeys,
         this.paginationService.currentPage,
         this.paginationService.itemsPerPage
       )

@@ -13,7 +13,12 @@ export class TablePaginationService {
     this.filteredData = data || [];
     this.paginationData = [...this.filteredData];
     this.totalItems = total ?? data?.length ?? 0;
-    this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
+    this.totalPages = pages ?? Math.ceil(this.totalItems / this.itemsPerPage);
+  }
+
+  setOnlyData(data: any[]): void {
+    this.filteredData = data || [];
+    this.paginationData = [...this.filteredData];
   }
 
   nextPage(): void {

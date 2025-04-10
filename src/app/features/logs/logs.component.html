@@ -1,25 +1,53 @@
-<div class="log-container">
-    <div class="log-header">
-        <h2>Journal des logs</h2>
-        <button (click)="clearLogs()" class="clear-btn">Effacer les logs</button>
-    </div>
-    
-    <div class="log-content">
-        @if (logs.length > 0) {
-            <div class="messages-container">
-                @for (log of logs; track $index) {
-                    <div class="message-container">
-                        <div class="message-time">{{ formatTimestamp(log.timestamp) }}</div>
-                        <div class="message-bubble" [class.service-message]="isServiceMessage(log.message)">
-                            {{ log.message }}
-                        </div>
-                    </div>
+<div class="log-container bg-gradient-to-br from-gray-900 to-gray-800 text-gray-100 p-4 rounded-lg shadow-lg">
+  <div class="log-header flex justify-between items-center mb-4">
+    <h2 class="text-xl font-bold flex items-center gap-2">
+      <mat-icon class="material-icons-outlined">history</mat-icon>
+      Journal des logs
+    </h2>
+    <button
+      (click)="clearLogs()"
+      class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm transition-colors flex items-center gap-1"
+    >
+      <mat-icon class="material-icons-outlined" style="font-size: 16px;">delete</mat-icon>
+      Effacer
+    </button>
+  </div>
+
+  <div class="log-content bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+    @if (logs.length > 0) {
+      <div class="messages-container divide-y divide-gray-700 max-h-[60vh] overflow-y-auto p-0">
+        @for (log of logs; track $index) {
+          <div class="message-container p-4 hover:bg-gray-700/50 transition-colors">
+            <div class="message-time text-xs text-gray-400 mb-1 flex items-center gap-1">
+              <mat-icon class="material-icons-outlined" style="font-size: 14px;">schedule</mat-icon>
+              {{ formatTimestamp(log.timestamp) }}
+            </div>
+            <div
+              class="message-bubble text-sm px-3 py-2 rounded-md inline-block max-w-full"
+              [ngClass]="{
+                                'bg-blue-900/30 text-blue-100': !isServiceMessage(log.message),
+                                'bg-red-900/30 text-red-100': isServiceMessage(log.message)
+                            }"
+            >
+              <div class="flex items-start gap-2">
+                @if (isServiceMessage(log.message)) {
+                  <mat-icon class="material-icons-outlined text-red-400" style="font-size: 18px;">warning</mat-icon>
+                } @else {
+                  <mat-icon class="material-icons-outlined text-blue-400" style="font-size: 18px;">info</mat-icon>
                 }
+                <span>{{ log.message }}</span>
+              </div>
             </div>
-        } @else {
-            <div class="empty-state">
-                <p>Aucun log disponible</p>
-            </div>
+          </div>
         }
-    </div>
+      </div>
+    } @else {
+      <div class="empty-state p-8 text-center text-gray-400">
+        <mat-icon class="material-icons-outlined text-gray-600 mb-2" style="font-size: 48px;">
+          hourglass_empty
+        </mat-icon>
+        <p>Aucun log disponible</p>
+      </div>
+    }
+  </div>
 </div>

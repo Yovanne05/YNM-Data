@@ -75,25 +75,25 @@ export class GenericTableService {
 
   deleteItem(tableName: string, item: any): Observable<any> {
     const id = this.extractIdFromItem(tableName, item);
-    const requestBody = {
-      table: tableName,
-      item: item,
-    };
 
-    return this.http
-      .delete(`${this.apiUrl}/${tableName}/${id}`, {
-        body: requestBody,
-        headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+    return this.http.delete(`${this.apiUrl}/${tableName}/${id}`, {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+    }).pipe(
+      catchError((err) => {
+        console.error(`Erreur suppression ${tableName} id ${id}`, err);
+        let errorMessage = 'Erreur inconnue';
+
+        if (err.error instanceof ErrorEvent) {
+          errorMessage = `Erreur: ${err.error.message}`;
+        } else if (err.error?.message) {
+          errorMessage = err.error.message;
+        } else {
+          errorMessage = `Erreur ${err.status}: ${err.statusText}`;
+        }
+
+        return throwError(() => new Error(errorMessage));
       })
-      .pipe(
-        catchError((err) => {
-          console.error(
-            `Erreur lors de la suppression de l'élément de la table ${tableName}`,
-            err
-          );
-          throw new Error(`Une erreur est survenue: ${err}`);
-        })
-      );
+    );
   }
 
   createItem(tableName: string, data: any): Observable<{id: number}> {
@@ -186,11 +186,10 @@ export class GenericTableService {
 
   getTableDataNoPagination(
     tableName: string,
-    params: Record<string, string> // Format: { "colonne__operateur": "valeur", "sort_colonne": "asc|desc" }
+    params: Record<string, string>
   ): Observable<Record<string, string>[]> {
     let httpParams = new HttpParams();
 
-    // Ajouter tous les paramètres (filtres et tris)
     Object.keys(params).forEach(key => {
       if (params[key]) {
         httpParams = httpParams.set(key, params[key]);

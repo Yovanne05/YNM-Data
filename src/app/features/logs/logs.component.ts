@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { LogService } from '../../services/transactional/log.service.service';
 import { CommonModule } from '@angular/common';
+import {MatIcon} from "@angular/material/icon";
 
 interface Log {
   timestamp: string;
@@ -10,7 +11,7 @@ interface Log {
 @Component({
   selector: 'app-log',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatIcon],
   templateUrl: './logs.component.html',
   styleUrls: ['./logs.component.scss']
 })
@@ -49,8 +50,7 @@ export class LogComponent implements OnInit {
   }
 
   isServiceMessage(message: string): boolean {
-    // Adaptez cette logique selon vos besoins
-    return message.startsWith('[SERVICE]') || 
+    return message.startsWith('[SERVICE]') ||
            message.startsWith('[SYSTEM]') ||
            message.toLowerCase().includes('error');
   }

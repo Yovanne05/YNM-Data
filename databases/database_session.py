@@ -12,8 +12,8 @@ def get_db_session(bind=None):
                              Si None, utilise la base de données principale.
     """
     engine = db.get_engine(bind=bind)
-    Session = sessionmaker(bind=engine)
-    session = Session()
+    session = sessionmaker(bind=engine)
+    session = session()
     try:
         yield session
         session.commit()

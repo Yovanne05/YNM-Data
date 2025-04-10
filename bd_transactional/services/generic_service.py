@@ -1,7 +1,7 @@
 import json
+import re
 from typing import Type, List, Any, Dict, Optional
-import sqlalchemy
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import class_mapper
 
 from databases.db import db
@@ -27,28 +27,31 @@ class GenericService:
         except SQLAlchemyError as e:
             raise Exception(f"Erreur lors de la récupération: {str(e)}")
 
-    def create_item(self, data):
-        """Version robuste avec validation améliorée"""
-        print(data)
+    def create_item(self, data: Dict[str, Any]) -> Any:
+        """Crée un nouvel enregistrement avec validation complète"""
         try:
-            # Validation des types
-            schema = {
-                'nom': {'type': 'string', 'maxlength': 100},
-                'date_debut': {'type': 'string', 'regex': r'^\d{4}-\d{2}-\d{2}$'},
-                # Ajoutez tous les champs nécessaires
-            }
+            self._validate_data(data)
 
-            errors = {}
-            for field, rules in schema.items():
-                if field in data:
-                    if not isinstance(data[field], str) and rules['type'] == 'string':
-                        errors[field] = "Doit être une chaîne de caractères"
-                    # Ajoutez d'autres règles de validation...
+            # Validation des types et formats (optionnelle)
+            if hasattr(self.model_class, 'validation_schema'):
+                schema = getattr(self.model_class, 'validation_schema')
+                errors = {}
 
-            if errors:
-                raise ValueError(json.dumps({"errors": errors}))
+                for field, rules in schema.items():
+                    if field in data:
+                        expected_type = rules.get('type')
+                        if expected_type and not isinstance(data[field], eval(expected_type)):
+                            errors[field] = f"Doit être de type {expected_type}"
 
-            # Reste de la logique...
+                        if 'maxlength' in rules and len(str(data[field])) > rules['maxlength']:
+                            errors[field] = f"Ne doit pas dépasser {rules['maxlength']} caractères"
+
+                        if 'regex' in rules and not re.match(rules['regex'], str(data[field])):
+                            errors[field] = "Format invalide"
+
+                if errors:
+                    raise ValueError(json.dumps({"errors": errors}))
+
             item = self.model_class(**data)
             db.session.add(item)
             db.session.commit()
@@ -57,16 +60,16 @@ class GenericService:
         except ValueError as ve:
             db.session.rollback()
             try:
-                # Si l'erreur contient du JSON (validation structurée)
                 error_data = json.loads(str(ve))
-                raise ValueError(error_data)
+                raise ValueError(json.dumps(error_data))
             except json.JSONDecodeError:
-                # Erreur texte simple
-                raise ve
+                raise ValueError(json.dumps({"errors": {"general": str(ve)}}))
 
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            raise Exception(f"Erreur lors de la création: {str(e)}")
     def _validate_data(self, data):
         """Validation des données métier"""
-        # 1. Vérifier les champs requis
         required_fields = {
             column.name for column in self.model_class.__table__.columns
             if not column.nullable
@@ -79,7 +82,6 @@ class GenericService:
         if missing_fields:
             raise ValueError(f"Champs requis manquants: {', '.join(missing_fields)}")
 
-        # 2. Validation spécifique au modèle
         if hasattr(self.model_class, 'validate'):
             self.model_class.validate(data)
 
@@ -99,13 +101,12 @@ class GenericService:
     def delete(self, id: int) -> bool:
         """Supprime un enregistrement avec cascade"""
         try:
-            # Charge l'objet avec toutes ses relations (ajustez selon vos besoins)
             obj = db.session.query(self.model_class).get(id)
 
             if not obj:
                 return False
 
-            db.session.delete(obj)  # Laisser SQLAlchemy gérer la cascade
+            db.session.delete(obj)
             db.session.commit()
             return True
 
@@ -140,8 +141,18 @@ class GenericService:
         except Exception as e:
             raise Exception(f"Erreur récupération structure: {str(e)}")
 
-    def get_with_filters(self, filters: dict) -> List[Any]:
-        """Récupère avec filtres avancés"""
+    def get_paginated(self, page: int = 1, per_page: int = 5) -> tuple[List[Any], int]:
+        """Récupère les enregistrements paginés"""
+        try:
+            query = db.session.query(self.model_class)
+            total = query.count()
+            items = query.offset((page - 1) * per_page).limit(per_page).all()
+            return items, total
+        except SQLAlchemyError as e:
+            raise Exception(f"Erreur lors de la récupération paginée: {str(e)}")
+
+    def get_with_filters(self, filters: dict, page: int = 1, per_page: int = 5) -> tuple[List[Any], int]:
+        """Récupère avec filtres avancés et pagination"""
         try:
             query = db.session.query(self.model_class)
 
@@ -173,9 +184,11 @@ class GenericService:
                 elif operator == "not_like":
                     query = query.filter(~column_attr.like(f"%{value}%"))
 
-            return query.all()
+            total = query.count()
+            items = query.offset((page - 1) * per_page).limit(per_page).all()
+            return items, total
         except Exception as e:
-            raise Exception(f"Erreur lors du filtrage: {str(e)}")
+            raise Exception(f"Erreur lors du filtrage paginé: {str(e)}")
 
     def get_primary_key(self, item):
         """Récupère le nom de la colonne clé primaire"""
@@ -188,16 +201,13 @@ class GenericService:
     def get_column_schema(self, column_name: str) -> Dict[str, Any]:
         """Version corrigée avec gestion robuste des colonnes ENUM"""
         try:
-            # Vérification de base
             if not hasattr(self.model_class, '__table__'):
                 return {"error": "Model has no table representation"}
 
-            # Récupération sécurisée de la colonne
             column = getattr(self.model_class, column_name, None)
             if column is None:
                 return {"error": f"Column {column_name} not found"}
 
-            # Pour les colonnes SQLAlchemy standard
             if hasattr(column, 'type'):
                 type_info = {
                     "name": column_name,
@@ -205,7 +215,6 @@ class GenericService:
                     "nullable": column.nullable
                 }
 
-                # Gestion spéciale des ENUM
                 if hasattr(column.type, 'enums'):
                     type_info.update({
                         "type": "ENUM",

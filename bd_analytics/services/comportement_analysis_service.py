@@ -44,7 +44,8 @@ def get_viewing_analytics():
 
             if not result.empty:
                 global_stats['total_views'] = int(result.iloc[0]['aggregated_idVisionnage'])
-                global_stats['avg_duration_minutes'] = round(result.iloc[0]['aggregated_dureeVisionnage'] / 60, 2)
+                duree_moyenne = result.iloc[0]['aggregated_dureeVisionnage']
+                global_stats['avg_duration_minutes'] = round((duree_moyenne or 0) / 60, 2)
 
                 # Stats par utilisateur
                 user_stats = olap.scoping(
@@ -62,7 +63,7 @@ def get_viewing_analytics():
                         {
                             'user_id': int(row['idUtilisateur']),
                             'total_views': int(row['aggregated_idVisionnage']),
-                            'avg_duration_minutes': round(row['aggregated_dureeVisionnage'] / 60, 2)
+                            'avg_duration_minutes': round((row['aggregated_dureeVisionnage'] or 0) / 60, 2)
                         }
                         for _, row in user_stats.iterrows()
                     ]

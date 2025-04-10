@@ -97,7 +97,6 @@ def process_temps_dim():
     print("Traitement de la dimension Temps...")
 
     with get_main_db_session() as session, get_db_entrepot_session() as entrepot_session:
-        # Récupérer toutes les dates uniques
         dates_uniques = set()
 
         paiement_dates = session.execute(text("SELECT DISTINCT datePaiement FROM Paiement")).fetchall()

@@ -8,17 +8,28 @@ class GenericController:
 
         @self.blueprint.route("/", methods=["GET"])
         def get_all():
-            """Récupère tous les éléments ou les éléments filtrés"""
+            """Récupère tous les éléments ou les éléments filtrés avec pagination"""
             try:
+                page = request.args.get('page', default=1, type=int)
+                per_page = request.args.get('per_page', default=5, type=int)
                 filters = request.args.to_dict()
-                if filters:
-                    items = self.service.get_with_filters(filters)
-                else:
-                    items = self.service.get_all()
 
-                if items and hasattr(items[0], 'as_dict'):
-                    return jsonify([item.as_dict() for item in items]), 200
-                return jsonify(items), 200
+                filters.pop('page', None)
+                filters.pop('per_page', None)
+
+                if filters:
+                    items, total = self.service.get_with_filters(filters, page=page, per_page=per_page)
+                else:
+                    items, total = self.service.get_paginated(page=page, per_page=per_page)
+
+                response = {
+                    'items': [item.as_dict() for item in items] if items and hasattr(items[0], 'as_dict') else items,
+                    'total': total,
+                    'page': page,
+                    'per_page': per_page,
+                    'pages': (total + per_page - 1) // per_page
+                }
+                return jsonify(response), 200
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
 
@@ -42,10 +53,9 @@ class GenericController:
 
                 item = self.service.create_item(data)
 
-                # Récupération dynamique de la clé primaire
                 primary_key = self.service.get_primary_key(item)
                 return jsonify({
-                    "id": getattr(item, primary_key),  # Accès dynamique à l'ID
+                    "id": getattr(item, primary_key),
                     "message": "Création réussie"
                 }), 201
 

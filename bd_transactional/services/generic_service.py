@@ -141,8 +141,18 @@ class GenericService:
         except Exception as e:
             raise Exception(f"Erreur récupération structure: {str(e)}")
 
-    def get_with_filters(self, filters: dict) -> List[Any]:
-        """Récupère avec filtres avancés"""
+    def get_paginated(self, page: int = 1, per_page: int = 5) -> tuple[List[Any], int]:
+        """Récupère les enregistrements paginés"""
+        try:
+            query = db.session.query(self.model_class)
+            total = query.count()
+            items = query.offset((page - 1) * per_page).limit(per_page).all()
+            return items, total
+        except SQLAlchemyError as e:
+            raise Exception(f"Erreur lors de la récupération paginée: {str(e)}")
+
+    def get_with_filters(self, filters: dict, page: int = 1, per_page: int = 5) -> tuple[List[Any], int]:
+        """Récupère avec filtres avancés et pagination"""
         try:
             query = db.session.query(self.model_class)
 
@@ -174,9 +184,11 @@ class GenericService:
                 elif operator == "not_like":
                     query = query.filter(~column_attr.like(f"%{value}%"))
 
-            return query.all()
+            total = query.count()
+            items = query.offset((page - 1) * per_page).limit(per_page).all()
+            return items, total
         except Exception as e:
-            raise Exception(f"Erreur lors du filtrage: {str(e)}")
+            raise Exception(f"Erreur lors du filtrage paginé: {str(e)}")
 
     def get_primary_key(self, item):
         """Récupère le nom de la colonne clé primaire"""

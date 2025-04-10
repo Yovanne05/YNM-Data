@@ -87,7 +87,6 @@ class GenericService:
             db.session.rollback()
             raise self._handle_db_error("suppression", e)
 
-    # Méthodes de requêtage avancé
     def get_paginated(self, page: int = 1, per_page: int = 5) -> Tuple[List[Any], int]:
         """Récupère les enregistrements paginés."""
         return self._execute_query(

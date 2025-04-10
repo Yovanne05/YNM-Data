@@ -29,8 +29,6 @@ SERVICES = {
 
 FILE_PATH = "utils/import.csv"
 
-netflix_object: TypeAlias = db.models.Abonnement | db.models.Genre | db.models.Paiement | db.models.Serie | db.models.Titre | db.models.Utilisateur
-
 def save_file(request: Request) -> None:
     file = request.files['file']
 
@@ -48,18 +46,6 @@ def import_data_to_db(table_name: str) -> None:
                 SERVICES[table_name].create_item(d)
     except Exception as e:
         raise Exception(f"Erreur lors de l'importation dans la base de données : {str(e)}")
-
-
-def get_instance(table_name: str) -> netflix_object :
-    try:
-        print("oui ?")
-        print(inspect(db).get_table_names())
-        if table_name not in db.tables.keys():
-            raise Exception(f"La table {table_name} n'existe pas")
-        model = type(db.models.get(table_name.lower()))
-        return model()
-    except Exception as e:
-        raise Exception(f"Erreur lors de la récupération de la table d'import: {str(e)}")
 
 
 def read_data(table_name: str) -> list[dict[str, str]]:

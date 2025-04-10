@@ -76,25 +76,20 @@ class GenericService:
     def delete(self, identifier: Any) -> bool:
         """Supprime un enregistrement en gérant automatiquement les clés simples et composites"""
         try:
-            # Récupère le schéma pour connaître la structure de la PK
             schema = self.get_table_schema()
             pk_columns = [col for col in schema if schema[col]['primary_key']]
 
-            # Gestion des clés composites
             if len(pk_columns) > 1:
                 if not isinstance(identifier, dict):
                     raise ValueError("Pour une clé composite, l'identifiant doit être un dictionnaire")
 
-                # Vérifie que toutes les colonnes PK sont présentes
                 missing = set(pk_columns) - set(identifier.keys())
                 if missing:
                     raise ValueError(f"Clés primaires manquantes: {', '.join(missing)}")
 
-                # Crée le tuple dans l'ordre des colonnes PK
                 pk_values = tuple(identifier[col] for col in pk_columns)
                 obj = db.session.query(self.model_class).get(pk_values)
             else:
-                # Gestion classique pour clé simple
                 obj = db.session.query(self.model_class).get(identifier)
 
             if not obj:

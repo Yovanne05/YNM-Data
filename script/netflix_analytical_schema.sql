@@ -30,7 +30,13 @@ CREATE TABLE Temps (
     annee INT,
     trimestre INT,
     jour_semaine INT,
-    est_weekend BOOLEAN,
+    est_weekend BOOLEAN
+);
+
+-- Table Genre
+CREATE TABLE Genre (
+    idGenre INT AUTO_INCREMENT PRIMARY KEY,
+    nomGenre VARCHAR(50)
 );
 
 CREATE TABLE Titre (
@@ -45,7 +51,7 @@ CREATE TABLE Titre (
     description TEXT,
     FOREIGN KEY (iddateDebutLicence) REFERENCES Temps(idDate) ON DELETE SET NULL,
     FOREIGN KEY (iddateFinLicence) REFERENCES Temps(idDate) ON DELETE SET NULL,
-    FOREIGN KEY (idGenre) REFERENCES Genre(idGenre) ON DELETE SET NULL;
+    FOREIGN KEY (idGenre) REFERENCES Genre(idGenre) ON DELETE SET NULL
 
 );
 
@@ -65,11 +71,6 @@ CREATE TABLE Film (
     FOREIGN KEY (idTitre) REFERENCES Titre(idTitre)
 );
 
--- Table Genre
-CREATE TABLE Genre (
-    idGenre INT AUTO_INCREMENT PRIMARY KEY,
-    nomGenre VARCHAR(50)
-);
 
 -- Table Langue
 CREATE TABLE Langue (

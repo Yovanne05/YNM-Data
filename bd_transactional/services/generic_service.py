@@ -29,7 +29,6 @@ class GenericService:
         self.table_name = model_class.__tablename__
         self.logs: List[str] = []
 
-    # Méthodes CRUD de base
     def get_all(self) -> List[Any]:
         """Récupère tous les enregistrements."""
         try:
@@ -115,7 +114,6 @@ class GenericService:
         query = self._apply_sorting(query, sort_params)
         return self._execute_query(query, page, per_page)
 
-    # Méthodes de schéma et métadonnées
     def get_table_schema(self) -> Dict[str, Dict[str, Any]]:
         """Retourne le schéma complet de la table."""
         try:
@@ -185,7 +183,6 @@ class GenericService:
             raise ValueError("Aucune clé primaire définie pour ce modèle")
         return mapper.primary_key[0].name
 
-    # Méthodes privées
     def _validate_data(self, data: Dict[str, Any]) -> None:
         """Valide les données selon les contraintes de la table."""
         required_fields = {

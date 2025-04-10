@@ -5,7 +5,7 @@ class Paiement(GenericModel):
     __tablename__ = 'paiement'
 
     idPaiement = db.Column(db.Integer, primary_key=True)
-    idAbonnement = db.Column(db.Integer, db.ForeignKey('abonnement.idAbonnement'), nullable=False)
+    idAbonnement = db.Column(db.Integer, db.ForeignKey('abonnement.idAbonnement', ondelete='CASCADE'), nullable=False)
     datePaiement = db.Column(db.Date, nullable=False)
     montant = db.Column(db.Numeric(6, 2), nullable=False)
     statusPaiement = db.Column(db.Enum('Effectué', 'Échoué'))

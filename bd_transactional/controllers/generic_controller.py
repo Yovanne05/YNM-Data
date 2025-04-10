@@ -124,3 +124,19 @@ class GenericController:
                 return jsonify(schema)
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
+
+        @self.blueprint.route("/no_pagination", methods=["GET"])
+        def get_all_no_pagination():
+            """Récupère tous les éléments sans pagination"""
+            try:
+                filters = request.args.to_dict()
+                if filters:
+                    items = self.service.get_with_filters(filters)
+                else:
+                    items = self.service.get_all()
+
+                if items and hasattr(items[0], 'as_dict'):
+                    return jsonify([item.as_dict() for item in items]), 200
+                return jsonify(items), 200
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500

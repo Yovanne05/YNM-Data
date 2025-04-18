@@ -1,4 +1,0 @@
-from bd_transactional.services.generic_service import GenericService
-from bd_transactional.models.evaluation_model import Evaluation
-
-evaulation_service = GenericService(Evaluation)

@@ -1,0 +1,58 @@
+<div class="absolute mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-10 p-4 max-h-96 overflow-y-auto"
+     [class]="{'w-64': filters.length <= 3, 'w-80': filters.length > 3 && filters.length <= 5, 'w-96': filters.length > 5}">
+  <form [formGroup]="filterForm" (ngSubmit)="onSubmit()">
+    @for (filter of filters; track filter.key) {
+      <div class="block w-full text-left mb-4">
+        <label class="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+          {{ filter.label }}
+        </label>
+
+        @switch (filter.type) {
+          @case ('text') {
+            <input type="text" [formControlName]="filter.key" placeholder="Rechercher..."
+                   class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-sm text-white placeholder-gray-400 focus:ring-2 focus:ring-red-500 focus:border-transparent">
+          }
+          @case ('number') {
+            <div class="flex gap-2">
+              <select [formControlName]="filter.key + '_operator'"
+                      class="bg-gray-700 border border-gray-600 rounded-md px-2 py-2 text-sm text-white focus:ring-2 focus:ring-red-500 focus:border-transparent min-w-[60px]">
+                <option value="eq">=</option>
+                <option value="gt">></option>
+                <option value="lt"><</option>
+                <option value="gte">>=</option>
+                <option value="lte"><=</option>
+                <option value="ne">≠</option>
+              </select>
+              <input type="number" [formControlName]="filter.key" placeholder="Valeur"
+                     class="flex-1 bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-sm text-white focus:ring-2 focus:ring-red-500 focus:border-transparent">
+            </div>
+          }
+          @case ('date') {
+            <input type="date" [formControlName]="filter.key"
+                   class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-sm text-white [&::-webkit-calendar-picker-indicator]:invert focus:ring-2 focus:ring-red-500 focus:border-transparent">
+          }
+          @case ('boolean') {
+            <div class="flex items-center">
+              <input type="checkbox" [formControlName]="filter.key"
+                     class="mr-2 w-4 h-4 text-red-600 bg-gray-700 border-gray-600 rounded focus:ring-red-500">
+              <span class="text-gray-300">Oui / Non</span>
+            </div>
+          }
+        }
+      </div>
+    }
+
+    <div class="flex justify-between mt-4 gap-2">
+      <button type="button" (click)="onReset()"
+              class="flex-1 bg-gray-700 text-gray-300 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-600 transition-colors flex items-center justify-center gap-1">
+        <mat-icon>restart_alt</mat-icon>
+        Réinitialiser
+      </button>
+      <button type="submit"
+              class="flex-1 bg-gradient-to-r from-red-600 to-red-800 text-white px-4 py-2 rounded-md text-sm font-medium hover:from-red-700 hover:to-red-900 transition-colors flex items-center justify-center gap-1">
+        <mat-icon>check_circle</mat-icon>
+        Appliquer
+      </button>
+    </div>
+  </form>
+</div>

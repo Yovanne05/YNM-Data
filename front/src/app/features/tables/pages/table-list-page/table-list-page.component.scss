@@ -1,0 +1,26 @@
+.page-container {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-items: center;
+  align-content: center;
+  max-width: 100%;
+  height: 100%;
+
+}
+
+.card-info {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  flex-direction: column;
+  overflow: auto;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  padding: 0;
+  margin: 0;
+}

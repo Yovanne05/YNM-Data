@@ -1,0 +1,57 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Data Analytics</h1>
+    <div class="etl-control">
+      <button class="etl-button"
+              (click)="runETLProcess()"
+              [disabled]="isEtlRunning">
+        @if (!isEtlRunning) {
+          <span>Run ETL Process</span>
+        }
+        @if (isEtlRunning) {
+          <span class="loading">
+            <span class="spinner"></span>
+            Processing...
+          </span>
+        }
+      </button>
+      @if (showEtlMessage) {
+        <div class="etl-message" [class.error]="isEtlError">
+          {{ etlMessage }}
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="grid-container">
+    <div class="card full-width-card">
+      <div class="chart-container">
+        <app-top-content-chart [topContent]="topContent" />
+      </div>
+    </div>
+
+    <div class="card uniform-card">
+      <div class="chart-container">
+        <app-content-performance-chart [contentPerformance]="contentPerformance" />
+      </div>
+    </div>
+
+    <div class="card uniform-card">
+      <div class="chart-container">
+        <app-viewing-trends-chart [viewingTrends]="viewingTrends" />
+      </div>
+    </div>
+
+    <div class="card uniform-card">
+      <div class="chart-container">
+        <app-user-engagement-chart [userEngagement]="userEngagement ?? null" />
+      </div>
+    </div>
+
+    <div class="card full-width-card">
+      <div class="chart-container">
+        <app-daily-activity-chart [dailyActivity]="dailyActivity" />
+      </div>
+    </div>
+  </div>
+</div>
